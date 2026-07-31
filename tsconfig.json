@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+      "target": "ES2020", // Pour cibler des navigateurs
+      "module": "ESNext",
+      "strict": true, // Pour activer plusieurs options et tous notre code doit être typé correctement
+      "moduleResolution": "node", // Permet d'importer un module dans notre code ts
+      "allowJs": true,
+
+      "jsx": "react-jsx", // La partie spécifique pour 'react'
+      "baseUrl": ".", // Pour 'shadcn'
+      "paths": {
+          "@/*": ["./*"]
+      }
+  },
+  "include": [ // Pour inclure des fichiers supplémentaires comme les fichiers de déclarations pour qu'il soit utiliser dans mon code, les fichiers de déclarations ne sont pas générer en sortie car il est là pour nous aider
+      "assets/**/*"
+  ]
+}

@@ -1,0 +1,175 @@
+{# -- form_row - conteneur de chaque champ -- #}
+{% block form_row %}
+    <div class="field {{ row_attr.class|default('') }}">
+        {{- form_label(form) -}}
+        {{- form_widget(form) -}}
+        {{- form_errors(form) -}}
+        {% if help is defined and help %}
+            <p class="field-description">{{ help|trans }}</p>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{# -- Label -- #}
+{% block form_label %}
+    {% if label is not same as(false) %}
+        {% set label_attr = label_attr|merge({
+            class: (label_attr.class|default('') ~ ' label')|trim
+        }) %}
+        <label {% for k,v in label_attr %}{{ k }}="{{ v }}" {% endfor %}for="{{ id }}">
+            {{ label|default(name|humanize)|trans({}, translation_domain) }}
+            {% if required %}
+                <span class="required" aria-hidden="true">*</span>
+            {% else %}
+                <span class="optional">({{ 'optionel'|trans }})</span>
+            {% endif %}
+        </label>
+    {% endif %}
+{% endblock %}
+
+{# -- Error -- #}
+{% block form_errors %}
+    {% if errors|length > 0 %}
+        <ul class="mt-1 space-y-0.5" role="alert">
+            {% for error in errors %}
+                <li class="field-error-description flex items-center gap-1">
+                    <svg class="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    {{ error.message }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}
+
+{# -- Input -- #}
+{% block form_widget_simple %}
+    {%- set classes = 'input' -%}
+    {%- if errors|length > 0 -%}
+        {%- set classes = classes ~ ' input-error' -%}
+    {%- endif -%}
+    {%- set attr = attr|merge({ class: (attr.class|default('') ~ ' ' ~ classes)|trim }) -%}
+    <input
+        type="{{ type|default('text') }}"
+        {{ block('widget_attributes') }}
+        {% if value is not empty %}value="{{ value }}"{% endif %} {# Pour les champs 'password' ça peut réinjecter la valeur ou '{% if value is not empty and type != 'password' %}value="{{ value }}"{% endif %}' #}
+    />
+{% endblock %}
+
+{# -- Textarea -- #}
+{% block textarea_widget %}
+    {%- set classes = 'input' -%}
+    {%- if errors|length > 0 -%}
+        {%- set classes = classes ~ ' input-error' -%}
+    {%- endif -%}
+    {%- set attr = attr|merge({ class: (attr.class|default('') ~ ' ' ~ classes)|trim }) -%}
+    <textarea {{ block('widget_attributes') }}>{{ value }}</textarea>
+{% endblock %}
+
+{# -- Select -- #}
+{% block choice_widget_collapsed %}
+    {# Select à AUTOCOMPLETE DISTANT (tom-select via data-remote-select) : PAS de classe .input ni de
+       .select-wrapper — tom-select stylise son propre wrapper (.ts-wrapper), sinon superposition. #}
+    {%- set isRemote = attr['data-remote-select'] is defined and attr['data-remote-select'] -%}
+    {%- if not isRemote -%}
+        {%- set classes = 'input' -%}
+        {%- if errors|length > 0 -%}
+            {%- set classes = classes ~ ' input-error' -%}
+        {%- endif -%}
+        {%- set attr = attr|merge({ class: (attr.class|default('') ~ ' ' ~ classes)|trim }) -%}
+    {%- endif -%}
+    <select {{ block('widget_attributes') }} {% if multiple %}multiple="multiple"{% endif %}>
+        {% if placeholder is not none %}
+            <option value=""{% if required and value is empty %} selected{% endif %} disabled>
+                {{ placeholder|trans({}, translation_domain) }}
+            </option>
+        {% endif %}
+        {% for group_label, choice in choices %}
+            {% if choice is iterable %}
+                <optgroup label="{{ group_label|trans({}, translation_domain) }}">
+                    {% for c in choice %}
+                        <option value="{{ c.value }}"{% if c.value in value %} selected="selected"{% endif %}> {# Peut échouer si value est un entier et 'c.value' une 'string' ou '{% if c.value|string in value|map(v => v|string) %}' #}
+                            {{ c.label|trans({}, translation_domain) }}
+                        </option>
+                    {% endfor %}
+                </optgroup>
+            {% else %}
+                <option value="{{ choice.value }}"{% if choice.value in value %} selected="selected"{% endif %}>
+                    {{ choice.label|trans({}, translation_domain) }}
+                </option>
+            {% endif %}
+        {% endfor %}
+    </select>
+    {% if not isRemote %}
+    <div class="select-wrapper">
+        {#
+            - Le 'select'
+            - Si 'multiple' on peut masquer l'icône ou le faire dans le css
+            {% if not multiple %}
+                <span class="select-arrow"..
+            {% endif %}
+        #}
+    </div>
+    {% endif %}
+{% endblock %}
+
+{# -- Checkbox - champ unique -- #}
+{% block checkbox_widget %}
+    {%- set attr = attr|merge({
+        class: (attr.class|default('') ~ ' checkbox')|trim
+    }) -%}
+    <input
+        type="checkbox"
+        {{ block('widget_attributes') }}
+        {% if value is defined %}value="{{ value }}"{% endif %}
+        {% if checked %}checked="checked"{% endif %}
+    />
+{% endblock %}
+
+{# -- Checkbox - label à droite #}
+{% block checkbox_row %}
+    <div class="checkbox-wrapper {{ row_attr.class|default('') }}">
+        {{- form_widget(form) -}}
+        {{- form_label(form, null, { label_attr: { class: 'cursor-pointer' } }) -}}
+        {{- form_errors(form) -}}
+    </div>
+{% endblock %}
+
+{# -- Radio - champ unique -- #}
+{% block radio_widget %}
+    {%- set attr = attr|merge({
+        class: (attr.class|default('') ~ ' radio')|trim
+    }) -%}
+    <input
+        type="radio"
+        {{ block('widget_attributes') }}
+        {% if value is defined %}value="{{ value }}"{% endif %}
+        {% if checked %}checked="checked"{% endif %}
+    />
+{% endblock %}
+
+{# -- Choice 'expanded' - checkboxes ou radios en liste -- #}
+{% block choice_widget_expanded %}
+    {%- set isRadio = multiple is defined and not multiple -%}
+    <div class="{{ isRadio ? 'radio-group' : 'flex flex-col gap-2' }}">
+        {% for child in form %}
+            <div class="{{ isRadio ? 'radio-wrapper' : 'checkbox-wrapper' }}">
+                {{- form_widget(child) -}}
+                <label for="{{ child.vars.id }}" class="cursor-pointer font-normal text-sm text-foreground">
+                    {{ child.vars.label|default(child.vars.value)|trans }} {# Peut afficher la valeur brute au lieu du 'label' si 'label' est 'null' aucun crash mais le rendu peut être inattendu si 'label' est intentionnellement 'false'vu que symfony utilise 'false' pour masquer les labels ou '{{ child.vars.label is not same as(false) ? child.vars.label|default(child.vars.value)|trans : child.vars.value }}' #}
+                </label>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{# -- Input -- #}
+{% block file_widget %}
+    {%- set attr = attr|merge({
+        class: (attr.class|default('') ~ ' file')|trim
+    }) -%}
+    <input type="file" {{ block('widget_attributes') }} />
+{% endblock %}

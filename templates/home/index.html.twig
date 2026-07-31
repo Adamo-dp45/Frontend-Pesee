@@ -1,0 +1,236 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Acceuil{% endblock %}
+
+{% block body %}
+<form action="" method="get">
+    <!-- Filtre -->
+</form>
+
+{# KPI Cards #}
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div class="card p-4">
+        <p class="text-xs text-muted-foreground mb-1">Opérations</p>
+        <p class="text-2xl font-semibold">{{ data.nombreOperations ?? 0 }}</p>
+    </div>
+
+    <div class="card p-4">
+        <p class="text-xs text-muted-foreground mb-1">Poids net total</p>
+        <p class="text-2xl font-semibold">
+            {{ (data.poidsnetTotal ?? 0)|number_format(0, ',', ' ') }}
+            <span class="text-sm font-normal text-muted-foreground">kg</span>
+        </p>
+    </div>
+
+    <div class="card p-4">
+        <p class="text-xs text-muted-foreground mb-1">Montant total</p>
+        <p class="text-2xl font-semibold">
+            {{ (data.montantTotal ?? 0)|number_format(0, ',', ' ') }}
+            <span class="text-sm font-normal text-muted-foreground">FCFA</span>
+        </p>
+    </div>
+
+    <div class="card p-4">
+        <p class="text-xs text-muted-foreground mb-1">Sites actifs</p>
+        <p class="text-2xl font-semibold">
+            {{ data.nombreSitesActifs ?? 0 }}
+            <span class="text-sm font-normal text-muted-foreground">sites</span>
+        </p>
+    </div>
+
+    <div class="card p-4">
+        <p class="text-xs text-muted-foreground mb-1">Poids brut total</p>
+        <p class="text-2xl font-semibold">
+            {{ (data.poidsbrutTotal ?? 0)|number_format(0, ',', ' ') }}
+            <span class="text-sm font-normal text-muted-foreground">kg</span>
+        </p>
+    </div>
+
+    {# Solde selon le rôle #}
+    {% if is_granted('ROLE_OPERATEUR') %}
+        <div class="card p-4">
+            <p class="text-xs text-muted-foreground mb-1">Solde du site</p>
+            <p class="text-2xl font-semibold {{ (data.soldeSite ?? 0) < 100000 ? 'text-destructive' : '' }}">
+                {{ (data.soldeSite ?? 0)|number_format(0, ',', ' ') }}
+                <span class="text-sm font-normal text-muted-foreground">FCFA</span>
+            </p>
+        </div>
+    {% elseif is_granted('ROLE_ADMIN') %}
+        <div class="card p-4">
+            <p class="text-xs text-muted-foreground mb-1">Solde entreprise</p>
+            <p class="text-2xl font-semibold">
+                {{ (data.soldeEntreprise ?? 0)|number_format(0, ',', ' ') }}
+                <span class="text-sm font-normal text-muted-foreground">FCFA</span>
+            </p>
+        </div>
+    {% endif %}
+
+</div>
+
+{% if data.parSite is defined and data.parSite is not empty %}
+<div class="card mb-6">
+    <div class="px-4 py-3 border-b border-border">
+        <p class="text-sm font-medium">Top sites</p>
+    </div>
+    <div class="divide-y divide-border">
+        {% for site in data.parSite %}
+            <div class="flex items-center justify-between px-4 py-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    {# Rang #}
+                    <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold shrink-0
+                        {% if loop.index == 1 %}bg-primary text-primary-foreground
+                        {% elseif loop.index == 2 %}bg-muted text-foreground
+                        {% elseif loop.index == 3 %}bg-accent text-accent-foreground
+                        {% else %}bg-muted/50 text-muted-foreground
+                        {% endif %}">
+                        {{ loop.index }}
+                    </span>
+                    <div class="min-w-0">
+                        <p class="text-sm font-medium truncate">{{ site.libellesite ?? site.codesite }}</p>
+                        <p class="text-xs text-muted-foreground font-mono">{{ site.codesite }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-6 shrink-0 text-right">
+                    <div>
+                        <p class="text-xs text-muted-foreground">Opérations</p>
+                        <p class="text-sm font-medium tabular-nums">{{ site.nombre_operations }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-muted-foreground">Poids net</p>
+                        <p class="text-sm font-medium tabular-nums">
+                            {{ site.total_poidsnet|number_format(0, ',', ' ') }}
+                            <span class="text-xs font-normal text-muted-foreground">kg</span>
+                        </p>
+                    </div>
+                    {# Barre de progression relative au 1er site #}
+                    {% set max = data.parSite[0].total_poidsnet %}
+                    {% if max > 0 %}
+                        <div class="w-24">
+                            <div class="h-1.5 bg-muted rounded-full overflow-hidden">
+                                <div
+                                    class="h-full bg-primary rounded-full"
+                                    style="width: {{ (site.total_poidsnet / max * 100)|round }}%"
+                                ></div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{# Charts — ligne 1 #}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+
+    {# Évolution par jour #}
+    <div class="card p-4 md:col-span-2">
+        <p class="text-sm font-medium mb-3">Évolution du poids net par jour</p>
+        {% if data.parJour is defined and data.parJour is not empty %}
+            <canvas
+                id="chartParJour"
+                height="120"
+                data-values="{{ data.parJour|json_encode }}"
+            ></canvas>
+        {% else %}
+            {% include 'partials/empty_chart.html.twig' %}
+        {% endif %}
+    </div>
+
+    {# Répartition par produit #}
+    <div class="card p-4">
+        <p class="text-sm font-medium mb-3">Top produits</p>
+        {% if data.parProduit is defined and data.parProduit is not empty %}
+            <canvas
+                id="chartParProduit"
+                height="120"
+                data-values="{{ data.parProduit|json_encode }}"
+            ></canvas>
+        {% else %}
+            {% include 'partials/empty_chart.html.twig' %}
+        {% endif %}
+    </div>
+
+</div>
+
+{# Charts — ligne 2 #}
+{% if data.parSite is defined and data.parSite|length > 1 %}
+<div class="grid grid-cols-1 gap-4 mb-6">
+    <div class="card p-4">
+        <p class="text-sm font-medium mb-3">Poids net par site</p>
+        <canvas
+            id="chartParSite"
+            height="80"
+            data-values="{{ data.parSite|json_encode }}"
+        ></canvas>
+    </div>
+</div>
+{% endif %}
+
+{# Dernières opérations #}
+<div class="card">
+    <div class="flex items-center justify-between px-4 py-3 border-b border-border">
+        <p class="text-sm font-medium">Dernières opérations</p>
+        <a
+            href=""
+            class="text-xs text-primary hover:underline"
+        >
+            Voir tout
+        </a>
+    </div>
+
+    {% if data.dernieres is defined and data.dernieres is not empty %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-border bg-muted/40">
+                        <th class="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">N° Ticket</th>
+                        <th class="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">Site</th>
+                        <th class="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">Fournisseur</th>
+                        <th class="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground">Produit</th>
+                        <th class="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground">Poids net</th>
+                        <th class="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground">Montant</th>
+                        <th class="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground">Date</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-border">
+                    {% for op in data.dernieres %}
+                        <tr class="hover:bg-muted/30 transition-colors">
+                            <td class="px-4 py-2.5 font-mono text-xs text-muted-foreground">
+                                {{ op.numticket ?? '—' }}
+                            </td>
+                            <td class="px-4 py-2.5 text-foreground">
+                                {{ op.libellesite ?? '—' }}
+                            </td>
+                            <td class="px-4 py-2.5 text-foreground">
+                                {{ op.fournisseur ?? '—' }}
+                            </td>
+                            <td class="px-4 py-2.5 text-foreground">
+                                {{ op.produit ?? '—' }}
+                            </td>
+                            <td class="px-4 py-2.5 text-right font-medium">
+                                {{ (op.poidsnet ?? 0)|number_format(0, ',', ' ') }} kg
+                            </td>
+                            <td class="px-4 py-2.5 text-right font-medium">
+                                {{ (op.montantcalcule ?? 0)|number_format(0, ',', ' ') }} FCFA
+                            </td>
+                            <td class="px-4 py-2.5 text-right text-muted-foreground text-xs">
+                                {{ op.date2 ?? '—' }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="flex flex-col items-center justify-center py-12 text-muted-foreground">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 mb-2 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+            </svg>
+            <p class="text-sm">Aucune opération sur cette période</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

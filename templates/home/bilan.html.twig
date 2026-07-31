@@ -1,0 +1,405 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Bilan{% endblock %}
+
+{% block body %}
+<div class="statistique">
+    {# ── Toolbar ── #}
+    <div class="stats-toolbar">
+        <div class="stats-toolbar__left">
+            <h2 class="stats-toolbar__title">Statistiques</h2>
+            <p class="stats-toolbar__sub">
+                {% if pagination.total is defined %}
+                    {{ pagination.total }} opération{{ pagination.total > 1 ? 's' : '' }} trouvée{{ pagination.total > 1 ? 's' : '' }}
+                {% else %}
+                    Filtrez et exportez les opérations de pesée
+                {% endif %}
+            </p>
+        </div>
+        <div class="stats-toolbar__actions">
+            <button type="button" class="btn btn--outline" id="btn-export-excel">
+                <svg viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                </svg>
+                Excel
+            </button>
+            <button type="button" class="btn btn--outline" id="btn-export-pdf">
+                <svg viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                </svg>
+                PDF
+            </button>
+        </div>
+    </div>
+
+    {# ── Filtres ── #}
+    <div class="filters-card">
+
+        {# Trigger #}
+        <button class="filters-card__trigger" type="button" id="filters-trigger">
+            <span class="filters-card__trigger-left">
+                <svg viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
+                </svg>
+                Filtres
+                {% set activeCount = 0 %}
+                {% for key, val in filtres %}
+                    {% if val and key not in ['page', 'limit'] %}
+                        {% set activeCount = activeCount + 1 %}
+                    {% endif %}
+                {% endfor %}
+                {% if activeCount > 0 %}
+                    <span class="filters-card__badge">{{ activeCount }}</span>
+                {% endif %}
+            </span>
+            <svg class="filters-card__chevron {% if activeCount > 0 %}is-open{% endif %}"
+                 id="filters-chevron"
+                 viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </button>
+
+        {# Body #}
+        <div class="filters-card__body {% if activeCount > 0 %}is-open{% endif %}" id="filters-body">
+            <form method="GET" id="filters-form">
+                <input type="hidden" name="page"  value="1">
+                <input type="hidden" name="limit" value="{{ filtres.limit ?? 20 }}">
+
+                <div class="filters-grid">
+
+                    {# Site — déclenche le chargement des référentiels #}
+                    <div class="filter-field">
+                        <label class="filter-field__label" for="select-site">Site</label>
+                        <select class="filter-field__select" name="code" id="select-site">
+                            <option value="">Sélectionner un site</option>
+                            {% for site in sites %}
+                                <option value="{{ site.codesite }}"
+                                        {% if (filtres.code ?? '') == site.codesite %}selected{% endif %}>
+                                    {{ site.libellesite }} - {{ site.codesite }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {# Date début #}
+                    <div class="filter-field">
+                        <label class="filter-field__label" for="date-debut">Date début</label>
+                        <input class="filter-field__input" type="date"
+                               id="date-debut" name="date_debut"
+                               value="{{ filtres.date_debut ?? '' }}">
+                    </div>
+
+                    {# Date fin #}
+                    <div class="filter-field">
+                        <label class="filter-field__label" for="date-fin">Date fin</label>
+                        <input class="filter-field__input" type="date"
+                               id="date-fin" name="date_fin"
+                               value="{{ filtres.date_fin ?? '' }}">
+                    </div>
+
+                    {# Mouvement #}
+                    <div class="filter-field">
+                        <label class="filter-field__label" for="select-mouvement">Mouvement</label>
+                        <select class="filter-field__select filter-field__select--ref"
+                                name="mouvement" id="select-mouvement"
+                                data-type="mouvement"
+                                data-loaded="{{ codeSelectionne ?? 'false' }}"
+                                {% if not codeSelectionne %}disabled{% endif %}>
+                            <option value="">Tous</option>
+                            {% for item in referentiels.mouvement ?? [] %}
+                                <option value="{{ item.mouvement }}"
+                                        {% if (filtres.mouvement ?? '') == item.mouvement %}selected{% endif %}>
+                                    {{ item.mouvement }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {# Produit #}
+                    <div class="filter-field">
+                        <label class="filter-field__label" for="select-produit">Produit</label>
+                        <select class="filter-field__select filter-field__select--ref"
+                                name="produit" id="select-produit"
+                                data-type="produit"
+                                data-loaded="{{ codeSelectionne ?? 'false' }}"
+                                {% if not codeSelectionne %}disabled{% endif %}>
+                            <option value="">Tous</option>
+                            {% for item in referentiels.produit ?? [] %}
+                                <option value="{{ item.produit }}"
+                                        {% if (filtres.produit ?? '') == item.produit %}selected{% endif %}>
+                                    {{ item.produit }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {# Client #}
+                    <div class="filter-field">
+                        <label class="filter-field__label" for="select-client">Client</label>
+                        <select class="filter-field__select filter-field__select--ref"
+                                name="client" id="select-client"
+                                data-type="client"
+                                data-loaded="{{ codeSelectionne ?? 'false' }}"
+                                {% if not codeSelectionne %}disabled{% endif %}>
+                            <option value="">Tous</option>
+                            {% for item in referentiels.client ?? [] %}
+                                <option value="{{ item.client }}"
+                                        {% if (filtres.client ?? '') == item.client %}selected{% endif %}>
+                                    {{ item.client }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {# Fournisseur #}
+                    <div class="filter-field">
+                        <label class="filter-field__label" for="select-fournisseur">Fournisseur</label>
+                        <select class="filter-field__select filter-field__select--ref"
+                                name="fournisseur" id="select-fournisseur"
+                                data-type="fournisseur"
+                                data-loaded="{{ codeSelectionne ?? 'false' }}"
+                                {% if not codeSelectionne %}disabled{% endif %}>
+                            <option value="">Tous</option>
+                            {% for item in referentiels.fournisseur ?? [] %}
+                                <option value="{{ item.fournisseur }}"
+                                        {% if (filtres.fournisseur ?? '') == item.fournisseur %}selected{% endif %}>
+                                    {{ item.fournisseur }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {# Transporteur #}
+                    <div class="filter-field">
+                        <label class="filter-field__label" for="select-transporteur">Transporteur</label>
+                        <select class="filter-field__select filter-field__select--ref"
+                                name="transporteur" id="select-transporteur"
+                                data-type="transporteur"
+                                data-loaded="{{ codeSelectionne ?? 'false' }}"
+                                {% if not codeSelectionne %}disabled{% endif %}>
+                            <option value="">Tous</option>
+                            {% for item in referentiels.transporteur ?? [] %}
+                                <option value="{{ item.transporteur }}"
+                                        {% if (filtres.transporteur ?? '') == item.transporteur %}selected{% endif %}>
+                                    {{ item.transporteur }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {# Destination #}
+                    <div class="filter-field">
+                        <label class="filter-field__label" for="select-destination">Destination</label>
+                        <select class="filter-field__select filter-field__select--ref"
+                                name="destination" id="select-destination"
+                                data-type="destination"
+                                data-loaded="{{ codeSelectionne ?? 'false' }}"
+                                {% if not codeSelectionne %}disabled{% endif %}>
+                            <option value="">Tous</option>
+                            {% for item in referentiels.destination ?? [] %}
+                                <option value="{{ item.destination }}"
+                                        {% if (filtres.destination ?? '') == item.destination %}selected{% endif %}>
+                                    {{ item.destination }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {# Provenance #}
+                    <div class="filter-field">
+                        <label class="filter-field__label" for="select-provenance">Provenance</label>
+                        <select class="filter-field__select filter-field__select--ref"
+                                name="provenance" id="select-provenance"
+                                data-type="provenance"
+                                data-loaded="{{ codeSelectionne ?? 'false' }}"
+                                {% if not codeSelectionne %}disabled{% endif %}>
+                            <option value="">Tous</option>
+                            {% for item in referentiels.provenance ?? [] %}
+                                <option value="{{ item.provenance }}"
+                                        {% if (filtres.provenance ?? '') == item.provenance %}selected{% endif %}>
+                                    {{ item.provenance }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {# Véhicule #}
+                    <div class="filter-field">
+                        <label class="filter-field__label" for="select-vehicule">Immatriculation</label>
+                        <select class="filter-field__select filter-field__select--ref"
+                                name="immatriculation" id="select-vehicule"
+                                data-type="vehicule"
+                                data-loaded="{{ codeSelectionne ?? 'false' }}"
+                                {% if not codeSelectionne %}disabled{% endif %}>
+                            <option value="">Tous</option>
+                            {% for item in referentiels.vehicule ?? [] %}
+                                <option value="{{ item.immatriculation }}"
+                                        {% if (filtres.immatriculation ?? '') == item.immatriculation %}selected{% endif %}>
+                                    {{ item.immatriculation }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="filters-actions">
+                    <button type="submit" class="btn btn--primary">
+                        <svg viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        Rechercher
+                    </button>
+                    <a href="{{ path('bilan') }}" class="btn btn--ghost">
+                        Réinitialiser
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    {# ── Résumé ── #}
+    {% if operations is not empty %}
+        {% set totalNet = 0 %}
+        {% for op in operations %}
+            {% set totalNet = totalNet + op.poidsnet %}
+        {% endfor %}
+        <div class="results-summary">
+            <p class="results-summary__count">
+                Page <strong>{{ pagination.page }}</strong>
+                sur <strong>{{ pagination.totalPages }}</strong>
+                — <strong>{{ pagination.total }}</strong>
+                résultat{{ pagination.total > 1 ? 's' : '' }}
+            </p>
+            <p class="results-summary__total">
+                Poids net total page :
+                <strong>{{ (totalNet / 1000)|number_format(2, ',', ' ') }} T</strong>
+            </p>
+        </div>
+    {% endif %}
+
+    {# ── Tableau ── #}
+    <div class="stats-card">
+        <div class="table-wrap">
+            <table class="data-table" id="operations-table">
+                <thead>
+                    <tr>
+                        <th>Site</th>
+                        <th>Date</th>
+                        <th>Mouvement</th>
+                        <th>Produit</th>
+                        <th>Client</th>
+                        <th>Fournisseur</th>
+                        <th>Transporteur</th>
+                        <th>Immat.</th>
+                        <th class="col-right">Poids 1 (kg)</th>
+                        <th class="col-right">Poids 2 (kg)</th>
+                        <th class="col-right">Brut (kg)</th>
+                        <th class="col-right">Net (kg)</th>
+                        <th>N° Ticket</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if operations is empty %}
+                        <tr>
+                            <td class="col-empty" colspan="13">
+                                Aucune opération trouvée. Sélectionnez un site et lancez une recherche.
+                            </td>
+                        </tr>
+                    {% else %}
+                        {% for op in operations %}
+                            <tr>
+                                <td>
+                                    <span class="cell-primary">{{ op.libellesite }}</span>
+                                    <span class="cell-sub">{{ op.code }}</span>
+                                </td>
+                                <td class="col-muted">
+                                    {{ op.date2 is not null ? op.date2|date('d/m/Y') : '—' }}
+                                </td>
+                                <td>
+                                    <span class="badge">{{ op.mouvement }}</span>
+                                </td>
+                                <td class="col-muted">{{ op.produit }}</td>
+                                <td class="col-muted">{{ op.client ?: '—' }}</td>
+                                <td class="col-muted">{{ op.fournisseur ?: '—' }}</td>
+                                <td class="col-muted">{{ op.transporteur ?: '—' }}</td>
+                                <td class="col-muted">{{ op.immatriculation ?: '—' }}</td>
+                                <td class="col-right">{{ op.poids1|number_format(0, ',', ' ') }}</td>
+                                <td class="col-right">{{ op.poids2|number_format(0, ',', ' ') }}</td>
+                                <td class="col-right">{{ op.poidsbrut|number_format(0, ',', ' ') }}</td>
+                                <td class="col-right">{{ op.poidsnet|number_format(0, ',', ' ') }}</td>
+                                <td class="col-muted">{{ op.numticket ?: '—' }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        {# ── Pagination ── #}
+        {% if pagination.totalPages is defined and pagination.totalPages > 1 %}
+            <div class="pagination">
+                <p class="pagination__info">
+                    {{ ((pagination.page - 1) * pagination.limit) + 1 }}
+                    –
+                    {{ min(pagination.page * pagination.limit, pagination.total) }}
+                    sur {{ pagination.total }}
+                </p>
+                <div class="pagination__controls">
+
+                    {# Précédent #}
+                    {% if pagination.page > 1 %}
+                        <a href="{{ path('bilan', filtres|merge({page: pagination.page - 1})) }}"
+                           class="pagination__btn">
+                            <svg viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                            </svg>
+                        </a>
+                    {% else %}
+                        <button class="pagination__btn" disabled>
+                            <svg viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                            </svg>
+                        </button>
+                    {% endif %}
+
+                    {# Pages #}
+                    {% for p in 1..pagination.totalPages %}
+                        {% if p == 1
+                            or p == pagination.totalPages
+                            or (p >= pagination.page - 2 and p <= pagination.page + 2) %}
+                            <a href="{{ path('bilan', filtres|merge({page: p})) }}"
+                               class="pagination__btn {% if p == pagination.page %}is-active{% endif %}">
+                                {{ p }}
+                            </a>
+                        {% elseif p == pagination.page - 3 or p == pagination.page + 3 %}
+                            <span class="pagination__ellipsis">…</span>
+                        {% endif %}
+                    {% endfor %}
+
+                    {# Suivant #}
+                    {% if pagination.page < pagination.totalPages %}
+                        <a href="{{ path('bilan', filtres|merge({page: pagination.page + 1})) }}"
+                           class="pagination__btn">
+                            <svg viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                    {% else %}
+                        <button class="pagination__btn" disabled>
+                            <svg viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

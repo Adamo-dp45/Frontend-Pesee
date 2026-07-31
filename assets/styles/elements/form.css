@@ -1,0 +1,381 @@
+.field {
+    display: flex;
+    flex-direction: column;
+}
+
+.field-description {
+    font-size: .8125rem;
+    color: var(--muted-foreground);
+    margin-top: .25rem;
+}
+
+.field-error-description {
+    font-size: .8125rem;
+    font-weight: 400;
+    margin-top: .375rem;
+    color: var(--destructive);
+}
+
+.field-success-description {
+    font-size: .8125rem;
+    font-weight: 400;
+    margin-top: .375rem;
+    color: var(--color-green);
+}
+
+.required {
+    color: var(--color-red);
+}
+/* -- Label -- */
+.label {
+    display: block; /* Ou 'inline-block' pour plus d'idée */
+    font-size: .875rem;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--foreground);
+    margin-bottom: .375rem;
+    cursor: default;
+}
+
+.label .optional { /*
+    - 'optional' pour indiquer que le champ est optionel
+*/
+    font-size: .75rem;
+    font-weight: 400;
+    color: var(--muted-foreground);
+    margin-left: .25rem;
+}
+/* -- Input -- */
+.input {
+    display: inline-block;
+    height: 2.25rem;
+    width: 100%;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border);
+    background-color: transparent;
+    padding: .5rem .75rem;
+    font-size: .875rem;
+    color: var(--foreground);
+    line-height: 1.25rem;
+    transition: box-shadow .15s ease, border-color .15s ease;
+    outline: none;
+}
+
+.input::placeholder {
+    color: var(--muted-foreground);
+}
+
+.input:focus {
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 20%, transparent);
+}
+
+.input:hover {
+    border-color: var(--primary);
+}
+
+.input:disabled,
+.input[readonly] {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.input-sm {
+    height: 1.75rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.78rem;
+    border-radius: 0.2rem;
+}
+
+.input-lg {
+    height: 2.75rem;
+    padding: 0.5rem 1rem;
+    font-size: 1.25rem;
+    border-radius: 0.3rem;
+}
+
+.input.input-error {
+    border-color: var(--destructive);
+}
+
+.input.input-error:focus {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--destructive) 20%, transparent);
+}
+/* -- Textarea -- */
+textarea.input {
+    height: auto;
+    min-height: 5rem;
+    resize: vertical;
+    padding: .625rem .75rem;
+}
+
+/* -- Plage -- */
+/*
+    Deux champs fusionnés dans UNE seule boîte (ex. période « du → au »). La boîte porte la bordure,
+    le focus et le hover à la place des champs internes, qui sont neutralisés : de l'extérieur la
+    plage se comporte comme un '.input' unique et s'aligne donc avec les autres champs d'une ligne
+    de filtres (même hauteur, même rayon, même anneau de focus).
+*/
+.input-range {
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+    height: 2.25rem;
+    width: 100%;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border);
+    background-color: transparent;
+    padding: 0 .5rem;
+    transition: box-shadow .15s ease, border-color .15s ease;
+}
+
+.input-range:hover {
+    border-color: var(--primary);
+}
+
+.input-range:focus-within {
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 20%, transparent);
+}
+
+.input-range .input { /* Le champ interne ne porte plus la boîte : c'est '.input-range' qui la porte */
+    height: 2rem;
+    min-width: 0;
+    border: 0;
+    border-radius: 0;
+    background-color: transparent;
+    padding: .25rem;
+}
+
+.input-range .input:hover,
+.input-range .input:focus {
+    border-color: transparent;
+    box-shadow: none;
+}
+
+.input-range-separator {
+    flex-shrink: 0;
+    font-size: .875rem;
+    color: var(--muted-foreground);
+}
+
+html.dark .input-range {
+    background-color: var(--background);
+}
+
+/* -- Select -- */
+.select-wrapper {
+    position: relative;
+}
+
+select.input {
+    appearance: none; /* Pour annuler le style du navigateur par défaut */
+    -webkit-appearance: none;
+    cursor: pointer;
+    padding-right: 2.25rem;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center right 1rem / 15px 16px no-repeat;
+    /* background: url(../../icons/select.svg) center right 1rem / 15px 8px no-repeat; -- L'icône ou le faire dans le html avec 'select-arrow' */
+}
+/*
+    .select-arrow {
+        position: absolute;
+        right: .75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        color: var(--muted-foreground);
+    }
+    select[multiple] ~ .select-arrow {
+        - '~' cible le '.select-arrow' qui suit un 'select[multiple]' dans le même '.select-wrapper'
+        display: none;
+    }
+*/
+
+select[multiple].input {
+    height: auto;
+    min-height: 2.25rem;
+    padding: .375rem .75rem;
+}
+/* -- Checkbox -- */
+.checkbox-wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: .625rem;
+}
+
+.checkbox-wrapper label {
+    margin-bottom: 0;
+    cursor: pointer;
+    font-weight: 400;
+    line-height: 1.4;
+}
+
+input[type="checkbox"].checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 1rem;
+    height: 1rem;
+    min-width: 1rem;
+    border-radius: .25rem;
+    border: 1px solid var(--primary);
+    background: var(--background);
+    cursor: pointer;
+    position: relative;
+    margin-top: .125rem;
+    transition: background .1s, box-shadow .15s;
+    flex-shrink: 0; /* shrink-0 */
+}
+
+input[type="checkbox"].checkbox:checked {
+    background: var(--primary);
+}
+
+input[type="checkbox"].checkbox:checked::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 9px;
+    height: 5.5px;
+    border-left: 1.75px solid var(--primary-foreground);
+    border-bottom: 1.75px solid var(--primary-foreground);
+    transform: rotate(-48deg) translateY(-1px); /* léger ajustement optique vertical */
+}
+
+input[type="checkbox"].checkbox:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 20%, transparent);
+}
+
+input[type="checkbox"].checkbox:indeterminate {
+    background: var(--primary);
+}
+
+input[type="checkbox"].checkbox:indeterminate::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 9px;
+    height: 2px;
+    background: var(--primary-foreground); /* plein au lieu de border-bottom */
+    border: none;
+}
+/* -- Radio -- */
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: .55rem;
+}
+
+.radio-wrapper {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+}
+
+.radio-wrapper label {
+    margin-bottom: 0;
+    cursor: pointer;
+    font-weight: 400;
+}
+
+input[type="radio"].radio {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 9999px;
+    border: 1px solid var(--primary);
+    background: var(--background);
+    cursor: pointer;
+    position: relative;
+    transition: box-shadow .15s;
+}
+
+input[type="radio"].radio:checked {
+    background: var(--background);
+    border-color: var(--primary);
+}
+
+input[type="radio"].radio:checked::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: .5rem;
+    height: .5rem;
+    border-radius: 9999px;
+    background: var(--primary);
+}
+
+input[type="radio"].radio:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 20%, transparent);
+}
+/* -- File -- */
+input[type="file"].file {
+    font-size: .875rem;
+    width: 100%;
+    padding: .5rem .75rem;
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius);
+    background: var(--muted);
+    color: var(--muted-foreground);
+    cursor: pointer;
+    outline: none;
+    transition: border-color .15s, background .15s;
+}
+
+input[type="file"].file::file-selector-button {
+    font-size: .8125rem;
+    font-weight: 500;
+    color: var(--secondary-foreground);
+    background: var(--secondary);
+    border: none;
+    border-radius: calc(var(--radius) - 2px);
+    padding: .375rem .75rem;
+    margin-right: .75rem;
+    cursor: pointer;
+    transition: opacity .15s;
+}
+
+input[type="file"].file::file-selector-button:hover {
+    opacity: .8;
+}
+
+input[type="file"].file:focus {
+    border-color: var(--ring);
+}
+
+html.dark .input {
+    background-color: var(--background);
+    color: var(--foreground);
+}
+/*
+    html.dark select.input,
+    html.dark input[type="number"].input {
+        background-color: var(--background);
+        color: var(--foreground);
+    }
+*/
+html.dark select.input {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+
+input[type="date"].input,
+input[type="time"].input,
+input[type="month"].input,
+input[type="datetime-local"].input {
+    color-scheme: light;
+}
+
+html.dark input[type="date"].input,
+html.dark input[type="time"].input,
+html.dark input[type="month"].input,
+html.dark input[type="datetime-local"].input {
+    color-scheme: dark; /*
+        - La couleur de fond de la bulle de date
+    */
+}

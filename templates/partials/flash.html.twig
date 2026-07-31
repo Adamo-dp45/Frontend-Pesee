@@ -1,0 +1,13 @@
+{% for type, messages in app.flashes %}
+    {#
+        <alert-message class="is-floating" type="{{ type }}" duration="5">
+            {{ messages | join('. ') }}
+        </alert-message>
+    #}
+    <twig:Alert variant="{{ type == 'danger' ? 'destructive' : type }}" class="max-w-md mb-3">
+        <twig:ux:icon name="lucide:circle-alert" /> {# !! #}
+        <twig:Alert:Title>
+            {{ messages | join('. ') }}
+        </twig:Alert:Title>
+    </twig:Alert>
+{% endfor %}

@@ -1,0 +1,20 @@
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 1.5rem;
+}
+
+.content-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+}

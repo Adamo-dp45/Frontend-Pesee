@@ -1,0 +1,53 @@
+{
+    "devDependencies": {
+        "@babel/core": "^8.0.0",
+        "@babel/preset-env": "^8.0.0",
+        "@babel/preset-react": "^8.0.0",
+        "@hotwired/stimulus": "^3.0.0",
+        "@hotwired/turbo": "^7.1.0 || ^8.0",
+        "@symfony/stimulus-bridge": "^4.0.1",
+        "@symfony/ux-react": "file:vendor/symfony/ux-react/assets",
+        "@symfony/ux-turbo": "file:vendor/symfony/ux-turbo/assets",
+        "@symfony/webpack-encore": "^7.0.0",
+        "babel-plugin-polyfill-corejs3": "^1.0.0",
+        "core-js": "^3.49.0",
+        "postcss-loader": "^8.1.1",
+        "postcss-preset-env": "^11.3.2",
+        "react": "^18.0 || ^19.0",
+        "react-dom": "^18.0 || ^19.0",
+        "sass": "^1.102.0",
+        "sass-loader": "^16.0.1",
+        "ts-loader": "^9.0.0",
+        "webpack": "^5.82",
+        "webpack-cli": "^7.0.0",
+        "webpack-dev-server": "^6.0.0"
+    },
+    "license": "UNLICENSED",
+    "private": true,
+    "scripts": {
+        "dev-server": "encore dev-server",
+        "dev": "encore dev",
+        "watch": "encore dev --watch",
+        "build": "encore production --progress"
+    },
+    "dependencies": {
+        "@base-ui/react": "^1.6.0",
+        "@tailwindcss/postcss": "^4.3.3",
+        "@tanstack/react-table": "^8.21.3",
+        "chart.js": "^4.5.1",
+        "class-variance-authority": "^0.7.1",
+        "clsx": "^2.1.1",
+        "jspdf": "^4.2.1",
+        "jspdf-autotable": "^5.0.8",
+        "lucide-react": "^1.28.0",
+        "postcss": "^8.5.25",
+        "react-resizable-panels": "^4.12.2",
+        "shadcn": "^4.16.0",
+        "tailwind-merge": "^3.6.0",
+        "tailwindcss": "^4.3.3",
+        "tom-select": "^2.6.2",
+        "tw-animate-css": "^1.4.0",
+        "xlsx": "^0.18.5",
+        "xlsx-js-style": "^1.2.0"
+    }
+}

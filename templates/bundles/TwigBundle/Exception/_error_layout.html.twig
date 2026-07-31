@@ -1,0 +1,69 @@
+{#
+    Layout partagé des pages d'erreur (404 / 403 / 500…). Utilise les tokens de thème de l'app
+    (bg/foreground/muted/border, classes .btn) → automatiquement compatible dark mode.
+    Les pages errorXXX.html.twig l'étendent et surchargent les blocs (badge, dot, icon, code,
+    heading, description, actions).
+#}
+{% extends 'app-base.html.twig' %}
+
+{% block title %}{% block heading %}Une erreur est survenue{% endblock %}{% endblock %}
+
+{% block body %}
+<div class="min-h-[85vh] flex items-center justify-center px-4 py-10">
+    <div class="w-full max-w-md text-center">
+
+        {# Badge #}
+        <span class="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mb-6">
+            <span class="inline-block size-1.5 rounded-full {% block dot %}bg-red-500{% endblock %} animate-pulse"></span>
+            {% block badge %}Erreur{% endblock %}
+        </span>
+
+        {# Icône #}
+        <div class="mx-auto mb-5 flex size-14 items-center justify-center rounded-xl border border-border bg-muted/40 text-muted-foreground">
+            {% block icon %}
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+            {% endblock %}
+        </div>
+
+        {# Code #}
+        <div class="text-7xl font-bold leading-none tracking-tight text-foreground mb-3">{% block code %}{{ status_code }}{% endblock %}</div>
+        <div class="mx-auto mb-5 h-0.5 w-8 rounded-full bg-border"></div>
+
+        {# Texte #}
+        <h1 class="text-xl font-semibold text-foreground mb-2">{{ block('heading') }}</h1>
+        <p class="text-sm text-muted-foreground leading-relaxed mb-8">{% block description %}Une erreur inattendue s'est produite.{% endblock %}</p>
+
+        {# Debug (dev uniquement) #}
+        {% if app.debug and exception is defined and exception %}
+        <div class="mb-7 text-left rounded-md border border-border overflow-hidden">
+            <div class="flex items-center gap-1.5 px-3.5 py-2.5 bg-foreground/[0.03] border-b border-border">
+                <span class="inline-block size-2.5 rounded-full bg-red-500"></span>
+                <span class="inline-block size-2.5 rounded-full bg-amber-500"></span>
+                <span class="inline-block size-2.5 rounded-full bg-green-500"></span>
+                <span class="ml-auto text-[11px] font-mono uppercase tracking-wider text-muted-foreground">debug · exception</span>
+            </div>
+            <pre class="m-0 px-4 py-3.5 bg-muted/30 font-mono text-xs text-red-600 dark:text-red-400 leading-relaxed overflow-x-auto whitespace-pre-wrap break-words">{{ exception.message }}</pre>
+        </div>
+        {% endif %}
+
+        {# Actions #}
+        <div class="flex flex-col gap-2.5">
+            {% block actions %}
+            <a href="{{ path('home') }}" class="btn btn-primary w-full justify-center">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 22V12h6v10"/></svg>
+                Retour à l'accueil
+            </a>
+            <a href="javascript:location.reload()" class="btn btn-secondary w-full justify-center">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 3v5h-5M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16m0 0v5h5"/></svg>
+                Réessayer
+            </a>
+            {% endblock %}
+        </div>
+
+        {# Méta #}
+        <div class="mt-8 pt-6 border-t border-border flex items-center justify-center gap-1.5 text-xs font-mono text-muted-foreground/70">
+            <span>HTTP {{ status_code }}</span><span>·</span><span>{{ status_text }}</span>
+        </div>
+    </div>
+</div>
+{% endblock %}

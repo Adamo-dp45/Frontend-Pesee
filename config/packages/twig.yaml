@@ -1,0 +1,9 @@
+twig:
+    file_name_pattern: '*.twig'
+    form_themes: ['form/form_theme.html.twig']
+    globals:
+        api_url: '%env(ENDPOINT)%'
+
+when@test:
+    twig:
+        strict_variables: true

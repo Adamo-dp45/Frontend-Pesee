@@ -1,0 +1,66 @@
+.layout-sidebar {
+    --gap: 5;
+    width: 100%;
+    padding-left: calc(50% - var(--container-width) / 2);
+    padding-right: calc(50% - var(--container-width) / 2);
+    display: grid;
+    gap: calc(var(--gap) * var(--space));
+    grid-template-columns: 1fr;
+
+    & > * {
+        min-width: 0;
+    }
+
+    @media only screen and (min-width: 1100px) {
+        grid-template-columns: 1fr 300px;
+    }
+}
+/* ----- */
+.tooltip {
+    position: fixed;
+    z-index: 9999;
+    pointer-events: none;
+    padding: .3125rem .625rem;
+    background: var(--primary);
+    color: var(--primary-fg);
+    font-size: .75rem;
+    font-weight: 500;
+    border-radius: calc(var(--radius) - 2px);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity .15s ease, transform .15s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    font-family: 'Geist', system-ui, sans-serif;
+}
+
+html.dark .tooltip {
+    box-shadow: 0 2px 12px rgba(0,0,0,.4);
+}
+
+.tooltip.visible {
+    opacity: 1;
+}
+
+/* Flèche générique */
+.tooltip::before {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: var(--primary);
+    border-radius: 1px;
+}
+
+/* Direction : droite (défaut sidebar) */
+.tooltip[data-dir="right"]::before {
+    top: 50%;
+    left: -4px;
+    transform: translateY(-50%) rotate(45deg);
+}
+
+/* Direction : bas (header) */
+.tooltip[data-dir="bottom"]::before {
+    top: -4px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+}

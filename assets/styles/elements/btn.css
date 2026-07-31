@@ -1,0 +1,113 @@
+.btn {
+    display: inline-flex; /*
+        - Permet de centrer les enfants du bouton correctement
+    */
+    align-items: center; /*
+        - 'justify-content: center' pas obligé grâce à lui
+    */
+    gap: .375rem;
+    font-size: .8125rem;
+    font-weight: 500;
+    padding: 0.70rem 1.20rem;
+    border-radius: 1.8rem;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--foreground);
+    transition: .3s;
+    width: max-content; /* Par défaut sur les liens */
+    cursor: pointer;
+
+    @media (min-width: 1100px) {
+        padding: 0 0.875rem;
+    }
+
+    svg {
+        width: 1rem;
+        height: 1rem;
+    }
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: var(--foreground);
+    border-color: var(--border);
+
+    &:hover {
+        background-color: var(--primary-light);
+        color: var(--primary);
+    }
+}
+
+.btn-secondary {
+    background-color: var(--secondary);
+    color: var(--foreground);
+    border-color: var(--border);
+
+    &:hover {
+        background-color: var(--secondary-foreground);
+        color: var(--secondary);
+    }
+}
+
+.btn-green {
+    background-color: var(--color-green);
+    color: var(--foreground);
+    border-color: var(--border);
+
+    &:hover {
+        background-color: var(--color-green-light);
+        color: var(--color-green);
+    }
+}
+
+.btn-danger {
+    background-color: var(--color-red);
+    color: var(--foreground);
+    border-color: var(--border);
+
+    &:hover {
+        background-color: var(--color-red-light);
+        color: var(--color-red);
+    }
+}
+
+.btn-icon,
+.btn-square {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 44px;
+    border: 1px solid var(--border);
+    transition: .3s;
+
+    &[aria-disabled="true"] {
+        opacity: .3;
+        pointer-events: none; /*
+            - Pour rendre l'élément désactiver même au survol
+        */
+    }
+
+    &[aria-selected="true"] {
+        background-color: var(--background)!important;
+        color: var(--foreground)!important;
+    }
+
+    &:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+
+    svg {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+.btn-square {
+    border-radius: 14px;
+}
+
+.btn-full {
+    width: 100%;
+}
