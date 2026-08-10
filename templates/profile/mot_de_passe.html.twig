@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Changer mon mot de passe{% endblock %}
+
+{% block body %}
+    <div class="max-w-xl">
+        <div class="mb-6">
+            <a href="{{ path('profile.index') }}" class="text-sm text-muted-foreground underline-offset-4 hover:underline">
+                ← Retour à mon profil
+            </a>
+            <h1 class="text-2xl font-semibold tracking-tight mt-2">Changer mon mot de passe</h1>
+        </div>
+
+        {% if erreur %}
+            <twig:Alert variant="destructive" class="mb-4">
+                <twig:ux:icon name="lucide:circle-alert" class="size-4" />
+                <twig:Alert:Title>{{ erreur }}</twig:Alert:Title>
+            </twig:Alert>
+        {% endif %}
+
+        <twig:Card>
+            <twig:Card:Content class="pt-6">
+                <form method="post" class="grid gap-4">
+                    <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('gestion') }}">
+
+                    {#
+                        - Le mot de passe actuel est exigé : une session ouverte ne suffit pas.
+                          Sans lui, un poste laissé déverrouillé suffirait à s'approprier le compte.
+                    #}
+                    {{ include('partials/_champ.html.twig', {
+                        nom: 'motDePasseActuel', label: 'Mot de passe actuel', type: 'password',
+                        requis: true, violations: violations
+                    }) }}
+                    {{ include('partials/_champ.html.twig', {
+                        nom: 'nouveauMotDePasse', label: 'Nouveau mot de passe', type: 'password',
+                        requis: true, violations: violations, aide: '8 caractères minimum.'
+                    }) }}
+                    {{ include('partials/_champ.html.twig', {
+                        nom: 'confirmation', label: 'Confirmation', type: 'password',
+                        requis: true, violations: violations
+                    }) }}
+
+                    <div class="flex gap-2">
+                        <twig:Button type="submit">Changer mon mot de passe</twig:Button>
+                        <twig:Button as="a" href="{{ path('profile.index') }}" variant="ghost">Annuler</twig:Button>
+                    </div>
+                </form>
+            </twig:Card:Content>
+        </twig:Card>
+    </div>
+{% endblock %}

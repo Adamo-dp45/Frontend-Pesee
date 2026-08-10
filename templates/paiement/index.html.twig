@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Versements{% endblock %}
+
+{% block body %}
+    <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold tracking-tight">Versements</h1>
+            <p class="text-sm text-muted-foreground mt-1">Les paiements mobile money aux planteurs.</p>
+        </div>
+    </div>
+
+    <twig:Alert class="mb-6">
+        <twig:ux:icon name="lucide:info" class="size-4" />
+        <twig:Alert:Description>Un versement part depuis une pesée terminée : ouvrez le bilan, choisissez la pesée, puis « Payer ». Une pesée peut être réglée en plusieurs fois.</twig:Alert:Description>
+    </twig:Alert>
+
+    {#
+        - Les filtres vivent DANS la table : ils écrivent dans la même URL que le tri et la
+          pagination, donc un écran filtré se partage tel quel.
+    #}
+    <div {{ react_component('Caisse/TablePaiements', {
+        items: items,
+        meta: meta,
+        queryParams: queryParams,
+        sortMeta: sortMeta,
+        sites: sites,
+    }) }}></div>
+{% endblock %}

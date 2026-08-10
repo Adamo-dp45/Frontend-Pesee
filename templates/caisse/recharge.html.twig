@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Recharger le solde{% endblock %}
+
+{% block body %}
+    <div class="max-w-xl">
+        <div class="mb-6">
+            <a href="{{ path('caisse.index') }}" class="text-sm text-muted-foreground underline-offset-4 hover:underline">
+                ← Retour à la caisse
+            </a>
+            <h1 class="text-2xl font-semibold tracking-tight mt-2">Recharger le solde</h1>
+            <p class="text-sm text-muted-foreground mt-1">
+                Une entrée d'argent venue de l'extérieur, à saisir à la main.
+            </p>
+        </div>
+
+        {# Les erreurs du formulaire sont rendues par 'form_errors' dans sa carte, plus ici #}
+
+        <twig:Card class="mb-4">
+            <twig:Card:Content class="pt-6">
+                <p class="text-sm text-muted-foreground">Solde actuel de {{ entreprise.nom }}</p>
+                <p class="text-2xl font-semibold tabular-nums mt-1">
+                    {{ entreprise.solde|number_format(0, ',', ' ') }} F
+                </p>
+            </twig:Card:Content>
+        </twig:Card>
+
+        <twig:Card>
+            <twig:Card:Header>
+                <twig:Card:Title>Nouvelle recharge</twig:Card:Title>
+                <twig:Card:Description>
+                    Elle est historisée au grand livre comme toutes les autres écritures.
+                </twig:Card:Description>
+            </twig:Card:Header>
+            <twig:Card:Content>
+                {{ form_start(form) }}
+                    {{ form_errors(form) }}
+                    <div class="grid gap-4">
+                        {{ form_row(form.montant) }}
+                        {{ form_row(form.motif) }}
+                    </div>
+                    <div class="mt-6 flex items-center justify-end gap-3 border-t border-border pt-4">
+                        <a href="{{ path('caisse.index') }}" class="btn btn-secondary">Annuler</a>
+                        <button class="btn btn-primary">Recharger</button>
+                    </div>
+                {{ form_end(form) }}
+            </twig:Card:Content>
+        </twig:Card>
+    </div>
+{% endblock %}

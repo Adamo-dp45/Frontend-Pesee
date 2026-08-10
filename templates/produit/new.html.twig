@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau produit{% endblock %}
+
+{% block body %}
+    <div class="mb-6">
+        <a href="{{ path('produit.index') }}" class="text-sm text-muted-foreground underline-offset-4 hover:underline">
+            ← Retour aux produits
+        </a>
+        <h1 class="mt-2 text-2xl font-semibold tracking-tight">Nouveau produit</h1>
+        <p class="mt-1 text-sm text-muted-foreground">
+            Le déclarer d'avance évite qu'il arrive du poste sans prix.
+        </p>
+    </div>
+
+    {% include 'produit/_form.html.twig' with { button: 'Créer' } %}
+{% endblock %}

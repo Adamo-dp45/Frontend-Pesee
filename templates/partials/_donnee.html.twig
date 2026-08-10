@@ -1,0 +1,6 @@
+{# Un couple libellé / valeur sur une fiche. Une valeur absente s'affiche, elle ne disparaît pas :
+   savoir qu'un champ est vide fait partie de l'information. #}
+<div>
+    <p class="text-xs text-muted-foreground">{{ libelle }}</p>
+    <p class="text-sm mt-0.5 {{ valeur is empty ? 'text-muted-foreground' }}">{{ valeur is empty ? '—' : valeur }}</p>
+</div>

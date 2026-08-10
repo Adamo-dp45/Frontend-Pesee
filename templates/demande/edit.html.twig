@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Corriger la demande{% endblock %}
+
+{% block body %}
+    <div class="mb-6">
+        <a href="{{ path('demande.index') }}" class="text-sm text-muted-foreground underline-offset-4 hover:underline">
+            ← Retour aux demandes
+        </a>
+        <h1 class="mt-2 text-2xl font-semibold tracking-tight">Corriger la demande</h1>
+        <p class="mt-1 text-sm text-muted-foreground">
+            {{ demande.site.libellesite ?? 'Pont bascule inconnu' }} · demandée le {{ demande.createdAt|date('d/m/Y à H:i') }}
+        </p>
+    </div>
+
+    {# Une demande traitée ne se corrige plus : l'API refuse, autant le dire avant la saisie #}
+    {% if demande.statut != 'EN_ATTENTE' %}
+        <twig:Alert variant="destructive" class="mb-4">
+            <twig:ux:icon name="lucide:triangle-alert" class="size-4" />
+            <twig:Alert:Description>
+                Cette demande a déjà été traitée : elle ne peut plus être corrigée.
+            </twig:Alert:Description>
+        </twig:Alert>
+    {% endif %}
+
+    {% include 'demande/_form.html.twig' with { button: 'Enregistrer' } %}
+{% endblock %}

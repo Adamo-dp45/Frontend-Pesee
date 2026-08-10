@@ -1,0 +1,18 @@
+{# Une tuile de chiffre clé. 'unite' vaut 't' ou 'F' selon la grandeur. #}
+<twig:Card>
+    <twig:Card:Content class="pt-6">
+        <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+                <p class="text-sm text-muted-foreground truncate">{{ titre }}</p>
+                <p class="text-2xl font-semibold tabular-nums mt-1">
+                    {{ valeur|number_format(unite == 't' ? 1 : 0, ',', ' ') }}
+                    <span class="text-base font-normal text-muted-foreground">{{ unite }}</span>
+                </p>
+                <p class="text-xs text-muted-foreground mt-1 truncate">{{ detail }}</p>
+            </div>
+            <div class="shrink-0 rounded-lg bg-muted p-2">
+                <twig:ux:icon name="{{ icone }}" class="size-5 text-muted-foreground" />
+            </div>
+        </div>
+    </twig:Card:Content>
+</twig:Card>

@@ -1,0 +1,9 @@
+{# Pastille d'état de règlement d'une pesée, partagée par le tableau de bord et le bilan. #}
+{% set apparence = {
+    'SOLDE':    { variant: 'default',   libelle: 'Soldée' },
+    'PARTIEL':  { variant: 'secondary', libelle: 'Partielle' },
+    'NON_PAYE': { variant: 'outline',   libelle: 'Non payée' },
+} %}
+{% set etat = apparence[statut] ?? { variant: 'outline', libelle: statut|default('—') } %}
+
+<twig:Badge variant="{{ etat.variant }}">{{ etat.libelle }}</twig:Badge>

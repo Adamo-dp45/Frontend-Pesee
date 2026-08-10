@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ entreprise.nom }}{% endblock %}
+
+{% block body %}
+    <div class="max-w-xl">
+        <div class="mb-6">
+            <a href="{{ path('admin.entreprise.index') }}" class="text-sm text-muted-foreground underline-offset-4 hover:underline">
+                ← Retour aux entreprises
+            </a>
+            <div class="flex flex-wrap items-center gap-3 mt-2">
+                <h1 class="text-2xl font-semibold tracking-tight">{{ entreprise.nom }}</h1>
+                {{ include('partials/_etat.html.twig', { statut: entreprise.statut }) }}
+            </div>
+            {# Le code ne se modifie pas : on l'affiche, puisque c'est par lui que le client s'identifie #}
+            <p class="mt-1 font-mono text-sm text-muted-foreground">{{ entreprise.codeentreprise }}</p>
+        </div>
+
+        {# Les erreurs du formulaire sont rendues par 'form_errors' dans sa carte, plus ici #}
+
+        <twig:Card>
+            <twig:Card:Header>
+                <twig:Card:Title>Fiche entreprise</twig:Card:Title>
+            </twig:Card:Header>
+            <twig:Card:Content>
+                {{ form_start(form) }}
+                    {{ form_errors(form) }}
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        {{ form_row(form.nom) }}
+                        {{ form_row(form.adresse) }}
+                        {{ form_row(form.email) }}
+                        {{ form_row(form.contact1) }}
+                        {{ form_row(form.contact2) }}
+                    </div>
+                    <div class="mt-6 flex items-center justify-end gap-3 border-t border-border pt-4">
+                        <a href="{{ path('admin.entreprise.index') }}" class="btn btn-secondary">Annuler</a>
+                        <button class="btn btn-primary">Enregistrer</button>
+                    </div>
+                {{ form_end(form) }}
+            </twig:Card:Content>
+        </twig:Card>
+
+
+        {% if is_granted('ENTREPRISE_BLOQUER') %}
+            <twig:Card class="mt-4 border-destructive/40">
+                <twig:Card:Header>
+                    <twig:Card:Title>
+                        {{ entreprise.statut == 'ACTIVE' ? 'Désactiver' : 'Réactiver' }} cette entreprise
+                    </twig:Card:Title>
+                    <twig:Card:Description>
+                        Désactiver coupe l'accès de tous ses comptes d'un coup. Rien n'est supprimé :
+                        l'historique reste, et la réactivation rend chacun à son travail.
+                    </twig:Card:Description>
+                </twig:Card:Header>
+                <twig:Card:Content>
+                    <form method="post" action="{{ path('admin.entreprise.activation', { id: entreprise.id }) }}">
+                        <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('gestion') }}">
+                        <twig:Button type="submit" variant="{{ entreprise.statut == 'ACTIVE' ? 'destructive' : 'outline' }}"
+                                     data-confirmer="{{ entreprise.statut == 'ACTIVE' ? 'Désactiver' : 'Réactiver' }} {{ entreprise.nom }} ?"
+                                     data-confirmer-detail="{{ entreprise.statut == 'ACTIVE'
+                                         ? 'Tous les comptes de cette entreprise perdront l\'accès immédiatement.'
+                                         : 'Tous ses comptes retrouvent l\'accès.' }}"
+                                     data-confirmer-action="{{ entreprise.statut == 'ACTIVE' ? 'Désactiver' : 'Réactiver' }}">
+                            {{ entreprise.statut == 'ACTIVE' ? 'Désactiver' : 'Réactiver' }}
+                        </twig:Button>
+                    </form>
+                </twig:Card:Content>
+            </twig:Card>
+        {% endif %}
+    </div>
+{% endblock %}

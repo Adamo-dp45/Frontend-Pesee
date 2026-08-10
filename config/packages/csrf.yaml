@@ -9,3 +9,5 @@ framework:
             - submit
             - authenticate
             - logout
+            - motdepasse # Formulaires publics « oublié » et « réinitialisation »
+            - gestion    # Tous les formulaires des écrans de gestion

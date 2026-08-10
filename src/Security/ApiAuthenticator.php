@@ -51,13 +51,9 @@ class ApiAuthenticator extends AbstractLoginFormAuthenticator
                     throw new CustomUserMessageAuthenticationException($e->getMessage());
                 }
 
-                if(!isset($data['user'])) { /*
-                    - Ou '$this->apiClient->getCurrentUser()'
+                return new ApiUser($data['user']); /*
+                    - 'login()' a déjà refusé une réponse sans profil : inutile de le revérifier ici
                 */
-                    throw new CustomUserMessageAuthenticationException('Utilisateur invalide');
-                }
-
-                return new ApiUser($data['user']);
             }),
             [
                 new CsrfTokenBadge('authenticate', $csrf),
@@ -70,7 +66,10 @@ class ApiAuthenticator extends AbstractLoginFormAuthenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        $response = new RedirectResponse($this->getTargetPath($request->getSession(), $firewallName) ?? $this->urlGenerator->generate('home'));
+        $response = new RedirectResponse(
+            $this->getTargetPath($request->getSession(), $firewallName)
+                ?? $this->urlGenerator->generate('tableau_de_bord.index')
+        );
         $refreshToken = $this->apiClient->getRefreshToken();
         if($refreshToken) {
             $response->headers->setCookie(

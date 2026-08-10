@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ponts bascules{% endblock %}
+
+{% block body %}
+    <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-semibold tracking-tight">Ponts bascules</h1>
+            <p class="mt-1 text-sm text-muted-foreground">
+                {% if app.user.estOperateur %}
+                    Ceux dont vous tenez la caisse.
+                {% else %}
+                    Chaque poste, sa caisse et son opérateur.
+                {% endif %}
+            </p>
+        </div>
+        {# Le patron installe les postes et attribue les codes : les entreprises exploitent les leurs #}
+        {% if is_granted('SITE_CREER') %}
+            <twig:Button as="a" href="{{ path('site.new') }}" size="sm">
+                <twig:ux:icon name="lucide:plus" class="size-4" />
+                Mettre un poste en service
+            </twig:Button>
+        {% endif %}
+    </div>
+
+    {#
+        - Les filtres vivent DANS la table, plus dans un formulaire Twig au-dessus : ils écrivent dans
+          la même URL que le tri et la pagination, donc un écran filtré se partage tel quel.
+        - Le jeton est engendré ici et non dans la table : un composant React ne doit pas avoir à
+          connaître l'identifiant de jeton des écrans de gestion.
+        - 'multiEntreprise' : seul le super administrateur voit les postes de plusieurs entreprises.
+          Ailleurs, la colonne répéterait la même valeur sur toutes les lignes.
+        - 'modifiable' et 'blocable' sont deux droits distincts, et ils divergent : le super
+          administrateur modifie un poste sans pouvoir bloquer une caisse qui n'est pas la sienne.
+    #}
+    <div {{ react_component('Gestion/TableSites', {
+        items: items,
+        meta: meta,
+        queryParams: queryParams,
+        sortMeta: sortMeta,
+        modifiable: is_granted('SITE_MODIFIER'),
+        blocable: is_granted('SITE_BLOQUER'),
+        multiEntreprise: app.user.estSuperAdmin,
+        jeton: csrf_token('gestion'),
+    }) }}></div>
+{% endblock %}

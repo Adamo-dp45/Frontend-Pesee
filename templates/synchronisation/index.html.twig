@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Synchronisations{% endblock %}
+
+{% block body %}
+    <div class="mb-6">
+        <h1 class="text-2xl font-semibold tracking-tight">Synchronisations</h1>
+        <p class="mt-1 text-sm text-muted-foreground">
+            Ce que chaque poste de pesée a envoyé, et ce qui a été refusé.
+        </p>
+    </div>
+
+    {#
+        - Le tableau de bord signale un poste « silencieux » ; c'est ici qu'on voit pourquoi. Sans cet
+          écran, chaque incident de synchronisation se règle par un appel au peseur.
+    #}
+    <twig:Alert class="mb-6">
+        <twig:ux:icon name="lucide:info" class="size-4" />
+        <twig:Alert:Description>
+            Un poste envoie la ligne entière à chaque passage : une pesée déjà reçue est
+            <strong>complétée</strong>, pas dupliquée. Une ligne refusée reste sur le poste et
+            repartira au prochain envoi, une fois sa cause corrigée.
+        </twig:Alert:Description>
+    </twig:Alert>
+
+    <div {{ react_component('Exploitation/TableSynchronisations', {
+        items: items,
+        meta: meta,
+        queryParams: queryParams,
+        sortMeta: sortMeta,
+        sites: sites,
+    }) }}></div>
+{% endblock %}

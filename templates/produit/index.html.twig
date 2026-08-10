@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Produits{% endblock %}
+
+{% block body %}
+    <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold tracking-tight">Produits</h1>
+            <p class="text-sm text-muted-foreground mt-1">
+                Le prix au kilo valorise chaque pesée terminée.
+            </p>
+        </div>
+        {# Les produits naissent sur le poste ; les créer ici sert à fixer le prix d'avance #}
+        {% if is_granted('PRODUIT_CREER') %}
+            <twig:Button as="a" href="{{ path('produit.new') }}" size="sm">
+                <twig:ux:icon name="lucide:plus" class="size-4" />
+                Nouveau produit
+            </twig:Button>
+        {% endif %}
+    </div>
+
+    {#
+        - Les produits naissent sur le poste de pesée, qui les crée à la volée et les pousse à la
+          synchronisation. Le web n'en est pas le maître : il complète le prix et l'activation.
+    #}
+    <twig:Alert class="mb-6">
+        <twig:ux:icon name="lucide:info" class="size-4" />
+        <twig:Alert:Description>
+            Le prix circule dans les deux sens : le poste envoie le sien à chaque synchronisation,
+            et vous pouvez le corriger ici. Le dernier qui modifie l'emporte.
+        </twig:Alert:Description>
+    </twig:Alert>
+
+    {#
+        - Les filtres vivent DANS la table, plus dans un formulaire Twig au-dessus : ils écrivent dans
+          la même URL que le tri et la pagination, donc un écran filtré se partage tel quel.
+        - Le jeton est engendré ici : un composant React n'a pas à connaître l'identifiant de jeton
+          des écrans de gestion.
+    #}
+    <div {{ react_component('Gestion/TableProduits', {
+        items: items,
+        meta: meta,
+        queryParams: queryParams,
+        sortMeta: sortMeta,
+        modifiable: modifiable,
+        supprimable: supprimable,
+        sites: sites,
+        jeton: csrf_token('gestion'),
+    }) }}></div>
+{% endblock %}

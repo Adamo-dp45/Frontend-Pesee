@@ -1,0 +1,108 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ fournisseur.nomComplet }}{% endblock %}
+
+{% block body %}
+    <div class="max-w-3xl">
+        <div class="mb-6">
+            <a href="{{ path('fournisseur.index') }}" class="text-sm text-muted-foreground underline-offset-4 hover:underline">
+                ← Retour aux planteurs
+            </a>
+            <div class="flex flex-wrap items-center gap-3 mt-2">
+                <h1 class="text-2xl font-semibold tracking-tight">{{ fournisseur.nomComplet }}</h1>
+                {{ include('partials/_etat.html.twig', { statut: fournisseur.statut }) }}
+            </div>
+            <p class="text-sm text-muted-foreground mt-1">{{ fournisseur.site.libellesite ?? 'Pont bascule inconnu' }}</p>
+        </div>
+
+        {% if fournisseur.motifNonPayable %}
+            <twig:Alert variant="destructive" class="mb-4">
+                <twig:ux:icon name="lucide:triangle-alert" class="size-4" />
+                <twig:Alert:Title>Ce planteur ne peut pas être payé</twig:Alert:Title>
+                <twig:Alert:Description>
+                    {{ fournisseur.motifNonPayable }} — ses pesées s'enregistrent, mais tout
+                    versement sera refusé.
+                </twig:Alert:Description>
+            </twig:Alert>
+        {% endif %}
+
+        <twig:Card class="mb-4">
+            <twig:Card:Header>
+                <twig:Card:Title>Fiche planteur</twig:Card:Title>
+            </twig:Card:Header>
+            <twig:Card:Content class="grid gap-3 sm:grid-cols-2">
+                {{ include('partials/_donnee.html.twig', { libelle: 'Nom', valeur: fournisseur.nom }) }}
+                {{ include('partials/_donnee.html.twig', { libelle: 'Prénom', valeur: fournisseur.prenom }) }}
+                {{ include('partials/_donnee.html.twig', { libelle: 'Code du poste', valeur: fournisseur.codefournisseur }) }}
+                {{ include('partials/_donnee.html.twig', { libelle: 'Téléphone mobile money', valeur: fournisseur.contact1 }) }}
+                {{ include('partials/_donnee.html.twig', { libelle: 'Autre téléphone', valeur: fournisseur.contact2 }) }}
+                {{ include('partials/_donnee.html.twig', { libelle: 'Réseau mobile', valeur: fournisseur.reseau }) }}
+                {{ include('partials/_donnee.html.twig', {
+                    libelle: 'Prix spécial au kilo',
+                    valeur: fournisseur.prixspeciale ? fournisseur.prixspeciale|number_format(0, ',', ' ') ~ ' F' : null
+                }) }}
+                {{ include('partials/_donnee.html.twig', {
+                    libelle: 'Créé le', valeur: fournisseur.createdAt ? fournisseur.createdAt|date('d/m/Y') : null
+                }) }}
+            </twig:Card:Content>
+            {% if modifiable %}
+                <twig:Card:Footer>
+                    <twig:Button as="a" href="{{ path('fournisseur.edit', { id: fournisseur.id }) }}" variant="outline">
+                        Modifier
+                    </twig:Button>
+                </twig:Card:Footer>
+            {% endif %}
+        </twig:Card>
+
+        {# Ce qu'on vient vraiment vérifier sur la fiche d'un planteur : ce qu'il a livré. #}
+        <twig:Card>
+            <twig:Card:Header>
+                <twig:Card:Title>Dernières pesées</twig:Card:Title>
+            </twig:Card:Header>
+            <twig:Card:Content class="p-0">
+                <div class="overflow-x-auto">
+                    <twig:Table>
+                        <twig:Table:Header>
+                            <twig:Table:Row>
+                                <twig:Table:Head>Ticket</twig:Table:Head>
+                                <twig:Table:Head>Date</twig:Table:Head>
+                                <twig:Table:Head>Produit</twig:Table:Head>
+                                <twig:Table:Head class="text-right">Net</twig:Table:Head>
+                                <twig:Table:Head class="text-right">Montant</twig:Table:Head>
+                                <twig:Table:Head>Règlement</twig:Table:Head>
+                            </twig:Table:Row>
+                        </twig:Table:Header>
+                        <twig:Table:Body>
+                            {% for p in pesees %}
+                                <twig:Table:Row>
+                                    <twig:Table:Cell>
+                                        <a href="{{ path('pesee.voir', { id: p.id }) }}" class="font-medium underline-offset-4 hover:underline">
+                                            {{ p.numticket ?? p.codepesee }}
+                                        </a>
+                                    </twig:Table:Cell>
+                                    <twig:Table:Cell class="whitespace-nowrap">
+                                        {{ p.peseeAt2 ? p.peseeAt2|date('d/m/Y') : '—' }}
+                                    </twig:Table:Cell>
+                                    <twig:Table:Cell>{{ p.produit.libelle ?? '—' }}</twig:Table:Cell>
+                                    <twig:Table:Cell class="text-right tabular-nums">
+                                        {{ p.poidsnet ? p.poidsnet|number_format(0, ',', ' ') ~ ' kg' : '—' }}
+                                    </twig:Table:Cell>
+                                    <twig:Table:Cell class="text-right tabular-nums">
+                                        {{ p.montantdu ? p.montantdu|number_format(0, ',', ' ') ~ ' F' : '—' }}
+                                    </twig:Table:Cell>
+                                    <twig:Table:Cell>{{ include('partials/_etat.html.twig', { statut: p.statutReglement }) }}</twig:Table:Cell>
+                                </twig:Table:Row>
+                            {% else %}
+                                <twig:Table:Row>
+                                    <twig:Table:Cell colspan="6" class="text-center text-muted-foreground py-8">
+                                        Aucune pesée pour ce planteur
+                                    </twig:Table:Cell>
+                                </twig:Table:Row>
+                            {% endfor %}
+                        </twig:Table:Body>
+                    </twig:Table>
+                </div>
+            </twig:Card:Content>
+        </twig:Card>
+    </div>
+{% endblock %}

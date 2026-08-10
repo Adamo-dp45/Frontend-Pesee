@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ fournisseur.nomComplet }}{% endblock %}
+
+{% block body %}
+    <div class="mb-6">
+        <a href="{{ path('fournisseur.index') }}" class="text-sm text-muted-foreground underline-offset-4 hover:underline">
+            ← Retour aux planteurs
+        </a>
+        <h1 class="mt-2 text-2xl font-semibold tracking-tight">{{ fournisseur.nomComplet }}</h1>
+        <p class="mt-1 text-sm text-muted-foreground">
+            {{ fournisseur.site.libellesite ?? 'Aucun pont bascule' }}
+        </p>
+    </div>
+
+    {# Le motif vient de l'API : les deux écrans ne peuvent pas diverger sur qui est payable #}
+    {% if fournisseur.motifNonPayable %}
+        <twig:Alert variant="destructive" class="mb-4">
+            <twig:ux:icon name="lucide:triangle-alert" class="size-4" />
+            <twig:Alert:Description>{{ fournisseur.motifNonPayable }}</twig:Alert:Description>
+        </twig:Alert>
+    {% endif %}
+
+    {% include 'fournisseur/_form.html.twig' with { button: 'Enregistrer' } %}
+{% endblock %}

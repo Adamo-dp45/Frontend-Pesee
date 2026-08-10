@@ -1,0 +1,24 @@
+{#
+    - Le partiel partagé par 'new' et 'edit' : une variable '{{ button }}' pour le libellé du bouton.
+    - Le pont bascule n'apparaît qu'au dépôt : déplacer une demande la ferait payer par la mauvaise caisse.
+#}
+<twig:Card>
+    <twig:Card:Content class="pt-6">
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+
+            <div class="grid gap-4">
+                {% if form.site is defined %}
+                    {{ form_row(form.site) }}
+                {% endif %}
+                {{ form_row(form.montantDemande) }}
+                {{ form_row(form.motif) }}
+            </div>
+
+            <div class="mt-6 flex items-center justify-end gap-3 border-t border-border pt-4">
+                <a href="{{ path('demande.index') }}" class="btn btn-secondary">Annuler</a>
+                <button class="btn btn-primary">{{ button }}</button>
+            </div>
+        {{ form_end(form) }}
+    </twig:Card:Content>
+</twig:Card>

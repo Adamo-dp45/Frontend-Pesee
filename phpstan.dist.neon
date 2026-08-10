@@ -1,0 +1,21 @@
+parameters:
+    level: 6
+
+    paths:
+        - src
+
+    # 'phpstan-symfony' lit le conteneur compilé pour connaître les services et leurs types.
+    # Il faut donc que le cache de développement existe : 'php bin/console cache:warmup'.
+    symfony:
+        containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml
+
+    ignoreErrors:
+        # Les réponses de l'API arrivent en tableaux associatifs non typés : les helpers qui les
+        # manipulent (ApiHelper, TableHelper) travaillent volontairement sur 'array' brut.
+        - identifier: missingType.iterableValue
+
+        # 'getAllowedEnvs()' est un point d'extension du framework : 'KernelTrait' le déclare et
+        # l'appelle, la classe Kernel ne fait que le redéfinir. PHPStan ne voit pas l'appel.
+        -
+            identifier: method.unused
+            path: src/Kernel.php

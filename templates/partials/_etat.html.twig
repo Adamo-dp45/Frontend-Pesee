@@ -1,0 +1,25 @@
+{#
+    - La pastille d'état, côté Twig. Même dictionnaire que celui du composant React 'cellules.tsx' :
+      un même état ne doit pas changer de couleur selon l'écran qui l'affiche.
+#}
+{% set etats = {
+    'ACTIF':      { libelle: 'Actif',      variant: 'default' },
+    'SUSPENDU':   { libelle: 'Suspendu',   variant: 'destructive' },
+    'ACTIVE':     { libelle: 'Active',     variant: 'default' },
+    'DESACTIVEE': { libelle: 'Désactivée', variant: 'destructive' },
+    'BLOQUE':     { libelle: 'Bloqué',     variant: 'destructive' },
+    'EN_ATTENTE': { libelle: 'En attente', variant: 'secondary' },
+    'ENVOYE':     { libelle: 'Envoyé',     variant: 'secondary' },
+    'REUSSI':     { libelle: 'Réussi',     variant: 'default' },
+    'ECHOUE':     { libelle: 'Échoué',     variant: 'destructive' },
+    'ANNULE':     { libelle: 'Annulé',     variant: 'outline' },
+    'APPROUVEE':  { libelle: 'Approuvée',  variant: 'default' },
+    'REJETEE':    { libelle: 'Rejetée',    variant: 'destructive' },
+    'ANNULEE':    { libelle: 'Annulée',    variant: 'outline' },
+    'NON_PAYE':   { libelle: 'Non payée',  variant: 'outline' },
+    'PARTIEL':    { libelle: 'Partielle',  variant: 'secondary' },
+    'SOLDE':      { libelle: 'Soldée',     variant: 'default' },
+} %}
+{% set etat = etats[statut] ?? { libelle: statut|default('—'), variant: 'outline' } %}
+
+<twig:Badge variant="{{ etat.variant }}">{{ etat.libelle }}</twig:Badge>

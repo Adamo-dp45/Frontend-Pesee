@@ -1,20 +1,97 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello ProfileController!{% endblock %}
+{% block title %}Mon profil{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+    <div class="max-w-xl">
+        <div class="mb-6">
+            <h1 class="text-2xl font-semibold tracking-tight">Mon profil</h1>
+            <p class="text-sm text-muted-foreground mt-1">
+                {{ app.user.libelleRole }}{{ moi.entreprise.nom is defined and moi.entreprise.nom ? ' · ' ~ moi.entreprise.nom }}
+            </p>
+        </div>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+        {% if erreur %}
+            <twig:Alert variant="destructive" class="mb-4">
+                <twig:ux:icon name="lucide:circle-alert" class="size-4" />
+                <twig:Alert:Title>{{ erreur }}</twig:Alert:Title>
+            </twig:Alert>
+        {% endif %}
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>C:/Users/adamo/Documents/Web/Webpesee/Frontend-Webpesee/src/Controller/ProfileController.php</code></li>
-        <li>Your template at <code>C:/Users/adamo/Documents/Web/Webpesee/Frontend-Webpesee/templates/profile/index.html.twig</code></li>
-    </ul>
-</div>
+        <twig:Card class="mb-4">
+            <twig:Card:Header>
+                <twig:Card:Title>Mes coordonnées</twig:Card:Title>
+                <twig:Card:Description>
+                    Votre rôle et votre entreprise ne se modifient pas ici : ils relèvent de votre
+                    administrateur.
+                </twig:Card:Description>
+            </twig:Card:Header>
+            <twig:Card:Content>
+                <form method="post" class="grid gap-4">
+                    <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('gestion') }}">
+
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        {{ include('partials/_champ.html.twig', {
+                            nom: 'nom', label: 'Nom', valeur: moi.nom, requis: true, violations: violations
+                        }) }}
+                        {{ include('partials/_champ.html.twig', {
+                            nom: 'prenom', label: 'Prénom', valeur: moi.prenom, violations: violations
+                        }) }}
+                    </div>
+
+                    {{ include('partials/_champ.html.twig', {
+                        nom: 'email', label: 'Adresse e-mail', type: 'email', valeur: moi.email,
+                        requis: true, violations: violations,
+                        aide: 'C\'est avec elle que vous vous connectez.'
+                    }) }}
+                    {{ include('partials/_champ.html.twig', {
+                        nom: 'telephone', label: 'Téléphone', type: 'tel', valeur: moi.telephone, violations: violations
+                    }) }}
+
+                    <div><twig:Button type="submit">Enregistrer</twig:Button></div>
+                </form>
+            </twig:Card:Content>
+        </twig:Card>
+
+        <twig:Card class="mb-4">
+            <twig:Card:Header>
+                <twig:Card:Title>Mot de passe</twig:Card:Title>
+                <twig:Card:Description>
+                    Changer votre mot de passe demande de saisir l'actuel.
+                </twig:Card:Description>
+            </twig:Card:Header>
+            <twig:Card:Content>
+                <twig:Button as="a" href="{{ path('profile.mot_de_passe') }}" variant="outline">
+                    Changer mon mot de passe
+                </twig:Button>
+            </twig:Card:Content>
+        </twig:Card>
+
+        {# Ce qu'on ne peut pas changer soi-même, mais qu'il est utile de voir #}
+        <twig:Card>
+            <twig:Card:Header>
+                <twig:Card:Title>Mon accès</twig:Card:Title>
+            </twig:Card:Header>
+            <twig:Card:Content class="grid gap-3 sm:grid-cols-2">
+                <div>
+                    <p class="text-xs text-muted-foreground">Rôle</p>
+                    <p class="text-sm mt-1">{{ app.user.libelleRole }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-muted-foreground">Entreprise</p>
+                    <p class="text-sm mt-1">{{ moi.entreprise.nom|default('—') }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-muted-foreground">État du compte</p>
+                    <p class="text-sm mt-1">{{ include('partials/_etat.html.twig', { statut: moi.statut }) }}</p>
+                </div>
+                {% if moi.sitesGeres|default([])|length > 0 %}
+                    <div>
+                        <p class="text-xs text-muted-foreground">Ponts bascules</p>
+                        <p class="text-sm mt-1">{{ moi.sitesGeres|join(', ') }}</p>
+                    </div>
+                {% endif %}
+            </twig:Card:Content>
+        </twig:Card>
+    </div>
 {% endblock %}

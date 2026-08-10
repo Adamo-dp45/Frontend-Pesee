@@ -21,7 +21,7 @@ class ApiHelper
     {
     }
 
-    public function get(string $endpoint, array $query = [], array $headers = [])
+    public function get(string $endpoint, array $query = [], array $headers = []): array
     {
         $response = $this->api->request('GET', $endpoint, [
             'query' => $query,
@@ -34,7 +34,7 @@ class ApiHelper
         $this->throwFromResponse($response, $response->getStatusCode());
     }
 
-    public function collection(string $endpoint, array $query = [], array $headers = [])
+    public function collection(string $endpoint, array $query = [], array $headers = []): array
     {
         $response = $this->api->request('GET', $endpoint, [
             'query' => $query,
@@ -66,17 +66,19 @@ class ApiHelper
             'headers' => array_merge(['Content-Type' => 'application/json'], $headers)
         ]);
 
-        if($response->getStatusCode() === 204) {
-            return [];
+        $statusCode = $response->getStatusCode();
+
+        if($statusCode >= 200 && $statusCode < 300) {
+            return $this->corps($response); /*
+                - '202 Accepted' et '204 No Content' n'ont pas de corps : les opérations en
+                  'output: false' (mot de passe oublié, réinitialisation) répondent ainsi
+            */
         }
 
-        if(in_array($response->getStatusCode(), [200, 201], true)) {
-            return $response->toArray(false);
-        }
-        $this->throwFromResponse($response, $response->getStatusCode());
+        $this->throwFromResponse($response, $statusCode);
     }
 
-    public function patch(string $endpoint, array $data = [], array $headers = [])
+    public function patch(string $endpoint, array $data = [], array $headers = []): array
     {
         $response = $this->api->request('PATCH', $endpoint, [
             'json' => $data,
@@ -132,38 +134,7 @@ class ApiHelper
         ];
     }
 
-    public function postMediaObject(UploadedFile $file)
-    {
-        $formFields = [
-            'file' => new DataPart(
-                body: file_get_contents($file->getRealPath()),
-                filename: $file->getClientOriginalName(),
-                contentType: $file->getMimeType() ?? 'application/octet-stream',
-            )
-        ];
-        $formData = new FormDataPart($formFields);
-        $token = $this->api->getToken();
-
-        $headers = $formData->getPreparedHeaders()->toArray();
-        $headers[] = 'Accept: application/ld+json';
-        if ($token) {
-            $headers[] = 'Authorization: Bearer ' . $token;
-        }
-
-        $url = $this->params->get('api.endpoint') . '/api/media_objects';
-
-        $response = $this->httpClient->request('POST', $url, [
-            'headers' => $headers,
-            'body' => $formData->bodyToString()
-        ]);
-
-        if(in_array($response->getStatusCode(), [200, 201], true)) {
-            return $response->toArray(false);
-        }
-        $this->throwFromResponse($response, $response->getStatusCode());
-    }
-
-    public function multipart(string $endpoint, array $fields = [], array $files = [], string $method = 'POST')
+    public function multipart(string $endpoint, array $fields = [], array $files = [], string $method = 'POST'): array
     {
         $formFields = [];
 
@@ -205,11 +176,30 @@ class ApiHelper
         $this->throwFromResponse($response, $status);
     }
 
+    /**
+     * Le corps décodé, ou un tableau vide si la réponse n'en a pas.
+     */
+    private function corps(ResponseInterface $response): array
+    {
+        $brut = $response->getContent(false);
+
+        if(trim($brut) === '') {
+            return [];
+        }
+
+        try {
+            return $response->toArray(false);
+        } catch(\Throwable) {
+            return []; /*
+                - Une passerelle ou un pare-feu peut répondre en HTML : mieux vaut un tableau vide
+                  qu'une 500 dont le message ne parle que de JSON
+            */
+        }
+    }
+
     private function throwFromResponse(ResponseInterface $response, int $status): never
     {
-        $body = $response->toArray(false); /*
-            - 'false' ne throw pas même si le status est une erreur
-        */
+        $body = $this->corps($response);
         $message = $body['detail'] ?? $body['description'] ?? $body['title'] ?? "Erreur API ({$status})";
 
         $violations = [];
@@ -232,32 +222,21 @@ class ApiHelper
         );
     }
 
-    /* Bilan
+    /* Collections paginées
      */
-    public function getOperations(array $params = []): array
-    {
-        $query = http_build_query(array_filter($params));
-        $url = '/api/bilan' . ($query ? "?$query" : '');
 
-        $response = $this->api->request('GET', $url);
-        if($response->getStatusCode() === 200) {
-            $data = $response->toArray(false);
-            return $data;
-        }
-        return [];
-    }
-
-    public function getReferentiel(string $type, string $code): array
+    /**
+     * Une collection avec ses métadonnées de pagination, telles que les renvoie API Platform.
+     *
+     * @return array{items: list<array<string, mixed>>, total: int}
+     */
+    public function page(string $endpoint, array $query = []): array
     {
-        $response = $this->api->request('POST', '/api/' . $type, [
-            'json' => [
-                'code' => $code
-            ]
-        ]);
-        if($response->getStatusCode() === 200) {
-            $data = $response->toArray(false);
-            return $data;
-        }
-        return [];
+        $data = $this->get($endpoint, $query);
+
+        return [
+            'items' => $data['member'] ?? $data['hydra:member'] ?? [],
+            'total' => (int) ($data['totalItems'] ?? $data['hydra:totalItems'] ?? 0),
+        ];
     }
 }

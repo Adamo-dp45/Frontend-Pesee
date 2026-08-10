@@ -1,0 +1,191 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ site.libellesite }}{% endblock %}
+
+{% set bloque = site.statut == 'BLOQUE' %}
+
+{% block body %}
+    <div class="max-w-3xl">
+        <div class="mb-6">
+            <a href="{{ path('site.index') }}" class="text-sm text-muted-foreground underline-offset-4 hover:underline">
+                ← Retour aux ponts bascules
+            </a>
+            <div class="flex flex-wrap items-center gap-3 mt-2">
+                <h1 class="text-2xl font-semibold tracking-tight">{{ site.libellesite }}</h1>
+                {{ include('partials/_etat.html.twig', { statut: site.statut }) }}
+            </div>
+            <p class="text-sm text-muted-foreground mt-1">
+                {{ site.code }}{{ site.localite ? ' — ' ~ site.localite }}
+                · {{ site.entreprise.nom ?? '—' }}
+            </p>
+        </div>
+
+        {# Les erreurs du formulaire d'identité sont rendues par 'form_errors' dans sa carte, plus ici #}
+
+        {% if bloque %}
+            <twig:Alert variant="destructive" class="mb-4">
+                <twig:ux:icon name="lucide:octagon-x" class="size-4" />
+                <twig:Alert:Title>Ce pont bascule est bloqué</twig:Alert:Title>
+                <twig:Alert:Description>
+                    Il ne reçoit plus de pesées et sa caisse est gelée. Le poste continue
+                    d'enregistrer localement : ses pesées remonteront au déblocage.
+                </twig:Alert:Description>
+            </twig:Alert>
+        {% endif %}
+
+        {# Un seul chiffre ici : le reste sont des faits, pas des mesures. #}
+        <div class="grid gap-4 sm:grid-cols-3 mb-6">
+            {{ include('tableau_de_bord/_kpi.html.twig', {
+                titre: 'Caisse du poste', valeur: site.solde, unite: 'F',
+                detail: 'disponible pour payer les planteurs', icone: 'lucide:wallet'
+            }) }}
+            {{ include('partials/_fait.html.twig', {
+                titre: 'Synchronisation', icone: 'lucide:refresh-cw',
+                valeur: site.statut == 'ACTIF' ? 'Ouverte' : 'Coupée',
+                detail: site.statut == 'ACTIF' ? 'le poste peut envoyer ses pesées' : 'le poste enregistre en local'
+            }) }}
+            {{ include('partials/_fait.html.twig', {
+                titre: 'Opérateur', icone: 'lucide:user',
+                valeur: site.operateur.nomComplet ?? 'Aucun',
+                detail: site.operateur ? 'tient la caisse de ce poste' : 'personne ne tient la caisse'
+            }) }}
+        </div>
+
+        {# Modifier un poste relève de son propriétaire : l'agent et l'opérateur le consultent #}
+        {% if modifiable %}
+        <twig:Card class="mb-4">
+            <twig:Card:Header>
+                <twig:Card:Title>Identité du poste</twig:Card:Title>
+                <twig:Card:Description>
+                    Le code n'est pas modifiable : le poste s'en sert à chaque synchronisation.
+                </twig:Card:Description>
+            </twig:Card:Header>
+            <twig:Card:Content>
+                {# Le formulaire vient du FormBuilder : mêmes champs, mêmes contraintes et même thème que partout ailleurs #}
+                {{ form_start(form) }}
+                    {{ form_errors(form) }}
+                    <div class="grid gap-4">
+                        {{ form_row(form.libellesite) }}
+                        {{ form_row(form.localite) }}
+                        <div><button class="btn btn-primary">Enregistrer</button></div>
+                    </div>
+                {{ form_end(form) }}
+            </twig:Card:Content>
+        </twig:Card>
+
+        {% endif %}
+
+        {# Affecter la caisse et la doter sont le même droit côté API : le super administrateur ne l'a pas, il installe les postes sans exploiter l'argent #}
+        {% if attribuable %}
+            <twig:Card class="mb-4">
+                <twig:Card:Header>
+                    <twig:Card:Title>Opérateur</twig:Card:Title>
+                    <twig:Card:Description>Qui tient la caisse de ce poste et paie les planteurs.</twig:Card:Description>
+                </twig:Card:Header>
+                <twig:Card:Content>
+                    <form method="post" action="{{ path('site.operateur', { id: site.id }) }}" class="flex flex-wrap items-end gap-2">
+                        <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('gestion') }}">
+                        <div class="grow">
+                            <select name="operateurId" class="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm">
+                                <option value="">Aucun — libérer le poste</option>
+                                {% for candidat in operateurs %}
+                                    {% if 'ROLE_OPERATEUR' in candidat.roles %}
+                                        <option value="{{ candidat.id }}" {{ site.operateur.id|default(null) == candidat.id ? 'selected' }}>
+                                            {{ candidat.nomComplet }}
+                                        </option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <twig:Button type="submit" variant="outline">Affecter</twig:Button>
+                    </form>
+                </twig:Card:Content>
+            </twig:Card>
+
+            <twig:Card class="mb-4">
+                <twig:Card:Header>
+                    <twig:Card:Title>Doter la caisse</twig:Card:Title>
+                    <twig:Card:Description>
+                        L'argent quitte le solde de l'entreprise pour rejoindre celui du poste.
+                        Deux écritures au grand livre : il se déplace, il ne se crée pas.
+                    </twig:Card:Description>
+                </twig:Card:Header>
+                <twig:Card:Content>
+                    <form method="post" action="{{ path('site.dotation', { id: site.id }) }}" class="grid gap-4">
+                        <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('gestion') }}">
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            {# La dotation poste sur sa propre route, qui signale ses refus par un flash : aucune violation ne revient ici #}
+                            {{ include('partials/_champ.html.twig', {
+                                nom: 'montant', label: 'Montant (F CFA)', type: 'number', requis: true
+                            }) }}
+                            {{ include('partials/_champ.html.twig', {
+                                nom: 'motif', label: 'Motif'
+                            }) }}
+                        </div>
+                        <div>
+                            <twig:Button type="submit" disabled="{{ bloque }}">Doter</twig:Button>
+                            {% if bloque %}
+                                <span class="text-xs text-muted-foreground ml-2">Débloquez le poste d'abord.</span>
+                            {% endif %}
+                        </div>
+                    </form>
+                </twig:Card:Content>
+            </twig:Card>
+        {% endif %}
+
+        {# Bloquer appartient à l'administrateur de l'entreprise seul : c'est sa caisse qui se gèle #}
+        {% if blocable %}
+            <twig:Card class="mb-4 border-destructive/40">
+                <twig:Card:Header>
+                    <twig:Card:Title>{{ bloque ? 'Débloquer' : 'Bloquer' }} le poste</twig:Card:Title>
+                    <twig:Card:Description>
+                        {{ bloque
+                            ? 'La synchronisation reprend et la caisse se rouvre.'
+                            : 'Coupe l\'arrivée des pesées et gèle la caisse. À utiliser quand un poste déraille.' }}
+                    </twig:Card:Description>
+                </twig:Card:Header>
+                <twig:Card:Content>
+                    <form method="post" action="{{ path('site.blocage', { id: site.id }) }}">
+                        <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('gestion') }}">
+                        <twig:Button type="submit" variant="{{ bloque ? 'outline' : 'destructive' }}"
+                                     data-confirmer="{{ bloque ? 'Débloquer' : 'Bloquer' }} {{ site.libellesite }} ?"
+                                     data-confirmer-detail="{{ bloque
+                                         ? 'La synchronisation reprend et la caisse se rouvre.'
+                                         : 'Le poste ne recevra plus de pesées et sa caisse sera gelée. Il continuera d\'enregistrer localement.' }}"
+                                     data-confirmer-action="{{ bloque ? 'Débloquer' : 'Bloquer' }}">
+                            {{ bloque ? 'Débloquer ce poste' : 'Bloquer ce poste' }}
+                        </twig:Button>
+                    </form>
+                </twig:Card:Content>
+            </twig:Card>
+        {% endif %}
+
+        {% if renouvelable %}
+            <twig:Card class="border-destructive/40">
+                <twig:Card:Header>
+                    <twig:Card:Title>Renouveler les identifiants du poste</twig:Card:Title>
+                    <twig:Card:Description>
+                        Produit un nouveau mot de passe, affiché une seule fois. Les jetons déjà émis
+                        restent valables : pour couper un poste immédiatement, bloquez-le.
+                    </twig:Card:Description>
+                </twig:Card:Header>
+                <twig:Card:Content>
+                    {#
+                        - 'data-turbo=false' : Turbo n'affiche une réponse à un POST que si elle
+                          redirige. Or la réponse EST le contenu — le mot de passe n'existe que là,
+                          on ne peut pas rediriger vers une page qui irait le rechercher.
+                    #}
+                    <form method="post" action="{{ path('site.identifiants', { id: site.id }) }}" data-turbo="false">
+                        <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('gestion') }}">
+                        <twig:Button type="submit" variant="outline"
+                                     data-confirmer="Renouveler les identifiants de {{ site.libellesite }} ?"
+                                     data-confirmer-detail="Le mot de passe actuel du poste cessera de fonctionner. Il faudra redéposer le fichier de configuration sur place."
+                                     data-confirmer-action="Régénérer">
+                            Régénérer
+                        </twig:Button>
+                    </form>
+                </twig:Card:Content>
+            </twig:Card>
+        {% endif %}
+    </div>
+{% endblock %}

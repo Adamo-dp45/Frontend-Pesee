@@ -1,0 +1,60 @@
+{% extends 'app-base.html.twig' %}
+
+{% block title %}Nouveau mot de passe{% endblock %}
+
+{% block body %}
+<div class="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+    <div class="w-full max-w-sm">
+        <div class="text-center mb-3">
+            <h1 class="text-2xl font-bold">Webpesee</h1>
+        </div>
+
+        {% if erreur %}
+            <twig:Alert variant="destructive" class="mb-3">
+                <twig:ux:icon name="lucide:circle-alert" />
+                <twig:Alert:Title>{{ erreur }}</twig:Alert:Title>
+            </twig:Alert>
+        {% endif %}
+
+        <twig:Card>
+            <twig:Card:Header>
+                <twig:Card:Title>Nouveau mot de passe</twig:Card:Title>
+                <twig:Card:Description>Le lien reçu par e-mail ne sert qu'une fois.</twig:Card:Description>
+            </twig:Card:Header>
+            <twig:Card:Content>
+                {% if token is empty %}
+                    <twig:Alert variant="destructive">
+                        <twig:ux:icon name="lucide:link-2-off" />
+                        <twig:Alert:Description>
+                            Ce lien est incomplet. Refaites une demande depuis la page
+                            <a href="{{ path('mot_de_passe.oubli') }}" class="underline">mot de passe oublié</a>.
+                        </twig:Alert:Description>
+                    </twig:Alert>
+                {% else %}
+                    <form method="post" class="grid gap-4">
+                        <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('motdepasse') }}">
+                        <input type="hidden" name="token" value="{{ token }}">
+                        <div class="grid gap-2">
+                            <twig:Label for="motDePasse">Mot de passe</twig:Label>
+                            <twig:Input id="motDePasse" type="password" name="motDePasse"
+                                        autocomplete="new-password" minlength="8" required autofocus />
+                            <p class="text-xs text-muted-foreground">8 caractères minimum.</p>
+                        </div>
+                        <div class="grid gap-2">
+                            <twig:Label for="confirmation">Confirmation</twig:Label>
+                            <twig:Input id="confirmation" type="password" name="confirmation"
+                                        autocomplete="new-password" minlength="8" required />
+                        </div>
+                        <twig:Button type="submit" class="w-full">Enregistrer</twig:Button>
+                    </form>
+                {% endif %}
+            </twig:Card:Content>
+            <twig:Card:Footer>
+                <a href="{{ path('app_login') }}" class="text-sm underline-offset-4 hover:underline">
+                    Retour à la connexion
+                </a>
+            </twig:Card:Footer>
+        </twig:Card>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{#
+    - Le partiel partagé par 'new' et l'édition depuis la fiche : une variable '{{ button }}' pour le
+      libellé du bouton, et '{{ retour }}' pour la destination du bouton Annuler.
+#}
+<twig:Card>
+    <twig:Card:Content class="pt-6">
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {% if form.code is defined %}
+                    {{ form_row(form.code) }}
+                {% endif %}
+                {{ form_row(form.libellesite) }}
+                {{ form_row(form.localite) }}
+                {% if form.entreprise is defined %}
+                    {{ form_row(form.entreprise) }}
+                {% endif %}
+            </div>
+
+            <div class="mt-6 flex items-center justify-end gap-3 border-t border-border pt-4">
+                <a href="{{ retour|default(path('site.index')) }}" class="btn btn-secondary">Annuler</a>
+                <button class="btn btn-primary">{{ button }}</button>
+            </div>
+        {{ form_end(form) }}
+    </twig:Card:Content>
+</twig:Card>

@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau planteur{% endblock %}
+
+{% block body %}
+    <div class="mb-6">
+        <a href="{{ path('fournisseur.index') }}" class="text-sm text-muted-foreground underline-offset-4 hover:underline">
+            ← Retour aux planteurs
+        </a>
+        <h1 class="mt-2 text-2xl font-semibold tracking-tight">Nouveau planteur</h1>
+        <p class="mt-1 text-sm text-muted-foreground">
+            Le déclarer d'avance permet de renseigner son numéro mobile money avant sa première pesée.
+        </p>
+    </div>
+
+    {% include 'fournisseur/_form.html.twig' with { button: 'Créer' } %}
+{% endblock %}

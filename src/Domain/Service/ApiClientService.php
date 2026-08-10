@@ -239,7 +239,16 @@ class ApiClientService
             'Accept' => 'application/ld+json',
         ], $options['headers'] ?? []);
 
-        $publicEndpoints = ['/api/login_check', '/api/token/refresh', '/api/register', '/api/forgot', '/api/reset'];
+        /*
+            - Les seuls appels qui partent SANS jeton. '/api/register' n'en fait plus partie :
+              l'inscription est réservée au super administrateur, elle doit donc porter le sien.
+        */
+        $publicEndpoints = [
+            '/api/login_check',
+            '/api/token/refresh',
+            '/api/mot-de-passe/oubli',
+            '/api/mot-de-passe/reinitialisation',
+        ];
         $path = parse_url($endpoint, PHP_URL_PATH);
         if(!in_array($path, $publicEndpoints) && $token) {
             $headers['Authorization'] = 'Bearer ' . $token;

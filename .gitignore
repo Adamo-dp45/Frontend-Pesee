@@ -13,6 +13,10 @@
 /.phpunit.cache/
 ###< phpunit/phpunit ###
 
+###> phpstan/phpstan ###
+/phpstan.neon
+###< phpstan/phpstan ###
+
 ###> symfony/webpack-encore-bundle ###
 /node_modules/
 # /public/build/ -- Vu que l'hébergeur n'a pas npm d'installé

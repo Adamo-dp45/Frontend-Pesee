@@ -1,0 +1,72 @@
+{# Gabarit du PDF. Rendu par Dompdf, qui ne comprend ni Tailwind ni CSS moderne : styles en ligne. #}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <style>
+        @page { margin: 14mm 10mm; }
+        body { font-family: 'DejaVu Sans', sans-serif; font-size: 8pt; color: #1a1a1a; }
+        h1 { font-size: 14pt; margin: 0 0 2mm; }
+        .sous-titre { font-size: 9pt; color: #555; margin: 0 0 5mm; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #1e3a5f; color: #fff; padding: 2mm 1.5mm; text-align: left; font-size: 7.5pt; }
+        td { padding: 1.5mm; border-bottom: 0.2mm solid #e3e3e3; font-size: 7.5pt; }
+        tr:nth-child(even) td { background: #f7f7f7; }
+        .nombre { text-align: right; }
+        .totaux { margin-top: 5mm; font-size: 9pt; }
+        .totaux td { border: none; padding: 1mm 3mm 1mm 0; }
+        .totaux .valeur { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Bilan des pesées</h1>
+    <p class="sous-titre">
+        Du {{ periode.du|date('d/m/Y') }} au {{ periode.au|date('d/m/Y') }}
+        — {{ totaux.nbPesees|number_format(0, ',', ' ') }} pesée(s)
+        — édité le {{ 'now'|date('d/m/Y à H:i') }}
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                {% for libelle in colonnes %}
+                    <th>{{ libelle }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for ligne in lignes %}
+                <tr>
+                    {% for colonne, valeur in ligne %}
+                        {% set estNombre = colonne in numeriques %}
+                        <td class="{{ estNombre ? 'nombre' }}">
+                            {{ estNombre ? (valeur ?? 0)|number_format(0, ',', ' ') : (valeur ?? '—') }}
+                        </td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <table class="totaux">
+        <tr>
+            <td>Poids net total</td>
+            <td class="valeur">{{ totaux.poidsnet|number_format(0, ',', ' ') }} kg</td>
+        </tr>
+        {% if avecMontants %}
+            <tr>
+                <td>Montant dû</td>
+                <td class="valeur">{{ totaux.montantdu|number_format(0, ',', ' ') }} F CFA</td>
+            </tr>
+            <tr>
+                <td>Montant versé</td>
+                <td class="valeur">{{ totaux.montantpaye|number_format(0, ',', ' ') }} F CFA</td>
+            </tr>
+            <tr>
+                <td>Reste à payer</td>
+                <td class="valeur">{{ (totaux.montantdu - totaux.montantpaye)|number_format(0, ',', ' ') }} F CFA</td>
+            </tr>
+        {% endif %}
+    </table>
+</body>
+</html>

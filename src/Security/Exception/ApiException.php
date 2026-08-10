@@ -92,4 +92,13 @@ class ApiException extends \Exception
     {
         return $this->getCode() === 403;
     }
+
+    /**
+     * Une valeur déjà prise : l'API répond 409 et non 422 quand elle constate le doublon elle-même,
+     * avant la validation (adresse e-mail ou code entreprise à l'inscription).
+     */
+    public function isConflict(): bool
+    {
+        return $this->getCode() === 409;
+    }
 }

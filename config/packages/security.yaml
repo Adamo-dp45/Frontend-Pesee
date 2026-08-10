@@ -42,8 +42,12 @@ security:
 
     # Note: Only the *first* matching rule is applied
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        # Les trois pages accessibles sans compte, à déclarer avant le filet
+        - { path: ^/connexion$, roles: PUBLIC_ACCESS }
+        - { path: ^/mot-de-passe-oublie$, roles: PUBLIC_ACCESS }
+        - { path: ^/reinitialiser-mot-de-passe$, roles: PUBLIC_ACCESS }
+        # Filet : tout le reste exige une session, y compris les écrans ajoutés plus tard
+        - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
     security:

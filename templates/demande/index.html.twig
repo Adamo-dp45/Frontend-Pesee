@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Demandes de solde{% endblock %}
+
+{% block body %}
+    <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold tracking-tight">Demandes de solde</h1>
+            <p class="text-sm text-muted-foreground mt-1">Quand la caisse d'un poste s'épuise, son opérateur en réclame ici.</p>
+        </div>
+        {# Seul l'opérateur, qui tient la caisse, a une raison d'en réclamer #}
+        {% if peutDemander %}
+            <twig:Button as="a" href="{{ path('demande.new') }}" size="sm">
+                <twig:ux:icon name="lucide:plus" class="size-4" />
+                Demander du solde
+            </twig:Button>
+        {% endif %}
+    </div>
+
+    {#
+        - Les filtres vivent DANS la table : ils écrivent dans la même URL que le tri et la
+          pagination, donc un écran filtré se partage tel quel.
+    #}
+    <div {{ react_component('Caisse/TableDemandes', {
+        items: items,
+        meta: meta,
+        queryParams: queryParams,
+        sortMeta: sortMeta,
+        sites: sites,
+        jeton: csrf_token('gestion'),
+    }) }}></div>
+{% endblock %}

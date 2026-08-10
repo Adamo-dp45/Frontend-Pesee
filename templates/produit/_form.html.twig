@@ -1,0 +1,28 @@
+{#
+    - Le partiel partagé par 'new' et 'edit' : un seul endroit où la mise en page du formulaire est
+      décrite, et une variable '{{ button }}' pour le libellé du bouton.
+#}
+<twig:Card>
+    <twig:Card:Content class="pt-6">
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {{ form_row(form.libelle) }}
+                {{ form_row(form.codeproduit) }}
+                {{ form_row(form.prix) }}
+                {% if form.site is defined %}
+                    {{ form_row(form.site) }}
+                {% endif %}
+                {% if form.actif is defined %}
+                    {{ form_row(form.actif) }}
+                {% endif %}
+            </div>
+
+            <div class="mt-6 flex items-center justify-end gap-3 border-t border-border pt-4">
+                <a href="{{ path('produit.index') }}" class="btn btn-secondary">Annuler</a>
+                <button class="btn btn-primary">{{ button }}</button>
+            </div>
+        {{ form_end(form) }}
+    </twig:Card:Content>
+</twig:Card>

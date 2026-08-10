@@ -1,0 +1,142 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ compte.nomComplet }}{% endblock %}
+
+{% set suspendu = compte.statut == 'SUSPENDU' %}
+
+{% block body %}
+    <div class="max-w-2xl">
+        <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
+            <div>
+                <a href="{{ path('utilisateur.index') }}" class="text-sm text-muted-foreground underline-offset-4 hover:underline">
+                    ← Retour aux utilisateurs
+                </a>
+                <div class="mt-2 flex flex-wrap items-center gap-2">
+                    <h1 class="text-2xl font-semibold tracking-tight">{{ compte.nomComplet }}</h1>
+                    {{ include('partials/_etat.html.twig', { statut: compte.statut }) }}
+                    {% if compte.fondateur %}<twig:Badge variant="outline">fondateur</twig:Badge>{% endif %}
+                </div>
+                <p class="mt-1 text-sm text-muted-foreground">{{ compte.email }}</p>
+            </div>
+            {# Ni sur son propre compte, ni sur un fondateur ou un pair qu'on n'encadre pas : l'API refuserait à l'enregistrement #}
+            {% if modifiable %}
+                <twig:Button as="a" href="{{ path('utilisateur.edit', { id: compte.id }) }}" variant="outline" size="sm">
+                    <twig:ux:icon name="lucide:pencil" class="size-4" />
+                    Modifier
+                </twig:Button>
+            {% endif %}
+        </div>
+
+        {% if compte.fondateur %}
+            {#
+                - Sans ce garde-fou, deux administrateurs peuvent se suspendre mutuellement et
+                  l'entreprise se retrouve verrouillée hors de son propre outil.
+            #}
+            <twig:Alert class="mb-4">
+                <twig:ux:icon name="lucide:shield" class="size-4" />
+                <twig:Alert:Description>
+                    Ce compte a inscrit l'entreprise. Il ne peut être ni suspendu ni rétrogradé par
+                    un pair — seul le super administrateur peut intervenir.
+                </twig:Alert:Description>
+            </twig:Alert>
+        {% endif %}
+
+        <twig:Card class="mb-4">
+            <twig:Card:Header>
+                <twig:Card:Title>Fiche du compte</twig:Card:Title>
+            </twig:Card:Header>
+            <twig:Card:Content class="grid gap-4 sm:grid-cols-2">
+                {{ include('partials/_donnee.html.twig', { libelle: 'Nom', valeur: compte.nom }) }}
+                {{ include('partials/_donnee.html.twig', { libelle: 'Prénom', valeur: compte.prenom }) }}
+                {{ include('partials/_donnee.html.twig', { libelle: 'Adresse email', valeur: compte.email }) }}
+                {{ include('partials/_donnee.html.twig', { libelle: 'Téléphone', valeur: compte.telephone }) }}
+                {# 'roleLibelle' vient de l'API : le dictionnaire des rôles n'existe qu'à un seul endroit #}
+                {{ include('partials/_donnee.html.twig', { libelle: 'Rôle', valeur: compte.roleLibelle }) }}
+                {{ include('partials/_donnee.html.twig', { libelle: 'Entreprise', valeur: compte.entreprise.nom ?? null }) }}
+                {# Un opérateur sans pont bascule ne peut encaisser nulle part : ça doit se voir sur sa fiche #}
+                {{ include('partials/_donnee.html.twig', {
+                    libelle: 'Ponts bascules tenus',
+                    valeur: compte.sitesGeres is not empty ? compte.sitesGeres|join(', ') : null
+                }) }}
+                {{ include('partials/_donnee.html.twig', { libelle: 'Compte créé le', valeur: compte.createdAt|date('d/m/Y à H:i') }) }}
+            </twig:Card:Content>
+        </twig:Card>
+
+        {#
+            - Le rôle a son propre formulaire, et ce n'est pas cosmétique : mélangé aux coordonnées,
+              corriger un nom suffisait à changer un rôle au passage.
+        #}
+        {% if promouvable %}
+            <twig:Card class="mb-4">
+                <twig:Card:Header>
+                    <twig:Card:Title>Rôle</twig:Card:Title>
+                    <twig:Card:Description>
+                        {{ compte.fondateur
+                            ? 'Le fondateur ne peut être rétrogradé que par le super administrateur.'
+                            : 'Ce que ce compte a le droit de faire dans l\'entreprise.' }}
+                    </twig:Card:Description>
+                </twig:Card:Header>
+                <twig:Card:Content>
+                    <form method="post" action="{{ path('utilisateur.role', { id: compte.id }) }}" class="flex flex-wrap items-end gap-2">
+                        <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('gestion') }}">
+                        <div class="grow">
+                            <select name="role" class="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm">
+                                {% for cle, libelle in roles %}
+                                    <option value="{{ cle }}" {{ roleActuel == cle ? 'selected' }}>{{ libelle }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <twig:Button type="submit" variant="outline">Appliquer</twig:Button>
+                    </form>
+                </twig:Card:Content>
+            </twig:Card>
+        {% endif %}
+
+        {#
+            - Le rôle et l'accès sont deux droits distincts côté API ('PROMOUVOIR' et 'BLOQUER') : les
+              afficher sous une seule condition marchait tant que les deux allaient ensemble, et
+              aurait menti le jour où ils divergent.
+        #}
+        {% if suspendable %}
+            <twig:Card class="border-destructive/40">
+                <twig:Card:Header>
+                    <twig:Card:Title>{{ suspendu ? 'Réactiver' : 'Suspendre' }} ce compte</twig:Card:Title>
+                    <twig:Card:Description>
+                        {{ suspendu
+                            ? 'Le compte retrouve son accès immédiatement.'
+                            : 'L\'accès est coupé sur-le-champ, y compris la session en cours. Rien n\'est supprimé.' }}
+                    </twig:Card:Description>
+                </twig:Card:Header>
+                <twig:Card:Content>
+                    <form method="post" action="{{ path('utilisateur.activation', { id: compte.id }) }}">
+                        <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('gestion') }}">
+                        <twig:Button type="submit" variant="{{ suspendu ? 'outline' : 'destructive' }}"
+                                     data-confirmer="{{ suspendu ? 'Réactiver' : 'Suspendre' }} le compte de {{ compte.nomComplet }} ?"
+                                     data-confirmer-detail="{{ suspendu
+                                         ? 'Le compte retrouve son accès immédiatement.'
+                                         : 'L\'accès est coupé sur-le-champ, y compris la session en cours.' }}"
+                                     data-confirmer-action="{{ suspendu ? 'Réactiver' : 'Suspendre' }}">
+                            {{ suspendu ? 'Réactiver' : 'Suspendre' }}
+                        </twig:Button>
+                    </form>
+                </twig:Card:Content>
+            </twig:Card>
+        {% endif %}
+
+        {#
+            - Une fiche sans aucun bouton ressemble à une panne : on dit pourquoi. Le motif vient du
+              miroir du guard de l'API, donc c'est le refus exact qu'on aurait obtenu en essayant.
+        #}
+        {% if not modifiable and not promouvable and not suspendable and motif %}
+            <twig:Alert>
+                <twig:ux:icon name="lucide:info" class="size-4" />
+                <twig:Alert:Description>
+                    {{ motif }}
+                    {% if moiMeme %}
+                        Passez par <a href="{{ path('profile.index') }}" class="underline">votre profil</a>.
+                    {% endif %}
+                </twig:Alert:Description>
+            </twig:Alert>
+        {% endif %}
+    </div>
+{% endblock %}

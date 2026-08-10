@@ -57,14 +57,12 @@
                         <div class="grid gap-2">
                             <div class="flex items-center">
                                 <twig:Label for="password">Mot de passe</twig:Label>
-                                {#
-                                    <a
-                                        href="{{ path('forgot') }}"
-                                        class="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                                    >
-                                        Mot de passe oublié ?
-                                    </a>
-                                #}
+                                <a
+                                    href="{{ path('mot_de_passe.oubli') }}"
+                                    class="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                                >
+                                    Mot de passe oublié ?
+                                </a>
                             </div>
                             <twig:Input 
                                 id="password"

@@ -55,87 +55,124 @@
                 </div>
 
                 <nav class="sidebar-nav">
+                    {#
+                        - Le super administrateur gère les clients, il n'a pas de données
+                          d'exploitation. Il porte pourtant 'SITE_VOIR' et 'USER_VOIR' : sans cette
+                          garde, ses deux entrées apparaîtraient ici ET dans son propre bloc.
+                    #}
+                    {% if not is_granted('ROLE_SUPER_ADMIN') %}
                     <div class="sidebar-section">
-                        {% if not is_granted('ROLE_SUPER_ADMIN') %}
-                        <div class="sb-section-title">Principal</div>
-                        <a href="{{ path('home') }}" class="nav-link {{ app.current_route starts with 'home' ? 'active' : '' }}" data-nav  title="Tableau de bord">
-                            <svg class="nav-icon" aria-hidden="true"><use href="{{ asset('sprite.svg') }}#dashbord"></use></svg>
-                            <span class="sb-text">Tableau de bord</span>
-                        </a>
-                        <a href="{{ path('bilan') }}" class="nav-link {{ app.current_route starts with 'bilan' ? 'active' : '' }}" data-nav  title="Bilan">
-                            <svg class="nav-icon" aria-hidden="true"><use href="{{ asset('sprite.svg') }}#dashbord"></use></svg>
-                            <span class="sb-text">Bilan</span>
-                        </a>
+                        <div class="sb-section-title">Exploitation</div>
+                        {% if is_granted('OPERATION_VOIR') %}
+                            <a href="{{ path('tableau_de_bord.index') }}" class="nav-link {{ app.current_route starts with 'tableau_de_bord' ? 'active' : '' }}" data-nav title="Tableau de bord">
+                                <svg class="nav-icon" aria-hidden="true"><use href="{{ asset('sprite.svg') }}#dashbord"></use></svg>
+                                <span class="sb-text">Tableau de bord</span>
+                            </a>
+                            <a href="{{ path('bilan.index') }}" class="nav-link {{ app.current_route starts with 'bilan.' ? 'active' : '' }}" data-nav title="Bilan">
+                                <svg class="nav-icon" aria-hidden="true"><use href="{{ asset('sprite.svg') }}#bilan"></use></svg>
+                                <span class="sb-text">Bilan</span>
+                            </a>
                         {% endif %}
                         {#
-                            {% if is_granted('TYPEPIECE_VOIR') or is_granted('MARQUEPIECE_VOIR') %}
-                            <button class="nav-link" data-submenu="sub-stock" title="Stock & Approvisionnement">
-                                <svg class="nav-icon" aria-hidden="true">
-                                    <use href="{{ asset('sprite.svg') }}#stock"></use>
-                                </svg>
-                                <span class="sb-text">Stock & Approvisionnement</span>
-                                <svg class="submenu-arrow" aria-hidden="true" width="14" height="14"><use href="{{ asset('sprite.svg') }}#chevron"></use></svg>
-                            </button>
-                            <div class="submenu" id="sub-stock">
-                                <div class="submenu-inner">
-                                    {% if is_granted('TYPEPIECE_VOIR') %}
-                                    <a href="{{ path('typepiece.index') }}" class="sub-link {{ app.current_route starts with 'typepiece.' ? 'active' : '' }}" data-subnav>
-                                        <span class="sub-dot"></span>Type de pièce
-                                    </a>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            {% endif %}
-                            {% if is_granted('ROLE_ADMIN') %}
-                            <a href="{{ path('owner') }}" class="nav-link {{ app.current_route starts with 'owner' ? 'active' : '' }}" data-nav title="Propriétaire">
-                                <svg class="nav-icon" aria-hidden="true">
-                                    <use href="{{ asset('sprite.svg') }}#owner"></use>
-                                </svg>
-                                <span class="sb-text">Propriétaire - Tableau de bord</span>
-                            </a>
-                            {% endif %}
+                            - C'est ici qu'on voit POURQUOI un poste signalé silencieux ne remonte
+                              plus rien. Écran de supervision : l'opérateur n'y a pas droit, et
+                              l'entrée lui menait droit sur un refus de l'API.
                         #}
+                        {% if is_granted('SYNCHRONISATIONLOT_VOIR') %}
+                            <a href="{{ path('synchronisation.index') }}" class="nav-link {{ app.current_route starts with 'synchronisation.' ? 'active' : '' }}" data-nav title="Synchronisations">
+                                <svg class="nav-icon" aria-hidden="true"><use href="{{ asset('sprite.svg') }}#sync"></use></svg>
+                                <span class="sb-text">Synchronisations</span>
+                            </a>
+                        {% endif %}
+                    </div>
+
+                    {#
+                        - Chaque entrée n'apparaît qu'à qui peut s'en servir. Ce n'est pas une
+                          protection — les voters de l'API tranchent — c'est pour ne pas proposer
+                          des écrans qui répondraient 403.
+                    #}
+                    <div class="sidebar-section">
+                        <div class="sb-section-title">Caisse</div>
+                        {# Le geste quotidien de l'opérateur : en tête, avant les écrans d'analyse #}
+                        {% if is_granted('PAIEMENT_PAYER') %}
+                            <a href="{{ path('pesee.a_payer') }}" class="nav-link {{ app.current_route starts with 'pesee.a_payer' ? 'active' : '' }}" data-nav title="À payer">
+                                <svg class="nav-icon" aria-hidden="true"><use href="{{ asset('sprite.svg') }}#paiement"></use></svg>
+                                <span class="sb-text">À payer</span>
+                            </a>
+                        {% endif %}
+                        {% if is_granted('MOUVEMENTCAISSE_VOIR') %}
+                            <a href="{{ path('caisse.index') }}" class="nav-link {{ app.current_route starts with 'caisse.' ? 'active' : '' }}" data-nav title="Caisse">
+                                <svg class="nav-icon" aria-hidden="true"><use href="{{ asset('sprite.svg') }}#caisse"></use></svg>
+                                <span class="sb-text">Caisse</span>
+                            </a>
+                        {% endif %}
+                        {% if is_granted('PAIEMENT_VOIR') %}
+                            <a href="{{ path('paiement.index') }}" class="nav-link {{ app.current_route starts with 'paiement.' ? 'active' : '' }}" data-nav title="Paiements">
+                                <svg class="nav-icon" aria-hidden="true"><use href="{{ asset('sprite.svg') }}#paiement"></use></svg>
+                                <span class="sb-text">Paiements</span>
+                            </a>
+                        {% endif %}
+                        {% if is_granted('DEMANDESOLDE_VOIR') %}
+                            <a href="{{ path('demande.index') }}" class="nav-link {{ app.current_route starts with 'demande.' ? 'active' : '' }}" data-nav title="Demandes de solde">
+                                <svg class="nav-icon" aria-hidden="true"><use href="{{ asset('sprite.svg') }}#demande"></use></svg>
+                                <span class="sb-text">Demandes de solde</span>
+                            </a>
+                        {% endif %}
                     </div>
 
                     <div class="sidebar-section">
-                        <div class="sb-section-title">Ressources humaines</div>
-                        {% if is_granted('ROLE_VOIR') or is_granted('USER_VOIR') or is_granted('ROLE_SUPER_ADMIN') or is_granted('ROLE_ADMIN') %}
-                        <button class="nav-link" data-submenu="sub-admin" title="Administration">
-                            <svg class="nav-icon" aria-hidden="true">
-                                <use href="{{ asset('sprite.svg') }}#admin"></use>
-                            </svg>
-                            <span class="sb-text">Administration</span>
-                            <svg class="submenu-arrow" aria-hidden="true" width="14" height="14"><use href="{{ asset('sprite.svg') }}#chevron"></use></svg>
-                        </button>
-                        <div class="submenu" id="sub-admin">
-                            <div class="submenu-inner">
-                                {#
-                                {% if is_granted('USER_VOIR') or is_granted('ROLE_SUPER_ADMIN') %}
-                                <a href="{{ path('admin.user.index') }}" class="sub-link {{ app.current_route starts with 'admin.user.' ? 'active' : '' }}" data-subnav>
-                                    <span class="sub-dot"></span>Utilisateurs
-                                </a>
-                                {% endif %}
-                                {% if is_granted('ROLE_ADMIN') %}
-                                <a href="{{ path('admin.entreprise.me') }}" class="sub-link {{ app.current_route starts with 'admin.entreprise.' ? 'active' : '' }}" data-subnav>
-                                    <span class="sub-dot"></span>Entreprise
-                                </a>
-                                {% endif %}
-                                #}
-                            </div>
-                        </div>
+                        <div class="sb-section-title">Référentiels</div>
+                        {% if is_granted('PRODUIT_VOIR') %}
+                            <a href="{{ path('produit.index') }}" class="nav-link {{ app.current_route starts with 'produit.' ? 'active' : '' }}" data-nav title="Produits">
+                                <svg class="nav-icon" aria-hidden="true"><use href="{{ asset('sprite.svg') }}#produit"></use></svg>
+                                <span class="sb-text">Produits</span>
+                            </a>
+                        {% endif %}
+                        {% if is_granted('FOURNISSEUR_VOIR') %}
+                            <a href="{{ path('fournisseur.index') }}" class="nav-link {{ app.current_route starts with 'fournisseur.' ? 'active' : '' }}" data-nav title="Planteurs">
+                                <svg class="nav-icon" aria-hidden="true"><use href="{{ asset('sprite.svg') }}#fournisseur"></use></svg>
+                                <span class="sb-text">Planteurs</span>
+                            </a>
+                        {% endif %}
+                        {% if is_granted('SITE_VOIR') %}
+                            <a href="{{ path('site.index') }}" class="nav-link {{ app.current_route starts with 'site.' ? 'active' : '' }}" data-nav title="Ponts bascules">
+                                <svg class="nav-icon" aria-hidden="true"><use href="{{ asset('sprite.svg') }}#site"></use></svg>
+                                <span class="sb-text">Ponts bascules (Site)</span>
+                            </a>
+                        {% endif %}
+                        {% if is_granted('USER_VOIR') %}
+                            <a href="{{ path('utilisateur.index') }}" class="nav-link {{ app.current_route starts with 'utilisateur.' ? 'active' : '' }}" data-nav title="Utilisateurs">
+                                <svg class="nav-icon" aria-hidden="true"><use href="{{ asset('sprite.svg') }}#users"></use></svg>
+                                <span class="sb-text">Utilisateurs</span>
+                            </a>
                         {% endif %}
                     </div>
+                    {% endif %}
+
+                    {% if is_granted('ROLE_SUPER_ADMIN') %}
+                        <div class="sidebar-section">
+                            <div class="sb-section-title">Administration</div>
+                            <a href="{{ path('admin.entreprise.index') }}" class="nav-link {{ app.current_route starts with 'admin.entreprise' ? 'active' : '' }}" data-nav title="Entreprises">
+                                <svg class="nav-icon" aria-hidden="true"><use href="{{ asset('sprite.svg') }}#buisness"></use></svg>
+                                <span class="sb-text">Entreprises</span>
+                            </a>
+                            <a href="{{ path('site.index') }}" class="nav-link {{ app.current_route starts with 'site.' ? 'active' : '' }}" data-nav title="Ponts bascules">
+                                <svg class="nav-icon" aria-hidden="true"><use href="{{ asset('sprite.svg') }}#site"></use></svg>
+                                <span class="sb-text">Ponts bascules</span>
+                            </a>
+                            <a href="{{ path('utilisateur.index') }}" class="nav-link {{ app.current_route starts with 'utilisateur.' ? 'active' : '' }}" data-nav title="Utilisateurs">
+                                <svg class="nav-icon" aria-hidden="true"><use href="{{ asset('sprite.svg') }}#users"></use></svg>
+                                <span class="sb-text">Utilisateurs</span>
+                            </a>
+                        </div>
+                    {% endif %}
                 </nav>
 
                 <div class="sidebar-footer">
                     <div class="dropdown-anchor">
                         <button class="sb-footer-user" id="sidebarUserBtn">
                         <div class="user-avatar">
-                            {% if app.user.fileUrl is defined and app.user.fileUrl %}
-                                <img src="{{ api_url ~ '/media' ~ app.user.fileUrl ~ '?w=80&h=80&fm=jpg&fit=crop' }}" alt="{{ app.user.prenom }} {{ app.user.nom }}" class="w-full h-full object-cover rounded-full" />
-                            {% else %}
-                                {{ app.user.nom|slice(0,1)|upper }}{{ app.user.prenom|slice(0,1)|upper }}
-                            {% endif %}
+                            {{ app.user.nom|slice(0,1)|upper }}{{ app.user.prenom|slice(0,1)|upper }}
                         </div>
                         <div class="user-info">
                             <span class="user-name">{{ app.user.nom }}</span>
@@ -196,21 +233,13 @@
 
                         <div class="dropdown-anchor">
                             <button class="topbar-avatar" id="profileBtn">
-                                {% if app.user.fileUrl is defined and app.user.fileUrl %}
-                                    <img src="{{ api_url ~ '/media' ~ app.user.fileUrl ~ '?w=80&h=80&fm=jpg&fit=crop' }}" alt="{{ app.user.prenom }} {{ app.user.nom }}" class="w-full h-full object-cover rounded-full" />
-                                {% else %}
-                                    {{ app.user.nom|slice(0,1)|upper }}{{ app.user.prenom|slice(0,1)|upper }}
-                                {% endif %}
+                                {{ app.user.nom|slice(0,1)|upper }}{{ app.user.prenom|slice(0,1)|upper }}
                             </button>
                             <div class="dropdown" id="profileDrop" style="min-width:220px;right:0;top:calc(100% + .375rem);">
                                 <div class="dropdown-header">
                                     <div style="display:flex;align-items:center;gap:.625rem;">
                                         <div style="width:2.25rem;height:2.25rem;border-radius:9999px;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--primary-fg);flex-shrink:0;">
-                                            {% if app.user.fileUrl is defined and app.user.fileUrl %}
-                                                <img src="{{ api_url ~ '/media' ~ app.user.fileUrl ~ '?w=80&h=80&fm=jpg&fit=crop' }}" alt="{{ app.user.prenom }} {{ app.user.nom }}" class="w-full h-full object-cover rounded-full" />
-                                            {% else %}
-                                                {{ app.user.nom|slice(0,1)|upper }}{{ app.user.prenom|slice(0,1)|upper }}
-                                            {% endif %}
+                                            {{ app.user.nom|slice(0,1)|upper }}{{ app.user.prenom|slice(0,1)|upper }}
                                         </div>
                                         <div>
                                             <div class="dropdown-title">{{ app.user.nom }} {{ app.user.prenom }}</div>

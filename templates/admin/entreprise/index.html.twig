@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Entreprises{% endblock %}
+
+{% block body %}
+    <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold tracking-tight">Entreprises</h1>
+            <p class="text-sm text-muted-foreground mt-1">Les clients de Webpesee.</p>
+        </div>
+        {# Une entreprise naît toujours avec son administrateur : c'est la seule porte #}
+        {% if creable %}
+            <twig:Button as="a" href="{{ path('admin.entreprise.register') }}" size="sm">
+                <twig:ux:icon name="lucide:plus" class="size-4" />
+                Inscrire une entreprise
+            </twig:Button>
+        {% endif %}
+    </div>
+
+    {#
+        - Les filtres vivent DANS la table : ils écrivent dans la même URL que le tri et la
+          pagination, donc un écran filtré se partage tel quel.
+    #}
+    <div {{ react_component('Admin/TableEntreprises', {
+        items: items,
+        meta: meta,
+        queryParams: queryParams,
+        sortMeta: sortMeta,
+        modifiable: modifiable,
+        blocable: blocable,
+        jeton: csrf_token('gestion'),
+    }) }}></div>
+{% endblock %}

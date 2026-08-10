@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Planteurs{% endblock %}
+
+{% block body %}
+    <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold tracking-tight">Planteurs</h1>
+            <p class="text-sm text-muted-foreground mt-1">
+                Numéro mobile money, réseau et prix spécial.
+            </p>
+        </div>
+        {# L'opérateur en crée aussi : c'est lui qui a le planteur en face de lui #}
+        {% if is_granted('FOURNISSEUR_CREER') %}
+            <twig:Button as="a" href="{{ path('fournisseur.new') }}" size="sm">
+                <twig:ux:icon name="lucide:plus" class="size-4" />
+                Nouveau planteur
+            </twig:Button>
+        {% endif %}
+    </div>
+
+    <twig:Alert class="mb-6">
+        <twig:ux:icon name="lucide:info" class="size-4" />
+        <twig:Alert:Description>
+            Un planteur sans numéro de téléphone ou sans réseau mobile est signalé « non payable » :
+            sa pesée s'enregistre, mais le versement sera refusé. Mieux vaut le corriger ici que
+            de le découvrir avec le planteur en face de soi.
+        </twig:Alert:Description>
+    </twig:Alert>
+
+    {#
+        - Les filtres vivent DANS la table, plus dans un formulaire Twig au-dessus : ils écrivent dans
+          la même URL que le tri et la pagination, donc un écran filtré se partage tel quel.
+    #}
+    <div {{ react_component('Gestion/TableFournisseurs', {
+        items: items,
+        meta: meta,
+        queryParams: queryParams,
+        sortMeta: sortMeta,
+        modifiable: modifiable,
+        supprimable: supprimable,
+        sites: sites,
+        jeton: csrf_token('gestion'),
+    }) }}></div>
+{% endblock %}

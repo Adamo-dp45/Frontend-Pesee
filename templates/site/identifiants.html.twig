@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Identifiants du poste{% endblock %}
+
+{% block body %}
+    <div class="max-w-xl">
+        <div class="mb-6">
+            <h1 class="text-2xl font-semibold tracking-tight">
+                {{ renouvelle|default(false) ? 'Nouveaux identifiants' : 'Poste mis en service' }}
+            </h1>
+            <p class="text-sm text-muted-foreground mt-1">{{ site.libellesite }} — {{ site.code }}</p>
+        </div>
+
+        {#
+            - Le mot de passe n'existe nulle part en clair : il vient d'être engendré et n'est
+              renvoyé que sur cette réponse. Quitter la page le perd définitivement — le seul
+              recours est de le régénérer, ce qui en produit un autre.
+        #}
+        <twig:Alert variant="destructive" class="mb-4">
+            <twig:ux:icon name="lucide:triangle-alert" class="size-4" />
+            <twig:Alert:Title>Ce mot de passe ne sera plus jamais affiché</twig:Alert:Title>
+            <twig:Alert:Description>
+                Téléchargez le fichier de configuration maintenant. Si vous le perdez, il faudra
+                régénérer les identifiants depuis la fiche du pont bascule.
+            </twig:Alert:Description>
+        </twig:Alert>
+
+        <twig:Card>
+            <twig:Card:Header>
+                <twig:Card:Title>Identifiants du compte machine</twig:Card:Title>
+                <twig:Card:Description>
+                    À déposer sur le poste de pesée, dans son fichier de configuration.
+                </twig:Card:Description>
+            </twig:Card:Header>
+            <twig:Card:Content class="grid gap-4">
+                <div>
+                    <p class="text-xs text-muted-foreground">Compte</p>
+                    <p class="font-mono text-sm mt-1 select-all">{{ site.identifiantMachine }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-muted-foreground">Mot de passe</p>
+                    <p class="font-mono text-sm mt-1 select-all">{{ site.motDePasseMachine }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-muted-foreground">Adresse de l'API</p>
+                    <p class="font-mono text-sm mt-1 select-all">{{ api_url }}</p>
+                </div>
+            </twig:Card:Content>
+            <twig:Card:Footer class="gap-2">
+                {#
+                    - 'data-turbo=false' : Turbo intercepte l'envoi et attend une redirection.
+                      Il n'en reçoit pas — la réponse est un fichier — alors il ne fait rien,
+                      et le clic reste sans effet.
+                #}
+                <form method="post" action="{{ path('site.configuration', { id: site.id }) }}" data-turbo="false">
+                    <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('gestion') }}">
+                    <input type="hidden" name="code" value="{{ site.code }}">
+                    <input type="hidden" name="compte" value="{{ site.identifiantMachine }}">
+                    <input type="hidden" name="motDePasse" value="{{ site.motDePasseMachine }}">
+                    <twig:Button type="submit">
+                        <twig:ux:icon name="lucide:download" class="size-4" />
+                        Télécharger le fichier de configuration
+                    </twig:Button>
+                </form>
+                <twig:Button as="a" href="{{ path('site.show', { id: site.id }) }}" variant="outline">
+                    Ouvrir la fiche
+                </twig:Button>
+            </twig:Card:Footer>
+        </twig:Card>
+    </div>
+{% endblock %}

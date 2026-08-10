@@ -5,6 +5,7 @@
       "strict": true, // Pour activer plusieurs options et tous notre code doit être typé correctement
       "moduleResolution": "node", // Permet d'importer un module dans notre code ts
       "allowJs": true,
+      "skipLibCheck": true, // Les types de 'node_modules' se contredisent entre eux, ce n'est pas notre code
 
       "jsx": "react-jsx", // La partie spécifique pour 'react'
       "baseUrl": ".", // Pour 'shadcn'

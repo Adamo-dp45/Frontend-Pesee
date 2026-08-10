@@ -1,0 +1,46 @@
+{#
+    - Un champ de formulaire avec, sous lui, l'erreur renvoyée par l'API.
+    - Les formulaires sont écrits à la main (le composant Form de Symfony n'est pas installé) :
+      c'est ici qu'on centralise le rendu pour ne pas le réécrire dix fois.
+
+    - Paramètres : nom, label, valeur, type ('text' par défaut, 'select', 'checkbox', 'textarea'),
+      options (pour un select : { valeur: libellé }), violations, aide, requis, attributs.
+#}
+{% set type = type|default('text') %}
+{% set erreurs = violations[nom]|default([]) %}
+{% set classe = 'h-9' ~ (erreurs is not empty ? ' border-destructive' : '') %}
+
+<div class="grid gap-1.5">
+    {% if type != 'checkbox' %}
+        <twig:Label for="{{ nom }}">{{ label }}</twig:Label>
+    {% endif %}
+
+    {% if type == 'select' %}
+        <select id="{{ nom }}" name="{{ nom }}" class="{{ classe }} w-full rounded-md border border-input bg-transparent px-3 text-sm">
+            {% if vide is defined %}<option value="">{{ vide }}</option>{% endif %}
+            {% for cle, libelle in options %}
+                <option value="{{ cle }}" {{ valeur|default('') == cle ? 'selected' }}>{{ libelle }}</option>
+            {% endfor %}
+        </select>
+    {% elseif type == 'checkbox' %}
+        <div class="flex items-center gap-2">
+            <twig:Checkbox id="{{ nom }}" name="{{ nom }}" value="1" checked="{{ valeur ? true : false }}" />
+            <twig:Label for="{{ nom }}">{{ label }}</twig:Label>
+        </div>
+    {% elseif type == 'textarea' %}
+        <twig:Textarea id="{{ nom }}" name="{{ nom }}" rows="3">{{ valeur|default('') }}</twig:Textarea>
+    {% else %}
+        <twig:Input type="{{ type }}" id="{{ nom }}" name="{{ nom }}" value="{{ valeur|default('') }}"
+                    class="{{ classe }}"
+                    required="{{ requis|default(false) }}"
+                    placeholder="{{ placeholder|default('') }}" />
+    {% endif %}
+
+    {% if aide is defined %}
+        <p class="text-xs text-muted-foreground">{{ aide }}</p>
+    {% endif %}
+
+    {% for message in erreurs %}
+        <p class="text-xs text-destructive">{{ message }}</p>
+    {% endfor %}
+</div>

@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Utilisateurs{% endblock %}
+
+{% block body %}
+    <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold tracking-tight">Utilisateurs</h1>
+            <p class="text-sm text-muted-foreground mt-1">Les comptes de l'entreprise. Les comptes machine des postes se gèrent depuis la fiche du pont bascule.</p>
+        </div>
+        {# L'agent peut créer des opérateurs, l'administrateur tous les rôles #}
+        {% if is_granted('USER_CREER') %}
+            <twig:Button as="a" href="{{ path('utilisateur.new') }}" size="sm">
+                <twig:ux:icon name="lucide:plus" class="size-4" />
+                Nouveau compte
+            </twig:Button>
+        {% endif %}
+    </div>
+
+    {#
+        - Les filtres vivent DANS la table : ils écrivent dans la même URL que le tri et la
+          pagination, donc un écran filtré se partage tel quel.
+        - 'multiEntreprise' : seul le super administrateur voit les comptes de plusieurs entreprises.
+    #}
+    <div {{ react_component('Gestion/TableUtilisateurs', {
+        items: items,
+        meta: meta,
+        queryParams: queryParams,
+        sortMeta: sortMeta,
+        multiEntreprise: multiEntreprise,
+        jeton: csrf_token('gestion'),
+    }) }}></div>
+{% endblock %}

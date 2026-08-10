@@ -1,0 +1,34 @@
+{#
+    - Le partiel partagé par 'new' et 'edit' : une variable '{{ button }}' pour le libellé du bouton.
+    - Le mot de passe et le rôle n'existent qu'à la création — le rôle a ensuite son propre verbe, et
+      le mot de passe se réinitialise plutôt qu'il ne s'édite.
+#}
+<twig:Card>
+    <twig:Card:Content class="pt-6">
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {{ form_row(form.nom) }}
+                {{ form_row(form.prenom) }}
+                {{ form_row(form.email) }}
+                {{ form_row(form.telephone) }}
+            </div>
+
+            {% if form.plainPassword is defined %}
+                <div class="mt-6 border-t border-border pt-4">
+                    <h2 class="mb-3 text-sm font-medium">Accès</h2>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        {{ form_row(form.plainPassword) }}
+                        {{ form_row(form.role) }}
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="mt-6 flex items-center justify-end gap-3 border-t border-border pt-4">
+                <a href="{{ path('utilisateur.index') }}" class="btn btn-secondary">Annuler</a>
+                <button class="btn btn-primary">{{ button }}</button>
+            </div>
+        {{ form_end(form) }}
+    </twig:Card:Content>
+</twig:Card>

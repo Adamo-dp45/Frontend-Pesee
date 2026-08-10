@@ -1,4 +1,10 @@
 import Encore from '@symfony/webpack-encore';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Racine du projet : 'tsconfig.json' fait pointer '@/' ici, webpack doit suivre la même règle
+// sinon les imports Shadcn ('@/components/ui/table') compilent chez TypeScript mais pas au build.
+const racine = path.dirname(fileURLToPath(import.meta.url));
 
 // Manually configure the runtime environment if not already configured yet by the "encore" command.
 // It's useful when you use tools that rely on webpack.config.js file.
@@ -21,6 +27,8 @@ Encore
      * and one CSS file (e.g. app.css) if your JavaScript imports CSS.
      */
     .addEntry('app', './assets/app.js')
+
+    .addAliases({ '@': racine })
 
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
     .splitEntryChunks()

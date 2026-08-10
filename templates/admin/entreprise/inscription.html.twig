@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inscrire une entreprise{% endblock %}
+
+{% block body %}
+    <div class="max-w-2xl">
+        <div class="mb-6">
+            <a href="{{ path('admin.entreprise.index') }}" class="text-sm text-muted-foreground underline-offset-4 hover:underline">
+                ← Retour aux entreprises
+            </a>
+            <h1 class="mt-2 text-2xl font-semibold tracking-tight">Inscrire une entreprise</h1>
+            <p class="mt-1 text-sm text-muted-foreground">
+                L'entreprise et son premier administrateur, en une seule fois.
+            </p>
+        </div>
+
+        {#
+            - Les deux moitiés du formulaire vont ensemble : c'est ce qui distingue cet écran de la
+              création d'une entreprise seule, qui donne un client que personne ne peut ouvrir.
+        #}
+        <twig:Alert class="mb-6">
+            <twig:ux:icon name="lucide:info" class="size-4" />
+            <twig:Alert:Description>
+                Le compte créé ici devient le <strong>fondateur</strong> de l'entreprise : ses pairs ne
+                pourront ni le suspendre ni le rétrograder. C'est lui qui créera ensuite les autres
+                comptes. Les ponts bascules, eux, se mettent en service depuis leur propre écran.
+            </twig:Alert:Description>
+        </twig:Alert>
+
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+
+            <twig:Card class="mb-4">
+                <twig:Card:Header>
+                    <twig:Card:Title>L'entreprise</twig:Card:Title>
+                    <twig:Card:Description>Le client, tel qu'il apparaîtra partout ensuite.</twig:Card:Description>
+                </twig:Card:Header>
+                <twig:Card:Content>
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        {{ form_row(form.nomEntreprise) }}
+                        {{ form_row(form.codeentreprise) }}
+                        {{ form_row(form.contact1) }}
+                        {{ form_row(form.contact2) }}
+                        {{ form_row(form.adresse) }}
+                        {{ form_row(form.emailEntreprise) }}
+                    </div>
+                </twig:Card:Content>
+            </twig:Card>
+
+            <twig:Card>
+                <twig:Card:Header>
+                    <twig:Card:Title>Son administrateur</twig:Card:Title>
+                    <twig:Card:Description>La personne qui ouvrira l'entreprise et créera les autres comptes.</twig:Card:Description>
+                </twig:Card:Header>
+                <twig:Card:Content>
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        {{ form_row(form.nom) }}
+                        {{ form_row(form.prenom) }}
+                        {{ form_row(form.email) }}
+                        {{ form_row(form.telephone) }}
+                        {{ form_row(form.motDePasse) }}
+                    </div>
+                </twig:Card:Content>
+            </twig:Card>
+
+            <div class="mt-6 flex items-center justify-end gap-3 border-t border-border pt-4">
+                <a href="{{ path('admin.entreprise.index') }}" class="btn btn-secondary">Annuler</a>
+                <button class="btn btn-primary">Inscrire</button>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

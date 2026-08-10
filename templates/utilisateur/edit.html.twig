@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ compte.nomComplet }}{% endblock %}
+
+{% block body %}
+    <div class="mb-6">
+        <a href="{{ path('utilisateur.show', { id: compte.id }) }}" class="text-sm text-muted-foreground underline-offset-4 hover:underline">
+            ← Retour à la fiche
+        </a>
+        <h1 class="mt-2 text-2xl font-semibold tracking-tight">{{ compte.nomComplet }}</h1>
+        <p class="mt-1 text-sm text-muted-foreground">
+            {# Le rôle et l'accès vivent sur la fiche : mélangés aux coordonnées, corriger un nom suffisait à changer un rôle au passage #}
+            Coordonnées du compte. Son rôle et son accès se règlent depuis la fiche.
+        </p>
+    </div>
+
+    {% include 'utilisateur/_form.html.twig' with { button: 'Enregistrer' } %}
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mettre un poste en service{% endblock %}
+
+{% block body %}
+    <div class="mb-6">
+        <a href="{{ path('site.index') }}" class="text-sm text-muted-foreground underline-offset-4 hover:underline">
+            ← Retour aux ponts bascules
+        </a>
+        <h1 class="mt-2 text-2xl font-semibold tracking-tight">Mettre un poste en service</h1>
+        <p class="mt-1 text-sm text-muted-foreground">
+            La création engendre le compte machine du poste et son fichier de configuration.
+        </p>
+    </div>
+
+    {#
+        - Le mot de passe du compte machine n'est affiché qu'une fois, sur l'écran suivant : il n'est
+          stocké nulle part en clair.
+    #}
+    <twig:Alert class="mb-4">
+        <twig:ux:icon name="lucide:info" class="size-4" />
+        <twig:Alert:Description>
+            L'écran suivant affichera les identifiants du poste. Le mot de passe n'y figure qu'une
+            seule fois : relevez-le ou téléchargez le fichier de configuration avant de quitter.
+        </twig:Alert:Description>
+    </twig:Alert>
+
+    {% include 'site/_form.html.twig' with { button: 'Mettre en service' } %}
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle demande de solde{% endblock %}
+
+{% block body %}
+    <div class="mb-6">
+        <a href="{{ path('demande.index') }}" class="text-sm text-muted-foreground underline-offset-4 hover:underline">
+            ← Retour aux demandes
+        </a>
+        <h1 class="mt-2 text-2xl font-semibold tracking-tight">Nouvelle demande de solde</h1>
+        <p class="mt-1 text-sm text-muted-foreground">
+            Demandez à votre administrateur de recharger la caisse de votre pont bascule.
+        </p>
+    </div>
+
+    {% include 'demande/_form.html.twig' with { button: 'Envoyer la demande' } %}
+{% endblock %}

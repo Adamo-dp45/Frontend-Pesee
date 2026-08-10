@@ -1,0 +1,38 @@
+{#
+    - Le partiel partagé par 'new' et 'edit' : un seul endroit où la mise en page du formulaire est
+      décrite, et une variable '{{ button }}' pour le libellé du bouton.
+#}
+<twig:Card>
+    <twig:Card:Content class="pt-6">
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {{ form_row(form.nom) }}
+                {{ form_row(form.prenom) }}
+                {{ form_row(form.codefournisseur) }}
+                {% if form.site is defined %}
+                    {{ form_row(form.site) }}
+                {% endif %}
+            </div>
+
+            {# Le couple numéro + réseau décide de la payabilité : le séparer du reste le rend impossible à oublier #}
+            <div class="mt-6 border-t border-border pt-4">
+                <h2 class="mb-3 text-sm font-medium">Paiement mobile money</h2>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    {{ form_row(form.contact1) }}
+                    {{ form_row(form.reseau) }}
+                    {{ form_row(form.contact2) }}
+                </div>
+                <div class="mt-4 sm:w-1/2">
+                    {{ form_row(form.prixspeciale) }}
+                </div>
+            </div>
+
+            <div class="mt-6 flex items-center justify-end gap-3 border-t border-border pt-4">
+                <a href="{{ path('fournisseur.index') }}" class="btn btn-secondary">Annuler</a>
+                <button class="btn btn-primary">{{ button }}</button>
+            </div>
+        {{ form_end(form) }}
+    </twig:Card:Content>
+</twig:Card>

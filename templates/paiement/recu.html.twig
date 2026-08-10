@@ -1,0 +1,94 @@
+{#
+    - Le reçu remis au planteur. Rendu par dompdf, donc en HTML autonome : pas de feuille de style
+      externe, pas de police distante, pas d'image — le moteur n'a aucun accès réseau et rendrait
+      des cadres vides.
+    - La RÉFÉRENCE est ce qui permet de retrouver l'opération auprès de la passerelle : elle est
+      donc en évidence, et non noyée dans le tableau.
+#}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Reçu {{ paiement.reference }}</title>
+    <style>
+        body { font-family: 'DejaVu Sans', sans-serif; font-size: 11px; color: #111; margin: 0; padding: 24px; }
+        h1 { font-size: 16px; margin: 0 0 2px; }
+        .entete { border-bottom: 2px solid #111; padding-bottom: 10px; margin-bottom: 16px; }
+        .sous-titre { font-size: 10px; color: #555; }
+        .reference { margin: 16px 0; padding: 10px 12px; border: 1px solid #111; text-align: center; }
+        .reference .cle { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #555; }
+        .reference .valeur { font-size: 15px; font-weight: bold; font-family: 'DejaVu Sans Mono', monospace; margin-top: 3px; }
+        .montant { margin: 16px 0; text-align: center; }
+        .montant .valeur { font-size: 22px; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+        td { padding: 5px 0; border-bottom: 1px solid #ddd; vertical-align: top; }
+        td.cle { color: #555; width: 42%; }
+        td.valeur { text-align: right; font-weight: bold; }
+        .etat { display: inline-block; padding: 2px 8px; border: 1px solid #111; font-size: 10px; }
+        .pied { margin-top: 22px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 9px; color: #555; }
+        .signatures { margin-top: 26px; width: 100%; }
+        .signatures td { border: 0; padding-top: 30px; font-size: 9px; color: #555; }
+    </style>
+</head>
+<body>
+    <div class="entete">
+        <h1>Reçu de versement</h1>
+        <div class="sous-titre">
+            {{ paiement.site.libellesite ?? '—' }}
+            {% if paiement.site.code is defined %} · {{ paiement.site.code }}{% endif %}
+        </div>
+    </div>
+
+    <div class="reference">
+        <div class="cle">Référence du versement</div>
+        <div class="valeur">{{ paiement.reference }}</div>
+    </div>
+
+    <div class="montant">
+        <div class="sous-titre">Montant versé</div>
+        <div class="valeur">{{ paiement.montant|number_format(0, ',', ' ') }} F CFA</div>
+        <div><span class="etat">{{ paiement.statutLibelle ?? paiement.statut }}</span></div>
+    </div>
+
+    <table>
+        <tr>
+            <td class="cle">Planteur</td>
+            <td class="valeur">{{ paiement.fournisseur.nomComplet ?? '—' }}</td>
+        </tr>
+        <tr>
+            <td class="cle">Numéro mobile money</td>
+            <td class="valeur">
+                {{ paiement.numeroDestinataire ?? '—' }}
+                {% if paiement.reseau %} ({{ paiement.reseau }}){% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td class="cle">Pesée réglée</td>
+            <td class="valeur">{{ paiement.operation.numticket ?? '—' }}</td>
+        </tr>
+        <tr>
+            <td class="cle">Engagé le</td>
+            <td class="valeur">{{ paiement.createdAt|date('d/m/Y à H:i') }}</td>
+        </tr>
+        {# Une date de confirmation n'existe que si la passerelle a répondu : l'absence est une information #}
+        <tr>
+            <td class="cle">Confirmé le</td>
+            <td class="valeur">
+                {{ paiement.confirmeAt ? paiement.confirmeAt|date('d/m/Y à H:i') : 'en attente de la passerelle' }}
+            </td>
+        </tr>
+    </table>
+
+    <table class="signatures">
+        <tr>
+            <td>Signature de l'opérateur</td>
+            <td style="text-align: right;">Signature du planteur</td>
+        </tr>
+    </table>
+
+    <div class="pied">
+        Document émis le {{ "now"|date('d/m/Y à H:i') }}. En cas de contestation, communiquez la
+        référence ci-dessus : c'est elle qui identifie l'opération auprès de l'opérateur mobile.
+    </div>
+</body>
+</html>

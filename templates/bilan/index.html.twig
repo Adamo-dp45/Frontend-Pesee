@@ -1,0 +1,84 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Bilan{% endblock %}
+
+{% set totaux = production.totaux|default({}) %}
+
+{#
+    - Les critères courants, reportés dans les liens d'export : un export doit sortir EXACTEMENT ce
+      qui est à l'écran. La période y est ajoutée explicitement, sinon un lien partagé retomberait
+      sur le mois en cours chez celui qui l'ouvre.
+#}
+{% set criteres = queryParams|merge(periode.versParametres) %}
+
+{% block body %}
+    <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold tracking-tight">Bilan</h1>
+            <p class="text-sm text-muted-foreground mt-1">{{ periode.libelle }}</p>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+            {#
+                - Exports SERVEUR : ils repaginent l'API et sortent tout le résultat filtré, pas
+                  seulement la page affichée.
+                - « Imprimer avec gain » reprend le vocabulaire du logiciel de pesée : l'état
+                  valorisé, prix unitaire et montants compris.
+            #}
+            <twig:Button as="a" href="{{ path('bilan.export_excel', criteres) }}" variant="outline" size="sm">
+                <twig:ux:icon name="lucide:file-spreadsheet" class="size-4" />
+                Exporter en Excel
+            </twig:Button>
+            <twig:Button as="a" href="{{ path('bilan.export_pdf', criteres) }}" target="_blank" variant="outline" size="sm">
+                <twig:ux:icon name="lucide:printer" class="size-4" />
+                Imprimer
+            </twig:Button>
+            <twig:Button as="a" href="{{ path('bilan.export_pdf', criteres|merge({ gain: 1 })) }}" target="_blank" size="sm">
+                <twig:ux:icon name="lucide:receipt-text" class="size-4" />
+                Imprimer avec gain
+            </twig:Button>
+        </div>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+        {{ include('tableau_de_bord/_kpi.html.twig', {
+            titre: 'Pesées', valeur: totaux.nbPesees|default(0), unite: '',
+            detail: 'sur la période', icone: 'lucide:layers'
+        }) }}
+        {{ include('tableau_de_bord/_kpi.html.twig', {
+            titre: 'Tonnage net', valeur: (totaux.tonnageNet|default(0)) / 1000, unite: 't',
+            detail: (totaux.tonnageNet|default(0))|number_format(0, ',', ' ') ~ ' kg', icone: 'lucide:weight'
+        }) }}
+        {{ include('tableau_de_bord/_kpi.html.twig', {
+            titre: 'Montant dû', valeur: totaux.montantDu|default(0), unite: 'F',
+            detail: 'toutes pesées confondues', icone: 'lucide:banknote'
+        }) }}
+        {{ include('tableau_de_bord/_kpi.html.twig', {
+            titre: 'Reste à payer', valeur: totaux.montantRestant|default(0), unite: 'F',
+            detail: (totaux.montantPaye|default(0))|number_format(0, ',', ' ') ~ ' F versés', icone: 'lucide:hand-coins'
+        }) }}
+    </div>
+
+    <twig:Card>
+        <twig:Card:Header>
+            <twig:Card:Title>Pesées</twig:Card:Title>
+            <twig:Card:Description>Cliquez sur un en-tête souligné pour trier sur l'ensemble du résultat</twig:Card:Description>
+        </twig:Card:Header>
+        <twig:Card:Content>
+            {#
+                - Table React : le tri et la pagination portent sur TOUT le résultat filtré, pas sur
+                  les vingt-cinq lignes affichées. Elle ne fait aucun appel réseau — les données
+                  arrivent d'ici, déjà cloisonnées par l'API.
+            #}
+            <div {{ react_component('Bilan/TablePesees', {
+                items: items,
+                meta: meta,
+                queryParams: queryParams,
+                sortMeta: sortMeta,
+                payable: payable,
+                sites: sites,
+                referentiels: referentiels,
+            }) }}></div>
+        </twig:Card:Content>
+    </twig:Card>
+{% endblock %}

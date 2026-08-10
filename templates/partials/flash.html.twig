@@ -1,13 +1,42 @@
+{#
+    - Les messages d'une action qui vient d'aboutir ou d'échouer.
+
+    - Chaque type porte sa couleur ET son icône. Auparavant tout s'affichait avec l'icône
+      d'alerte sur fond neutre : un mot de passe changé avec succès ressemblait à une erreur, au
+      point de faire croire que rien ne s'était passé.
+
+    - Le composant 'Alert' ne connaît que 'default' et 'destructive' — les autres teintes se
+      posent en classes, comme ailleurs dans le projet.
+#}
+{% set apparences = {
+    'success': {
+        variant: 'default',
+        icone: 'lucide:circle-check',
+        classes: 'border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-50',
+    },
+    'danger': {
+        variant: 'destructive',
+        icone: 'lucide:circle-alert',
+        classes: '',
+    },
+    'warning': {
+        variant: 'default',
+        icone: 'lucide:triangle-alert',
+        classes: 'border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50',
+    },
+    'info': {
+        variant: 'default',
+        icone: 'lucide:info',
+        classes: 'border-sky-200 bg-sky-50 text-sky-900 dark:border-sky-900 dark:bg-sky-950 dark:text-sky-50',
+    },
+} %}
+
 {% for type, messages in app.flashes %}
-    {#
-        <alert-message class="is-floating" type="{{ type }}" duration="5">
-            {{ messages | join('. ') }}
-        </alert-message>
-    #}
-    <twig:Alert variant="{{ type == 'danger' ? 'destructive' : type }}" class="max-w-md mb-3">
-        <twig:ux:icon name="lucide:circle-alert" /> {# !! #}
-        <twig:Alert:Title>
-            {{ messages | join('. ') }}
-        </twig:Alert:Title>
+    {# Un type inattendu s'affiche en information plutôt que de disparaître sans bruit #}
+    {% set apparence = apparences[type] ?? apparences.info %}
+
+    <twig:Alert variant="{{ apparence.variant }}" class="mb-3 {{ apparence.classes }}">
+        <twig:ux:icon name="{{ apparence.icone }}" class="size-4" />
+        <twig:Alert:Title>{{ messages|join(' ') }}</twig:Alert:Title>
     </twig:Alert>
 {% endfor %}

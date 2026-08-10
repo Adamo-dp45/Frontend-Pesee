@@ -1,0 +1,63 @@
+{% extends 'app-base.html.twig' %}
+
+{% block title %}Mot de passe oublié{% endblock %}
+
+{% block body %}
+<div class="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+    <div class="w-full max-w-sm">
+        <div class="text-center mb-3">
+            <h1 class="text-2xl font-bold">Webpesee</h1>
+        </div>
+
+        {% if erreur %}
+            <twig:Alert variant="destructive" class="mb-3">
+                <twig:ux:icon name="lucide:circle-alert" />
+                <twig:Alert:Title>{{ erreur }}</twig:Alert:Title>
+            </twig:Alert>
+        {% endif %}
+
+        <twig:Card>
+            <twig:Card:Header>
+                <twig:Card:Title>Mot de passe oublié</twig:Card:Title>
+                <twig:Card:Description>
+                    {% if envoye %}
+                        Vérifiez votre boîte mail.
+                    {% else %}
+                        Nous vous enverrons un lien pour en choisir un nouveau.
+                    {% endif %}
+                </twig:Card:Description>
+            </twig:Card:Header>
+            <twig:Card:Content>
+                {% if envoye %}
+                    {#
+                        - Message volontairement identique que l'adresse existe ou non : dire
+                          « adresse inconnue » permettrait de savoir qui a un compte chez qui.
+                    #}
+                    <twig:Alert class="border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-50">
+                        <twig:ux:icon name="lucide:mail-check" />
+                        <twig:Alert:Description>
+                            Si un compte est associé à cette adresse, un lien de réinitialisation
+                            vient d'y être envoyé. Il est valable une heure.
+                        </twig:Alert:Description>
+                    </twig:Alert>
+                {% else %}
+                    <form method="post" class="grid gap-4">
+                        <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('motdepasse') }}">
+                        <div class="grid gap-2">
+                            <twig:Label for="email">Adresse e-mail</twig:Label>
+                            <twig:Input id="email" type="email" name="email" value="{{ email }}"
+                                        placeholder="m@example.com" autocomplete="username" required autofocus />
+                        </div>
+                        <twig:Button type="submit" class="w-full">Envoyer le lien</twig:Button>
+                    </form>
+                {% endif %}
+            </twig:Card:Content>
+            <twig:Card:Footer>
+                <a href="{{ path('app_login') }}" class="text-sm underline-offset-4 hover:underline">
+                    Retour à la connexion
+                </a>
+            </twig:Card:Footer>
+        </twig:Card>
+    </div>
+</div>
+{% endblock %}

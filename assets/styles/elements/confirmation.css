@@ -1,0 +1,53 @@
+/*
+    - La boîte de confirmation des gestes irréversibles.
+    - Bâtie sur <dialog> : le navigateur fournit le fond, le piège au clavier et la fermeture par
+      Échap. Rien à réimplémenter, et ça reste utilisable au clavier sans effort.
+*/
+.confirmation {
+    /*
+        - Le navigateur centre un dialogue modal avec 'margin: auto'. Le reset global remet la
+          marge de tous les éléments à zéro, ce qui le collait en haut à gauche : on la repose.
+    */
+    margin: auto;
+    max-width: 26rem;
+    width: calc(100% - 2rem);
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card);
+    color: var(--card-foreground);
+    box-shadow: 0 10px 30px -10px rgb(0 0 0 / 0.35);
+}
+
+.confirmation::backdrop {
+    background: rgb(0 0 0 / 0.45);
+}
+
+.confirmation-corps {
+    padding: 1.25rem;
+    display: grid;
+    gap: 0.5rem;
+}
+
+.confirmation-titre {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.confirmation-detail {
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+    margin: 0;
+}
+
+.confirmation-detail[hidden] {
+    display: none;
+}
+
+.confirmation-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
