@@ -101,17 +101,17 @@ class InscriptionFormType extends AbstractType
                 'constraints' => [new Length(min: 8, max: 30)],
             ])
             /*
-                - Les règles de composition sont celles de l'API, y compris la longueur minimale de
-                  dix caractères : ce compte autorise des virements.
-                - L'API refuse en plus les mots de passe figurant dans des fuites connues, ce qui
-                  demande un appel distant et ne peut donc pas être vérifié ici.
+                - Les règles sont exactement celles de l'API : six caractères, une minuscule, une
+                  majuscule, un chiffre. Rien d'autre — le contrôle contre les fuites de mots de passe
+                  connues a été retiré des deux côtés, il refusait presque tout à cette longueur.
+                - Ce formulaire peut donc trancher seul : ce qu'il accepte, l'API l'accepte.
             */
             ->add('motDePasse', PasswordType::class, [
                 'label' => 'Mot de passe',
-                'help' => 'À communiquer à la personne. Elle pourra le changer depuis son profil.',
+                'help' => '6 caractères minimum, dont une minuscule, une majuscule et un chiffre. À communiquer à la personne, qui pourra le changer depuis son profil.',
                 'constraints' => [
                     new NotBlank(message: 'Le mot de passe est obligatoire'),
-                    new Length(min: 10, minMessage: 'Le mot de passe doit faire au moins {{ limit }} caractères'),
+                    new Length(min: 6, minMessage: 'Le mot de passe doit faire au moins {{ limit }} caractères'),
                     new Regex(
                         pattern: '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/',
                         message: 'Le mot de passe doit contenir au moins une minuscule, une majuscule et un chiffre'

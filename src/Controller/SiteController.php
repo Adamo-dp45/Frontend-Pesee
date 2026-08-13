@@ -111,6 +111,7 @@ final class SiteController extends GestionController
         */
         $modifiable = $this->isGranted('SITE_MODIFIER');
         $attribuable = $this->isGranted('SITE_ATTRIBUER');
+        $peseesVisibles = $this->isGranted('OPERATION_VOIR');
 
         /* Le code et l'entreprise n'y figurent pas : ils ne sont modifiables qu'à la création, d'où 'creation: false'. */
         $form = $this->createForm(SiteFormType::class, [
@@ -146,6 +147,25 @@ final class SiteController extends GestionController
             // Pour le sélecteur d'opérateur : seul celui qui affecte a besoin de la liste
             'operateurs' => $attribuable
                 ? $this->api->collection('/api/users', ['itemsPerPage' => 200])
+                : [],
+            /*
+                - Les dernières pesées du poste : c'est le signe de vie qu'on vient chercher ici. Le
+                  compteur dit COMBIEN, cette liste dit QUOI et QUAND — un poste qui n'a rien remonté
+                  depuis trois jours se voit d'un coup d'œil.
+
+                - Bornée par 'OPERATION_VOIR' et pas seulement affichée sous condition : le super
+                  administrateur consulte les postes sans avoir accès aux pesées, et l'appel lui
+                  répondrait 403. Le gestionnaire d'erreurs traite un 403 comme une session perdue et
+                  le renverrait à l'écran de connexion, depuis une page qu'il a pourtant le droit de
+                  voir.
+            */
+            'peseesVisibles' => $peseesVisibles,
+            'pesees' => $peseesVisibles
+                ? $this->api->collection('/api/operations', [
+                    'site' => $id,
+                    'itemsPerPage' => 10,
+                    'order[peseeAt2]' => 'desc',
+                ])
                 : [],
         ], new Response(status: $form->isSubmitted() && !$form->isValid() ? self::EN_ERREUR : Response::HTTP_OK));
     }

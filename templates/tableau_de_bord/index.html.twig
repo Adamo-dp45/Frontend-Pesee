@@ -84,7 +84,7 @@
     </div>
 
     {% if totaux.nbEnCours|default(0) > 0 %}
-        <twig:Alert class="mb-6">
+        <twig:Alert variant="info" class="mb-6">
             <twig:ux:icon name="lucide:truck" class="size-4" />
             <twig:Alert:Description>
                 {{ totaux.nbEnCours }} camion(s) actuellement sur un pont bascule, en attente du second passage.

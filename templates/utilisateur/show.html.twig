@@ -32,7 +32,7 @@
                 - Sans ce garde-fou, deux administrateurs peuvent se suspendre mutuellement et
                   l'entreprise se retrouve verrouillée hors de son propre outil.
             #}
-            <twig:Alert class="mb-4">
+            <twig:Alert variant="info" class="mb-4">
                 <twig:ux:icon name="lucide:shield" class="size-4" />
                 <twig:Alert:Description>
                     Ce compte a inscrit l'entreprise. Il ne peut être ni suspendu ni rétrogradé par
@@ -128,7 +128,7 @@
               miroir du guard de l'API, donc c'est le refus exact qu'on aurait obtenu en essayant.
         #}
         {% if not modifiable and not promouvable and not suspendable and motif %}
-            <twig:Alert>
+            <twig:Alert variant="info">
                 <twig:ux:icon name="lucide:info" class="size-4" />
                 <twig:Alert:Description>
                     {{ motif }}

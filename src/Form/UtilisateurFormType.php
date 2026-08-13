@@ -59,10 +59,11 @@ class UtilisateurFormType extends AbstractType
         $builder
             ->add('plainPassword', PasswordType::class, [
                 'label' => 'Mot de passe',
-                'help' => 'À communiquer à la personne. Elle pourra le changer depuis son profil.',
+                // Le minimum est celui de l'API : annoncer 8 ici alors qu'elle en exigeait 10 faisait passer la saisie pour valide, puis refuser à l'enregistrement
+                'help' => '6 caractères minimum, dont une minuscule, une majuscule et un chiffre. À communiquer à la personne, qui pourra le changer depuis son profil.',
                 'constraints' => [
                     new NotBlank(),
-                    new Length(min: 8, minMessage: 'Le mot de passe doit faire au moins {{ limit }} caractères.'),
+                    new Length(min: 6, minMessage: 'Le mot de passe doit faire au moins {{ limit }} caractères.'),
                 ],
             ])
             ->add('role', ChoiceType::class, [

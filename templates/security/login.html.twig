@@ -10,7 +10,7 @@
             <p class="text-sm mt-1">Connectez-vous à votre espace</p>
         </div>
         {% if app.request.query.get('compte_supprime') %}
-            <twig:Alert class="max-w-md mb-3 border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-50">
+            <twig:Alert variant="success" class="max-w-md mb-3">
                 <twig:ux:icon name="lucide:circle-check" />
                 <twig:Alert:Title>Votre compte a été supprimé et vous avez été déconnecté.</twig:Alert:Title>
             </twig:Alert>
@@ -24,7 +24,7 @@
         {% endif %}
 
         {% if app.user %}
-            <twig:Alert variant="warning" class="max-w-md mb-3 border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
+            <twig:Alert variant="warning" class="max-w-md mb-3">
                 <twig:ux:icon name="lucide:triangle-alert" />
                 <twig:Alert:Title>
                     Vous êtes connecté en tant que {{ app.user.userIdentifier }}, <a href="{{ logout_path() }}" class="underline">se déconnecté</a>
@@ -83,13 +83,6 @@
                     </twig:Button>
                 </form>
             </twig:Card:Content>
-            {#
-                {% if is_granted('ROLE_SUPER_ADMIN') %}
-                <twig:Card:Footer>
-                    <twig:Button as="a" href="{{ path('app_register') }}" variant="outline" class="w-full">S'inscrire</twig:Button>
-                </twig:Card:Footer>
-                {% endif %}
-            #}
         </twig:Card>
     </div>
 </div>

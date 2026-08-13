@@ -18,7 +18,34 @@
             <p class="text-sm text-muted-foreground mt-1">{{ periode.libelle }}</p>
         </div>
 
-        <div class="flex flex-wrap gap-2">
+        <div class="flex flex-wrap items-end gap-2">
+            {#
+                - La période est un FILTRE comme les autres, et le seul qui ne vivait pas dans la
+                  table : elle se posait par défaut sur le mois en cours, sans rien pour en sortir.
+                  Une pesée d'un autre mois devenait alors introuvable — l'écran n'était pas vide,
+                  il était incomplet, ce qui ne se voit pas.
+
+                - Les critères courants repartent en champs cachés : changer la période ne doit pas
+                  effacer le pont bascule ou le planteur qu'on venait de choisir. 'page' en est
+                  exclue, un changement de période ramène au début.
+            #}
+            <form method="get" class="flex flex-wrap items-end gap-2">
+                {% for cle, valeur in queryParams %}
+                    {% if cle not in ['du', 'au', 'page'] and valeur is not iterable %}
+                        <input type="hidden" name="{{ cle }}" value="{{ valeur }}">
+                    {% endif %}
+                {% endfor %}
+                <div>
+                    <twig:Label for="du" class="text-xs">Du</twig:Label>
+                    <twig:Input type="date" id="du" name="du" value="{{ periode.du }}" class="h-9" />
+                </div>
+                <div>
+                    <twig:Label for="au" class="text-xs">Au</twig:Label>
+                    <twig:Input type="date" id="au" name="au" value="{{ periode.au }}" class="h-9" />
+                </div>
+                <twig:Button type="submit" variant="outline" size="sm">Appliquer</twig:Button>
+            </form>
+
             {#
                 - Exports SERVEUR : ils repaginent l'API et sortent tout le résultat filtré, pas
                   seulement la page affichée.

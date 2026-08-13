@@ -51,6 +51,76 @@
             }) }}
         </div>
 
+        {#
+            - Ce que le poste a remonté, et c'est la question qu'on se pose en ouvrant sa fiche : le
+              compteur dit combien, cette liste dit quoi et quand. Un poste muet depuis trois jours
+              se voit ici avant de se voir dans les totaux du mois.
+            - Dix lignes seulement : le bilan est l'écran d'analyse, avec ses filtres et ses exports.
+        #}
+        {% if peseesVisibles %}
+            <twig:Card class="mb-4">
+                <twig:Card:Header>
+                    <twig:Card:Title>Dernières pesées</twig:Card:Title>
+                    <twig:Card:Description>
+                        Les dix plus récentes remontées par ce poste, sur {{ site.peseesCount|number_format(0, ',', ' ') }} au total.
+                    </twig:Card:Description>
+                    <twig:Card:Action>
+                        {# Le bilan pré-filtré sur ce poste : la suite de cette liste, avec ses filtres #}
+                        <twig:Button as="a" href="{{ path('bilan.index', { site: site.id }) }}" variant="outline" size="sm">
+                            Voir tout le bilan
+                        </twig:Button>
+                    </twig:Card:Action>
+                </twig:Card:Header>
+                <twig:Card:Content class="p-0">
+                    <div class="overflow-x-auto">
+                        <twig:Table>
+                            <twig:Table:Header>
+                                <twig:Table:Row>
+                                    <twig:Table:Head>Ticket</twig:Table:Head>
+                                    <twig:Table:Head>Date</twig:Table:Head>
+                                    <twig:Table:Head>Planteur</twig:Table:Head>
+                                    <twig:Table:Head>Produit</twig:Table:Head>
+                                    <twig:Table:Head class="text-right">Net</twig:Table:Head>
+                                    <twig:Table:Head class="text-right">Montant</twig:Table:Head>
+                                    <twig:Table:Head>Règlement</twig:Table:Head>
+                                </twig:Table:Row>
+                            </twig:Table:Header>
+                            <twig:Table:Body>
+                                {% for p in pesees %}
+                                    <twig:Table:Row>
+                                        <twig:Table:Cell>
+                                            <a href="{{ path('pesee.voir', { id: p.id }) }}" class="font-medium underline-offset-4 hover:underline">
+                                                {{ p.numticket ?? p.codepesee }}
+                                            </a>
+                                        </twig:Table:Cell>
+                                        {# Une pesée en cours n'a pas de date de sortie : le camion est encore sur le pont #}
+                                        <twig:Table:Cell class="whitespace-nowrap">
+                                            {{ p.peseeAt2 ? p.peseeAt2|date('d/m/Y à H:i') : 'En cours' }}
+                                        </twig:Table:Cell>
+                                        <twig:Table:Cell>{{ p.fournisseur.nomComplet ?? '—' }}</twig:Table:Cell>
+                                        <twig:Table:Cell>{{ p.produit.libelle ?? '—' }}</twig:Table:Cell>
+                                        <twig:Table:Cell class="text-right tabular-nums">
+                                            {{ p.poidsnet ? p.poidsnet|number_format(0, ',', ' ') ~ ' kg' : '—' }}
+                                        </twig:Table:Cell>
+                                        <twig:Table:Cell class="text-right tabular-nums">
+                                            {{ p.montantdu ? p.montantdu|number_format(0, ',', ' ') ~ ' F' : '—' }}
+                                        </twig:Table:Cell>
+                                        <twig:Table:Cell>{{ include('partials/_etat.html.twig', { statut: p.statutReglement }) }}</twig:Table:Cell>
+                                    </twig:Table:Row>
+                                {% else %}
+                                    <twig:Table:Row>
+                                        <twig:Table:Cell colspan="7" class="text-center text-muted-foreground py-8">
+                                            Ce poste n'a encore rien remonté. Vérifiez son fichier de configuration et le journal des synchronisations.
+                                        </twig:Table:Cell>
+                                    </twig:Table:Row>
+                                {% endfor %}
+                            </twig:Table:Body>
+                        </twig:Table>
+                    </div>
+                </twig:Card:Content>
+            </twig:Card>
+        {% endif %}
+
         {# Modifier un poste relève de son propriétaire : l'agent et l'opérateur le consultent #}
         {% if modifiable %}
         <twig:Card class="mb-4">

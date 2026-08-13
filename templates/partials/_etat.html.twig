@@ -1,6 +1,10 @@
 {#
     - La pastille d'état, côté Twig. Même dictionnaire que celui du composant React 'cellules.tsx' :
       un même état ne doit pas changer de couleur selon l'écran qui l'affiche.
+
+    - 'EN_COURS' et 'TERMINEE' sont l'état d'une PESÉE : le camion est-il ressorti ? Ils manquaient
+      aux deux dictionnaires — aucun écran ne les affichait encore, mais la première colonne « État »
+      sur une pesée aurait sorti la valeur brute dans une pastille grise.
 #}
 {% set etats = {
     'ACTIF':      { libelle: 'Actif',      variant: 'default' },
@@ -8,6 +12,8 @@
     'ACTIVE':     { libelle: 'Active',     variant: 'default' },
     'DESACTIVEE': { libelle: 'Désactivée', variant: 'destructive' },
     'BLOQUE':     { libelle: 'Bloqué',     variant: 'destructive' },
+    'EN_COURS':   { libelle: 'En cours',   variant: 'secondary' },
+    'TERMINEE':   { libelle: 'Terminée',   variant: 'default' },
     'EN_ATTENTE': { libelle: 'En attente', variant: 'secondary' },
     'ENVOYE':     { libelle: 'Envoyé',     variant: 'secondary' },
     'REUSSI':     { libelle: 'Réussi',     variant: 'default' },

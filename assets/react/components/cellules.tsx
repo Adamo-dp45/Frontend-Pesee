@@ -33,6 +33,9 @@ const ETATS: Record<string, { libelle: string; variant: Variante }> = {
     ACTIVE: { libelle: 'Active', variant: 'default' },
     DESACTIVEE: { libelle: 'Désactivée', variant: 'destructive' },
     BLOQUE: { libelle: 'Bloqué', variant: 'destructive' },
+    // L'état d'une pesée : le camion est-il ressorti ? Même libellé et même couleur que côté Twig
+    EN_COURS: { libelle: 'En cours', variant: 'secondary' },
+    TERMINEE: { libelle: 'Terminée', variant: 'default' },
     EN_ATTENTE: { libelle: 'En attente', variant: 'secondary' },
     ENVOYE: { libelle: 'Envoyé', variant: 'secondary' },
     REUSSI: { libelle: 'Réussi', variant: 'default' },

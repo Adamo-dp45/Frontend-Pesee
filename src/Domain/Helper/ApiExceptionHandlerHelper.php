@@ -8,6 +8,7 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\RouterInterface;
@@ -37,14 +38,29 @@ class ApiExceptionHandlerHelper
             */
         }
 
+        // Une API en panne n'est pas un bug du site : 502 le dit, et 500 le cacherait
         if($e->isServerError()) {
-            throw new HttpException(500, $e->getMessage());
+            throw new HttpException(502, $e->getMessage(), $e);
         }
 
-        if($e->isForbidden()) {
-            $session->getFlashBag()->add('danger', $e->getMessage());
+        /*
+            - Un 403 n'est PAS une session perdue. Il dit « vous êtes bien identifié, mais ce geste
+              ne vous revient pas » : renvoyer à la connexion faisait perdre la page à quelqu'un de
+              déjà connecté, qui se reconnectait pour se heurter au même refus.
 
-            return new RedirectResponse($this->router->generate('app_login'));
+            - Le cas se produisait dès qu'un écran chargeait une donnée hors de son périmètre de
+              rôle : le super administrateur ouvrant la fiche d'un poste, dont les pesées lui sont
+              fermées, se retrouvait déconnecté.
+
+            - La vraie expiration de session ne passe pas par ici : 'ApiClientService' intercepte le
+              401, tente le rafraîchissement, et lève 'AuthenticationExpiredException' s'il échoue —
+              c'est elle, et elle seule, qui déconnecte.
+
+            - Même traduction que 'ApiExceptionSubscriber', le filet des appels hors 'catch' : le
+              même refus de l'API doit produire le même écran, qu'un contrôleur l'ait rattrapé ou non.
+        */
+        if($e->isForbidden()) {
+            throw new AccessDeniedHttpException('Votre rôle ne donne pas accès à cet écran.', $e);
         }
 
         /*

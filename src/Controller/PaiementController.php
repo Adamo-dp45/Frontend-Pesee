@@ -106,7 +106,38 @@ final class PaiementController extends GestionController
         return $this->render('paiement/new.html.twig', [
             'pesee' => $pesee,
             'form' => $form,
+            'caisse' => $this->caisseDuPoste($pesee['site']['id'] ?? null),
         ], new Response(status: $form->isSubmitted() && !$form->isValid() ? self::EN_ERREUR : Response::HTTP_OK));
+    }
+
+
+    /*
+        - L'état de la caisse du poste d'où partira le versement. C'est le chiffre qui manque le plus
+          sur cet écran : sans lui, l'opérateur saisit un montant, valide, et découvre seulement
+          alors que le poste n'a pas de quoi payer.
+
+        - On prend la ligne de '/api/stats/caisse' plutôt que la fiche du site, parce qu'elle porte
+          aussi le montant IMMOBILISÉ — ce qui est déjà sorti pour des versements en vol. Le solde
+          brut, seul, promettrait un argent déjà engagé.
+
+        - L'appel est gardé : tous les rôles qui peuvent payer voient la caisse, mais une 403 non
+          gardée serait traitée comme une session perdue et renverrait à l'écran de connexion.
+
+        @return array{siteId: int, site: string, solde: int, immobilise: int, operateur: string|null}|null
+    */
+    private function caisseDuPoste(?int $siteId): ?array
+    {
+        if($siteId === null || !$this->isGranted('MOUVEMENTCAISSE_VOIR')) {
+            return null;
+        }
+
+        foreach($this->api->item('/api/stats/caisse')['parSite'] ?? [] as $ligne) {
+            if(($ligne['siteId'] ?? null) === $siteId) {
+                return $ligne;
+            }
+        }
+
+        return null; // Poste hors du périmètre de la trésorerie : l'écran s'en passe plutôt que de mentir
     }
 
     /*

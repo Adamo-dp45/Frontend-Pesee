@@ -4,6 +4,12 @@
 
 {% set reste = (pesee.montantdu|default(0)) - (pesee.montantpaye|default(0)) %}
 
+{#
+    - Ce dont le poste dispose RÉELLEMENT : son solde moins ce qui est déjà sorti pour des
+      versements en vol. C'est ce montant que l'API confrontera à la saisie, pas le solde brut.
+#}
+{% set disponible = caisse ? caisse.solde - caisse.immobilise : null %}
+
 {% block body %}
     <div class="max-w-xl">
         <div class="mb-6">
@@ -47,6 +53,60 @@
                 </div>
             </twig:Card:Content>
         </twig:Card>
+
+        {#
+            - La caisse du poste, en face du montant à verser : c'est la question qu'on se pose la
+              main sur le clavier. Sans elle, l'opérateur saisit, valide, et n'apprend qu'alors que
+              le poste n'a pas de quoi payer — avec le planteur en face de lui.
+        #}
+        {% if caisse %}
+            <twig:Card class="mb-4">
+                <twig:Card:Header>
+                    <twig:Card:Title>Caisse de {{ caisse.site }}</twig:Card:Title>
+                    <twig:Card:Description>C'est de cet argent que part le versement.</twig:Card:Description>
+                </twig:Card:Header>
+                <twig:Card:Content class="grid gap-3 sm:grid-cols-3">
+                    <div>
+                        <p class="text-xs text-muted-foreground">Solde du poste</p>
+                        <p class="text-lg font-semibold tabular-nums">{{ caisse.solde|number_format(0, ',', ' ') }} F</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-muted-foreground">Déjà engagé</p>
+                        {# Des versements partis chez l'agrégateur, pas encore confirmés : l'argent a quitté la caisse #}
+                        <p class="text-lg font-semibold tabular-nums {{ caisse.immobilise > 0 ? 'text-amber-600 dark:text-amber-400' }}">
+                            {{ caisse.immobilise > 0 ? '− ' ~ caisse.immobilise|number_format(0, ',', ' ') ~ ' F' : '—' }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-muted-foreground">Disponible</p>
+                        <p class="text-lg font-semibold tabular-nums {{ disponible < reste ? 'text-destructive' }}">
+                            {{ disponible|number_format(0, ',', ' ') }} F
+                        </p>
+                    </div>
+                </twig:Card:Content>
+            </twig:Card>
+
+            {#
+                - Prévenir vaut mieux que laisser l'API refuser : le message est le même, mais il
+                  arrive avant la saisie plutôt qu'après. La demande de solde est le geste attendu.
+            #}
+            {% if disponible < reste %}
+                <twig:Alert variant="warning" class="mb-4">
+                    <twig:ux:icon name="lucide:triangle-alert" class="size-4" />
+                    <twig:Alert:Title>La caisse ne couvre pas le reste à payer</twig:Alert:Title>
+                    <twig:Alert:Description>
+                        {{ disponible|number_format(0, ',', ' ') }} F disponibles pour
+                        {{ reste|number_format(0, ',', ' ') }} F dus. Vous pouvez verser une partie
+                        maintenant — une pesée se règle en plusieurs fois — ou
+                        {% if is_granted('DEMANDESOLDE_CREER') %}
+                            <a href="{{ path('demande.new') }}" class="underline">demander du solde</a>.
+                        {% else %}
+                            faire doter le poste par un administrateur.
+                        {% endif %}
+                    </twig:Alert:Description>
+                </twig:Alert>
+            {% endif %}
+        {% endif %}
 
         {#
             - « Reste à payer » ne compte que les versements confirmés. L'API, elle, décompte aussi

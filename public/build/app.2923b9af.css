@@ -30,6 +30,8 @@
 
   --color-amber-300: rgb(255, 210, 55);
 
+  --color-amber-400: rgb(250, 188, 0);
+
   --color-amber-500: rgb(246, 158, 0);
 
   --color-amber-600: rgb(218, 119, 0);
@@ -212,6 +214,8 @@
 
     --color-amber-300: rgb(255, 210, 55);
 
+    --color-amber-400: rgb(250, 188, 0);
+
     --color-amber-500: rgb(246, 158, 0);
 
     --color-amber-600: rgb(218, 119, 0);
@@ -251,6 +255,8 @@
       --color-amber-50: color(display-p3 0.9978 0.98505 0.92631);
 
       --color-amber-300: color(display-p3 0.97433 0.83063 0.33298);
+
+      --color-amber-400: color(display-p3 0.95919 0.73852 0.11827);
 
       --color-amber-500: color(display-p3 0.93994 0.62058 0.05854);
 
@@ -2616,14 +2622,49 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
 .border-destructive:not(#\#):not(#\#):not(#\#):not(#\#) {
 
-  border-color: rgb(20, 20, 19);
+  border-color: rgb(228, 0, 22);
+
+  border-color: color(display-p3 0.83032 0.14038 0.1332);
 
   border-color: var(--destructive);
 }
 
+.border-destructive\/30:not(#\#):not(#\#):not(#\#):not(#\#) {
+
+  border-color: rgb(228, 0, 22);
+
+  border-color: color(display-p3 0.83032 0.14038 0.1332);
+
+  border-color: var(--destructive);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+
+  .border-destructive\/30:not(#\#):not(#\#):not(#\#):not(#\#) {
+
+    border-color: color-mix(in oklab, rgb(228, 0, 22) 30%, transparent);
+  }
+
+@media (color-gamut: p3) {
+.border-destructive\/30:not(#\#):not(#\#):not(#\#):not(#\#) {
+
+      border-color: color-mix(in oklab, color(display-p3 0.83032 0.14038 0.1332) 30%, transparent);
+    }
+}
+
+@supports (color: color-mix(in lch, red, blue)) {
+.border-destructive\/30:not(#\#):not(#\#):not(#\#):not(#\#) {
+
+      border-color: color-mix(in oklab, var(--destructive) 30%, transparent);
+    }
+}
+}
+
 .border-destructive\/40:not(#\#):not(#\#):not(#\#):not(#\#) {
 
-  border-color: rgb(20, 20, 19);
+  border-color: rgb(228, 0, 22);
+
+  border-color: color(display-p3 0.83032 0.14038 0.1332);
 
   border-color: var(--destructive);
 }
@@ -2632,8 +2673,15 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
   .border-destructive\/40:not(#\#):not(#\#):not(#\#):not(#\#) {
 
-    border-color: color-mix(in oklab, rgb(20, 20, 19) 40%, transparent);
+    border-color: color-mix(in oklab, rgb(228, 0, 22) 40%, transparent);
   }
+
+@media (color-gamut: p3) {
+.border-destructive\/40:not(#\#):not(#\#):not(#\#):not(#\#) {
+
+      border-color: color-mix(in oklab, color(display-p3 0.83032 0.14038 0.1332) 40%, transparent);
+    }
+}
 
 @supports (color: color-mix(in lch, red, blue)) {
 .border-destructive\/40:not(#\#):not(#\#):not(#\#):not(#\#) {
@@ -2738,7 +2786,9 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
 .bg-destructive\/10:not(#\#):not(#\#):not(#\#):not(#\#) {
 
-  background-color: rgb(20, 20, 19);
+  background-color: rgb(228, 0, 22);
+
+  background-color: color(display-p3 0.83032 0.14038 0.1332);
 
   background-color: var(--destructive);
 }
@@ -2747,8 +2797,15 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
   .bg-destructive\/10:not(#\#):not(#\#):not(#\#):not(#\#) {
 
-    background-color: color-mix(in oklab, rgb(20, 20, 19) 10%, transparent);
+    background-color: color-mix(in oklab, rgb(228, 0, 22) 10%, transparent);
   }
+
+@media (color-gamut: p3) {
+.bg-destructive\/10:not(#\#):not(#\#):not(#\#):not(#\#) {
+
+      background-color: color-mix(in oklab, color(display-p3 0.83032 0.14038 0.1332) 10%, transparent);
+    }
+}
 
 @supports (color: color-mix(in lch, red, blue)) {
 .bg-destructive\/10:not(#\#):not(#\#):not(#\#):not(#\#) {
@@ -3560,7 +3617,9 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
 .text-destructive:not(#\#):not(#\#):not(#\#):not(#\#) {
 
-  color: rgb(20, 20, 19);
+  color: rgb(228, 0, 22);
+
+  color: color(display-p3 0.83032 0.14038 0.1332);
 
   color: var(--destructive);
 }
@@ -4881,7 +4940,9 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
 [aria-invalid="true"]:where(.peer):not(#\#):not(#\#):not(#\#):not(#\#) ~ .peer-aria-invalid\:border-destructive {
 
-  border-color: rgb(20, 20, 19);
+  border-color: rgb(228, 0, 22);
+
+  border-color: color(display-p3 0.83032 0.14038 0.1332);
 
   border-color: var(--destructive);
 }
@@ -5624,7 +5685,9 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
   .hover\:bg-destructive\/20:hover:not(#\#):not(#\#):not(#\#):not(#\#) {
 
-    background-color: rgb(20, 20, 19);
+    background-color: rgb(228, 0, 22);
+
+    background-color: color(display-p3 0.83032 0.14038 0.1332);
 
     background-color: var(--destructive);
   }
@@ -5633,8 +5696,15 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
     .hover\:bg-destructive\/20:hover:not(#\#):not(#\#):not(#\#):not(#\#) {
 
-      background-color: color-mix(in oklab, rgb(20, 20, 19) 20%, transparent);
+      background-color: color-mix(in oklab, rgb(228, 0, 22) 20%, transparent);
     }
+
+@media (color-gamut: p3) {
+.hover\:bg-destructive\/20:hover:not(#\#):not(#\#):not(#\#):not(#\#) {
+
+        background-color: color-mix(in oklab, color(display-p3 0.83032 0.14038 0.1332) 20%, transparent);
+      }
+}
 
 @supports (color: color-mix(in lch, red, blue)) {
 .hover\:bg-destructive\/20:hover:not(#\#):not(#\#):not(#\#):not(#\#) {
@@ -5846,7 +5916,9 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
 .focus-visible\:border-destructive\/40:focus-visible:not(#\#):not(#\#):not(#\#):not(#\#) {
 
-  border-color: rgb(20, 20, 19);
+  border-color: rgb(228, 0, 22);
+
+  border-color: color(display-p3 0.83032 0.14038 0.1332);
 
   border-color: var(--destructive);
 }
@@ -5855,8 +5927,15 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
   .focus-visible\:border-destructive\/40:focus-visible:not(#\#):not(#\#):not(#\#):not(#\#) {
 
-    border-color: color-mix(in oklab, rgb(20, 20, 19) 40%, transparent);
+    border-color: color-mix(in oklab, rgb(228, 0, 22) 40%, transparent);
   }
+
+@media (color-gamut: p3) {
+.focus-visible\:border-destructive\/40:focus-visible:not(#\#):not(#\#):not(#\#):not(#\#) {
+
+      border-color: color-mix(in oklab, color(display-p3 0.83032 0.14038 0.1332) 40%, transparent);
+    }
+}
 
 @supports (color: color-mix(in lch, red, blue)) {
 .focus-visible\:border-destructive\/40:focus-visible:not(#\#):not(#\#):not(#\#):not(#\#) {
@@ -6254,7 +6333,9 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
 .has-aria-invalid\:border-destructive:has([aria-invalid="true"]):not(#\#):not(#\#):not(#\#):not(#\#) {
 
-  border-color: rgb(20, 20, 19);
+  border-color: rgb(228, 0, 22);
+
+  border-color: color(display-p3 0.83032 0.14038 0.1332);
 
   border-color: var(--destructive);
 }
@@ -6488,7 +6569,9 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
 .has-\[\[data-slot\]\[aria-invalid\=true\]\]\:border-destructive:has(:is([data-slot][aria-invalid=true])):not(#\#):not(#\#):not(#\#):not(#\#) {
 
-  border-color: rgb(20, 20, 19);
+  border-color: rgb(228, 0, 22);
+
+  border-color: color(display-p3 0.83032 0.14038 0.1332);
 
   border-color: var(--destructive);
 }
@@ -6515,7 +6598,9 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
 .has-\[input\[aria-invalid\]\]\:border-destructive:has(:is(input[aria-invalid])):not(#\#):not(#\#):not(#\#):not(#\#) {
 
-  border-color: rgb(20, 20, 19);
+  border-color: rgb(228, 0, 22);
+
+  border-color: color(display-p3 0.83032 0.14038 0.1332);
 
   border-color: var(--destructive);
 }
@@ -6701,7 +6786,9 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
 .aria-invalid\:border-destructive[aria-invalid="true"]:not(#\#):not(#\#):not(#\#):not(#\#) {
 
-  border-color: rgb(20, 20, 19);
+  border-color: rgb(228, 0, 22);
+
+  border-color: color(display-p3 0.83032 0.14038 0.1332);
 
   border-color: var(--destructive);
 }
@@ -7102,7 +7189,9 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
 .data-\[invalid\=true\]\:text-destructive[data-invalid="true"]:not(#\#):not(#\#):not(#\#):not(#\#) {
 
-  color: rgb(20, 20, 19);
+  color: rgb(228, 0, 22);
+
+  color: color(display-p3 0.83032 0.14038 0.1332);
 
   color: var(--destructive);
 }
@@ -7637,7 +7726,9 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
 .\*\:data-\[slot\=alert-description\]\:text-destructive\/90:not(#\#):not(#\#):not(#\#):not(#\#) > [data-slot="alert-description"] {
 
-  color: rgb(20, 20, 19);
+  color: rgb(228, 0, 22);
+
+  color: color(display-p3 0.83032 0.14038 0.1332);
 
   color: var(--destructive);
 }
@@ -7646,8 +7737,15 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
   .\*\:data-\[slot\=alert-description\]\:text-destructive\/90:not(#\#):not(#\#):not(#\#):not(#\#) > [data-slot="alert-description"] {
 
-    color: color-mix(in oklab, rgb(20, 20, 19) 90%, transparent);
+    color: color-mix(in oklab, rgb(228, 0, 22) 90%, transparent);
   }
+
+@media (color-gamut: p3) {
+.\*\:data-\[slot\=alert-description\]\:text-destructive\/90:not(#\#):not(#\#):not(#\#):not(#\#) > [data-slot="alert-description"] {
+
+      color: color-mix(in oklab, color(display-p3 0.83032 0.14038 0.1332) 90%, transparent);
+    }
+}
 
 @supports (color: color-mix(in lch, red, blue)) {
 .\*\:data-\[slot\=alert-description\]\:text-destructive\/90:not(#\#):not(#\#):not(#\#):not(#\#) > [data-slot="alert-description"] {
@@ -8232,14 +8330,18 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
 .data-\[variant\=destructive\]\:text-destructive[data-variant="destructive"]:not(#\#):not(#\#):not(#\#):not(#\#) {
 
-  color: rgb(20, 20, 19);
+  color: rgb(228, 0, 22);
+
+  color: color(display-p3 0.83032 0.14038 0.1332);
 
   color: var(--destructive);
 }
 
 .data-\[variant\=destructive\]\:focus\:bg-destructive\/10[data-variant="destructive"]:focus:not(#\#):not(#\#):not(#\#):not(#\#) {
 
-  background-color: rgb(20, 20, 19);
+  background-color: rgb(228, 0, 22);
+
+  background-color: color(display-p3 0.83032 0.14038 0.1332);
 
   background-color: var(--destructive);
 }
@@ -8248,8 +8350,15 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
   .data-\[variant\=destructive\]\:focus\:bg-destructive\/10[data-variant="destructive"]:focus:not(#\#):not(#\#):not(#\#):not(#\#) {
 
-    background-color: color-mix(in oklab, rgb(20, 20, 19) 10%, transparent);
+    background-color: color-mix(in oklab, rgb(228, 0, 22) 10%, transparent);
   }
+
+@media (color-gamut: p3) {
+.data-\[variant\=destructive\]\:focus\:bg-destructive\/10[data-variant="destructive"]:focus:not(#\#):not(#\#):not(#\#):not(#\#) {
+
+      background-color: color-mix(in oklab, color(display-p3 0.83032 0.14038 0.1332) 10%, transparent);
+    }
+}
 
 @supports (color: color-mix(in lch, red, blue)) {
 .data-\[variant\=destructive\]\:focus\:bg-destructive\/10[data-variant="destructive"]:focus:not(#\#):not(#\#):not(#\#):not(#\#) {
@@ -8261,7 +8370,9 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
 .data-\[variant\=destructive\]\:focus\:text-destructive[data-variant="destructive"]:focus:not(#\#):not(#\#):not(#\#):not(#\#) {
 
-  color: rgb(20, 20, 19);
+  color: rgb(228, 0, 22);
+
+  color: color(display-p3 0.83032 0.14038 0.1332);
 
   color: var(--destructive);
 }
@@ -9050,7 +9161,9 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
 .dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:bg-destructive\/20 {
 
-  background-color: rgb(20, 20, 19);
+  background-color: rgb(228, 0, 22);
+
+  background-color: color(display-p3 0.83032 0.14038 0.1332);
 
   background-color: var(--destructive);
 }
@@ -9059,8 +9172,15 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
   .dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:bg-destructive\/20 {
 
-    background-color: color-mix(in oklab, rgb(20, 20, 19) 20%, transparent);
+    background-color: color-mix(in oklab, rgb(228, 0, 22) 20%, transparent);
   }
+
+@media (color-gamut: p3) {
+.dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:bg-destructive\/20 {
+
+      background-color: color-mix(in oklab, color(display-p3 0.83032 0.14038 0.1332) 20%, transparent);
+    }
+}
 
 @supports (color: color-mix(in lch, red, blue)) {
 .dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:bg-destructive\/20 {
@@ -9172,6 +9292,11 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
   color: var(--color-amber-300);
 }
 
+.dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:text-amber-400 {
+
+  color: var(--color-amber-400);
+}
+
 .dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:text-amber-500 {
 
   color: var(--color-amber-500);
@@ -9235,7 +9360,9 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
 .dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:peer-aria-invalid\:border-destructive\/50:is([aria-invalid="true"]:where(.peer) ~ *) {
 
-  border-color: rgb(20, 20, 19);
+  border-color: rgb(228, 0, 22);
+
+  border-color: color(display-p3 0.83032 0.14038 0.1332);
 
   border-color: var(--destructive);
 }
@@ -9244,8 +9371,15 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
   .dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:peer-aria-invalid\:border-destructive\/50:is([aria-invalid="true"]:where(.peer) ~ *) {
 
-    border-color: color-mix(in oklab, rgb(20, 20, 19) 50%, transparent);
+    border-color: color-mix(in oklab, rgb(228, 0, 22) 50%, transparent);
   }
+
+@media (color-gamut: p3) {
+.dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:peer-aria-invalid\:border-destructive\/50:is([aria-invalid="true"]:where(.peer) ~ *) {
+
+      border-color: color-mix(in oklab, color(display-p3 0.83032 0.14038 0.1332) 50%, transparent);
+    }
+}
 
 @supports (color: color-mix(in lch, red, blue)) {
 .dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:peer-aria-invalid\:border-destructive\/50:is([aria-invalid="true"]:where(.peer) ~ *) {
@@ -9293,7 +9427,9 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
   .dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:hover\:bg-destructive\/30:hover {
 
-    background-color: rgb(20, 20, 19);
+    background-color: rgb(228, 0, 22);
+
+    background-color: color(display-p3 0.83032 0.14038 0.1332);
 
     background-color: var(--destructive);
   }
@@ -9302,8 +9438,15 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
     .dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:hover\:bg-destructive\/30:hover {
 
-      background-color: color-mix(in oklab, rgb(20, 20, 19) 30%, transparent);
+      background-color: color-mix(in oklab, rgb(228, 0, 22) 30%, transparent);
     }
+
+@media (color-gamut: p3) {
+.dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:hover\:bg-destructive\/30:hover {
+
+        background-color: color-mix(in oklab, color(display-p3 0.83032 0.14038 0.1332) 30%, transparent);
+      }
+}
 
 @supports (color: color-mix(in lch, red, blue)) {
 .dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:hover\:bg-destructive\/30:hover {
@@ -9502,7 +9645,9 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
 .dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:has-aria-invalid\:border-destructive\/50:has([aria-invalid="true"]) {
 
-  border-color: rgb(20, 20, 19);
+  border-color: rgb(228, 0, 22);
+
+  border-color: color(display-p3 0.83032 0.14038 0.1332);
 
   border-color: var(--destructive);
 }
@@ -9511,8 +9656,15 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
   .dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:has-aria-invalid\:border-destructive\/50:has([aria-invalid="true"]) {
 
-    border-color: color-mix(in oklab, rgb(20, 20, 19) 50%, transparent);
+    border-color: color-mix(in oklab, rgb(228, 0, 22) 50%, transparent);
   }
+
+@media (color-gamut: p3) {
+.dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:has-aria-invalid\:border-destructive\/50:has([aria-invalid="true"]) {
+
+      border-color: color-mix(in oklab, color(display-p3 0.83032 0.14038 0.1332) 50%, transparent);
+    }
+}
 
 @supports (color: color-mix(in lch, red, blue)) {
 .dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:has-aria-invalid\:border-destructive\/50:has([aria-invalid="true"]) {
@@ -9594,7 +9746,9 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
 .dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:has-\[input\[aria-invalid\]\]\:border-destructive\/50:has(:is(input[aria-invalid])) {
 
-  border-color: rgb(20, 20, 19);
+  border-color: rgb(228, 0, 22);
+
+  border-color: color(display-p3 0.83032 0.14038 0.1332);
 
   border-color: var(--destructive);
 }
@@ -9603,8 +9757,15 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
   .dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:has-\[input\[aria-invalid\]\]\:border-destructive\/50:has(:is(input[aria-invalid])) {
 
-    border-color: color-mix(in oklab, rgb(20, 20, 19) 50%, transparent);
+    border-color: color-mix(in oklab, rgb(228, 0, 22) 50%, transparent);
   }
+
+@media (color-gamut: p3) {
+.dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:has-\[input\[aria-invalid\]\]\:border-destructive\/50:has(:is(input[aria-invalid])) {
+
+      border-color: color-mix(in oklab, color(display-p3 0.83032 0.14038 0.1332) 50%, transparent);
+    }
+}
 
 @supports (color: color-mix(in lch, red, blue)) {
 .dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:has-\[input\[aria-invalid\]\]\:border-destructive\/50:has(:is(input[aria-invalid])) {
@@ -9629,7 +9790,9 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
 .dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:aria-invalid\:border-destructive\/50[aria-invalid="true"] {
 
-  border-color: rgb(20, 20, 19);
+  border-color: rgb(228, 0, 22);
+
+  border-color: color(display-p3 0.83032 0.14038 0.1332);
 
   border-color: var(--destructive);
 }
@@ -9638,8 +9801,15 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
   .dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:aria-invalid\:border-destructive\/50[aria-invalid="true"] {
 
-    border-color: color-mix(in oklab, rgb(20, 20, 19) 50%, transparent);
+    border-color: color-mix(in oklab, rgb(228, 0, 22) 50%, transparent);
   }
+
+@media (color-gamut: p3) {
+.dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:aria-invalid\:border-destructive\/50[aria-invalid="true"] {
+
+      border-color: color-mix(in oklab, color(display-p3 0.83032 0.14038 0.1332) 50%, transparent);
+    }
+}
 
 @supports (color: color-mix(in lch, red, blue)) {
 .dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:aria-invalid\:border-destructive\/50[aria-invalid="true"] {
@@ -9664,7 +9834,9 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
 .dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:data-\[variant\=destructive\]\:focus\:bg-destructive\/20[data-variant="destructive"]:focus {
 
-  background-color: rgb(20, 20, 19);
+  background-color: rgb(228, 0, 22);
+
+  background-color: color(display-p3 0.83032 0.14038 0.1332);
 
   background-color: var(--destructive);
 }
@@ -9673,8 +9845,15 @@ button:not(#\#):not(#\#), input:where([type="button"], [type="reset"], [type="su
 
   .dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:data-\[variant\=destructive\]\:focus\:bg-destructive\/20[data-variant="destructive"]:focus {
 
-    background-color: color-mix(in oklab, rgb(20, 20, 19) 20%, transparent);
+    background-color: color-mix(in oklab, rgb(228, 0, 22) 20%, transparent);
   }
+
+@media (color-gamut: p3) {
+.dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:data-\[variant\=destructive\]\:focus\:bg-destructive\/20[data-variant="destructive"]:focus {
+
+      background-color: color-mix(in oklab, color(display-p3 0.83032 0.14038 0.1332) 20%, transparent);
+    }
+}
 
 @supports (color: color-mix(in lch, red, blue)) {
 .dark:not(#\#):not(#\#):not(#\#):not(#\#) .dark\:data-\[variant\=destructive\]\:focus\:bg-destructive\/20[data-variant="destructive"]:focus {
@@ -10724,7 +10903,9 @@ a.\[a\]\:transition-colors:not(#\#):not(#\#):not(#\#):not(#\#) {
 
   a.\[a\]\:hover\:bg-destructive\/20:hover:not(#\#):not(#\#):not(#\#):not(#\#) {
 
-    background-color: rgb(20, 20, 19);
+    background-color: rgb(228, 0, 22);
+
+    background-color: color(display-p3 0.83032 0.14038 0.1332);
 
     background-color: var(--destructive);
   }
@@ -10733,8 +10914,15 @@ a.\[a\]\:transition-colors:not(#\#):not(#\#):not(#\#):not(#\#) {
 
     a.\[a\]\:hover\:bg-destructive\/20:hover:not(#\#):not(#\#):not(#\#):not(#\#) {
 
-      background-color: color-mix(in oklab, rgb(20, 20, 19) 20%, transparent);
+      background-color: color-mix(in oklab, rgb(228, 0, 22) 20%, transparent);
     }
+
+@media (color-gamut: p3) {
+a.\[a\]\:hover\:bg-destructive\/20:hover:not(#\#):not(#\#):not(#\#):not(#\#) {
+
+        background-color: color-mix(in oklab, color(display-p3 0.83032 0.14038 0.1332) 20%, transparent);
+      }
+}
 
 @supports (color: color-mix(in lch, red, blue)) {
 a.\[a\]\:hover\:bg-destructive\/20:hover:not(#\#):not(#\#):not(#\#):not(#\#) {
@@ -10870,7 +11058,9 @@ a.\[a\]\:hover\:bg-secondary\/80:hover:not(#\#):not(#\#):not(#\#):not(#\#) {
 
 .data-\[variant\=destructive\]\:\*\:\[svg\]\:text-destructive[data-variant="destructive"]:not(#\#):not(#\#):not(#\#):not(#\#) > svg {
 
-  color: rgb(20, 20, 19);
+  color: rgb(228, 0, 22);
+
+  color: color(display-p3 0.83032 0.14038 0.1332);
 
   color: var(--destructive);
 }
@@ -11590,7 +11780,7 @@ a.\[a\]\:hover\:bg-secondary\/80:hover:not(#\#):not(#\#):not(#\#):not(#\#) {
 
   --accent-foreground: rgb(40, 38, 27);
 
-  --destructive: rgb(20, 20, 19);
+  --destructive: rgb(228, 0, 22);
 
   --destructive-foreground: rgb(255, 255, 255);
 
@@ -11665,6 +11855,20 @@ a.\[a\]\:hover\:bg-secondary\/80:hover:not(#\#):not(#\#):not(#\#):not(#\#) {
   --tracking-normal: 0em;
 
   --spacing: 0.25rem;
+}
+
+@supports (color: color(display-p3 0 0 0%)) {
+:root:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
+
+    --destructive: rgb(228, 0, 22);
+  }
+
+@media (color-gamut: p3) {
+:root:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
+
+      --destructive: color(display-p3 0.83032 0.14038 0.1332);
+    }
+}
 }
 
 .dark:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
@@ -13344,14 +13548,18 @@ html.dark:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) .dropdown {
 
 .dropdown-item.destructive:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
 
-  color: rgb(20, 20, 19);
+  color: rgb(228, 0, 22);
+
+  color: color(display-p3 0.83032 0.14038 0.1332);
 
   color: var(--destructive);
 }
 
 .dropdown-item.destructive:hover:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
 
-  background: rgb(20, 20, 19);
+  background: rgb(228, 0, 22);
+
+  background: color(display-p3 0.83032 0.14038 0.1332);
 
   background: var(--destructive);
 }
@@ -13360,8 +13568,15 @@ html.dark:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) .dropdown {
 
   .dropdown-item.destructive:hover:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
 
-    background: color-mix(in srgb,rgb(20, 20, 19) 10%,transparent);
+    background: color-mix(in srgb,rgb(228, 0, 22) 10%,transparent);
   }
+
+@media (color-gamut: p3) {
+.dropdown-item.destructive:hover:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
+
+      background: color-mix(in srgb,color(display-p3 0.83032 0.14038 0.1332) 10%,transparent);
+    }
+}
 
 @supports (color: color-mix(in lch, red, blue)) {
 .dropdown-item.destructive:hover:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
@@ -13382,7 +13597,9 @@ html.dark:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) .dropdown {
 
 .dropdown-item.destructive:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) svg {
 
-  color: rgb(20, 20, 19);
+  color: rgb(228, 0, 22);
+
+  color: color(display-p3 0.83032 0.14038 0.1332);
 
   color: var(--destructive);
 }
@@ -14038,7 +14255,9 @@ html.dark:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) .dropdown {
 
   margin-top: .375rem;
 
-  color: rgb(20, 20, 19);
+  color: rgb(228, 0, 22);
+
+  color: color(display-p3 0.83032 0.14038 0.1332);
 
   color: var(--destructive);
 }
@@ -14204,14 +14423,18 @@ html.dark:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) .dropdown {
 
 .input.input-error:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
 
-  border-color: rgb(20, 20, 19);
+  border-color: rgb(228, 0, 22);
+
+  border-color: color(display-p3 0.83032 0.14038 0.1332);
 
   border-color: var(--destructive);
 }
 
 .input.input-error:focus:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
 
-  box-shadow: 0 0 0 3px rgb(20, 20, 19);
+  box-shadow: 0 0 0 3px rgb(228, 0, 22);
+
+  box-shadow: 0 0 0 3px color(display-p3 0.83032 0.14038 0.1332);
 
   box-shadow: 0 0 0 3px var(--destructive);
 }
@@ -14220,8 +14443,15 @@ html.dark:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) .dropdown {
 
   .input.input-error:focus:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
 
-    box-shadow: 0 0 0 3px color-mix(in srgb, rgb(20, 20, 19) 20%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, rgb(228, 0, 22) 20%, transparent);
   }
+
+@media (color-gamut: p3) {
+.input.input-error:focus:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
+
+      box-shadow: 0 0 0 3px color-mix(in srgb, color(display-p3 0.83032 0.14038 0.1332) 20%, transparent);
+    }
+}
 
 @supports (color: color-mix(in lch, red, blue)) {
 .input.input-error:focus:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
