@@ -3,7 +3,7 @@ import { ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@/assets/components/ui/badge'
 import { ServerDataTable } from '../../components/server/server-data-table'
 import { entetesDepuis } from '../../components/server/server-data-table-column-header'
-import { MenuActions, texte } from '../../components/cellules'
+import { dateHeure, MenuActions, texte } from '../../components/cellules'
 import { ServerMeta, ServerTableFilter, SortMeta } from '../../hooks/useServerTable'
 import { Pesee, StatutReglement } from '../../models/pesee.model'
 
@@ -62,9 +62,7 @@ export default function TablePesees({ items, meta, queryParams, sortMeta, payabl
             header: () => entete('peseeAt2', 'Date'),
             cell: ({ row }) => (
                 <span className="whitespace-nowrap text-xs">
-                    {row.original.peseeAt2
-                        ? new Date(row.original.peseeAt2).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })
-                        : '—'}
+                    {dateHeure(row.original.peseeAt2)}
                 </span>
             ),
         },
@@ -141,7 +139,8 @@ export default function TablePesees({ items, meta, queryParams, sortMeta, payabl
                 <MenuActions
                     liens={[
                         { libelle: 'Voir la pesée', href: row.original.url },
-                        ...(payable && row.original.urlPaiement ? [{ libelle: 'Verser au planteur', href: row.original.urlPaiement }] : []),
+                        // Sous le trait : c'est de l'argent qui part, pas une page qu'on regarde
+                        ...(payable && row.original.urlPaiement ? [{ libelle: 'Verser au planteur', href: row.original.urlPaiement, engage: true }] : []),
                     ]}
                 />
             ),

@@ -23,8 +23,39 @@ export const montant = (valeur: number | null | undefined, unite = 'F'): string 
 export const texte = (valeur: string | null | undefined): string =>
     valeur === null || valeur === undefined || valeur === '' ? '—' : valeur
 
+/*
+    - L'API range les numéros au format que les agrégateurs exigent, '+2250701020304'. C'est
+      illisible pour qui doit le vérifier de vive voix avec un planteur, alors on le regroupe à
+      l'affichage — sans jamais toucher à la valeur stockée, qui, elle, doit rester canonique.
+    - Ce qui ne ressemble pas à un numéro ivoirien est rendu tel quel : c'est une saisie venue du
+      poste que personne n'a encore corrigée, et la masquer empêcherait de la reconnaître.
+*/
+export const numero = (valeur: string | null | undefined): string => {
+    if(!valeur) return '—'
+
+    const chiffres = valeur.replace(/[^0-9]/g, '')
+
+    if(!valeur.startsWith('+225') || chiffres.length !== 13) return valeur
+
+    return `+225 ${chiffres.slice(3).replace(/(\d{2})(?=\d)/g, '$1 ')}`
+}
+
+/*
+    - 'timeZone: UTC' n'est pas un détail : le navigateur formaterait sinon avec le fuseau de la
+      MACHINE qui regarde. L'application stocke et calcule en UTC, l'écran doit lire la même heure —
+      sinon un poste de développement à Paris affiche des pesées décalées d'une ou deux heures, et
+      c'est le genre d'écart qu'on met longtemps à soupçonner.
+    - C'est le seul endroit où le fuseau se pose côté client : PHP ne décide de rien dans le
+      navigateur.
+*/
+const FUSEAU = 'UTC'
+
 export const dateHeure = (valeur: string | null | undefined): string =>
-    valeur ? new Date(valeur).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) : '—'
+    valeur ? new Date(valeur).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short', timeZone: FUSEAU }) : '—'
+
+/** La date sans l'heure, quand la ligne est déjà chargée — mêmes règles de fuseau. */
+export const dateSeule = (valeur: string | null | undefined): string =>
+    valeur ? new Date(valeur).toLocaleDateString('fr-FR', { dateStyle: 'short', timeZone: FUSEAU }) : '—'
 
 /* Un seul dictionnaire pour tous les états du domaine : ils ne se contredisent jamais d'un écran à l'autre. */
 const ETATS: Record<string, { libelle: string; variant: Variante }> = {
@@ -88,6 +119,17 @@ export function Lien({ href, children }: { href: string; children: React.ReactNo
 export interface ActionLien {
     libelle: string
     href: string
+    /*
+        - Range le lien du côté de ce qui ENGAGE plutôt que de ce qui se consulte, donc sous le trait.
+
+        - Le menu sépare deux natures d'entrées : on regarde, ou on agit. La coupure suivait jusqu'ici
+          la mécanique — 'liens' pour ce qui navigue, 'actions' pour ce qui poste — et ça marchait tant
+          que les deux coïncidaient. « Verser au planteur » les fait diverger : c'est une simple
+          navigation vers un formulaire, mais c'est le geste qui sort l'argent de la caisse. Il se
+          retrouvait donc collé à « Voir la pesée », seul geste engageant de l'application à ne pas
+          être détaché du reste.
+    */
+    engage?: boolean
 }
 
 /** Une action qui poste. 'confirmer' déclenche la question de 'modules/confirmation.js'. */
@@ -102,6 +144,10 @@ export interface ActionPost {
 
 export function MenuActions({ liens = [], actions = [], jeton }: { liens?: ActionLien[]; actions?: ActionPost[]; jeton?: string }) {
     const boutons = React.useRef<Record<string, HTMLButtonElement | null>>({})
+
+    /* Le trait sépare ce qu'on consulte de ce qui engage, quelle que soit la mécanique derrière. */
+    const consultation = liens.filter(lien => !lien.engage)
+    const engagement = liens.filter(lien => lien.engage)
 
     if(liens.length === 0 && actions.length === 0) {
         return null // Une ligne sans action n'affiche pas un menu vide
@@ -130,11 +176,16 @@ export function MenuActions({ liens = [], actions = [], jeton }: { liens?: Actio
                     <MoreHorizontal className="size-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    {liens.map(lien => (
+                    {consultation.map(lien => (
                         <DropdownMenuItem key={lien.href} render={<a href={lien.href} />}>{lien.libelle}</DropdownMenuItem>
                     ))}
 
-                    {liens.length > 0 && actions.length > 0 && <DropdownMenuSeparator />}
+                    {/* Jamais orphelin : il faut quelque chose des DEUX côtés pour que le trait apparaisse */}
+                    {consultation.length > 0 && engagement.length + actions.length > 0 && <DropdownMenuSeparator />}
+
+                    {engagement.map(lien => (
+                        <DropdownMenuItem key={lien.href} render={<a href={lien.href} />}>{lien.libelle}</DropdownMenuItem>
+                    ))}
 
                     {actions.map(action => (
                         <DropdownMenuItem

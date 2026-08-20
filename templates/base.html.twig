@@ -74,6 +74,16 @@
                             </a>
                         {% endif %}
                         {#
+                            - Le pendant de la caisse : elle retient l'argent, celui-ci retient les
+                              décisions qui n'en déplacent pas. Même public de supervision.
+                        #}
+                        {% if is_granted('ACTIVITE_VOIR') %}
+                            <a href="{{ path('activite.index') }}" class="nav-link {{ app.current_route starts with 'activite.' ? 'active' : '' }}" data-nav title="Journal des activités">
+                                <svg class="nav-icon" aria-hidden="true"><use href="{{ asset('sprite.svg') }}#journal"></use></svg>
+                                <span class="sb-text">Journal</span>
+                            </a>
+                        {% endif %}
+                        {#
                             - C'est ici qu'on voit POURQUOI un poste signalé silencieux ne remonte
                               plus rien. Écran de supervision : l'opérateur n'y a pas droit, et
                               l'entrée lui menait droit sur un refus de l'API.
@@ -163,6 +173,14 @@
                             <a href="{{ path('utilisateur.index') }}" class="nav-link {{ app.current_route starts with 'utilisateur.' ? 'active' : '' }}" data-nav title="Utilisateurs">
                                 <svg class="nav-icon" aria-hidden="true"><use href="{{ asset('sprite.svg') }}#users"></use></svg>
                                 <span class="sb-text">Utilisateurs</span>
+                            </a>
+                            {#
+                                - Le seul écran qui lit par-dessus le cloisonnement : il montre ce que
+                                  TOUS les clients ont supprimé. D'où sa place ici, et nulle part ailleurs.
+                            #}
+                            <a href="{{ path('admin.corbeille.index') }}" class="nav-link {{ app.current_route starts with 'admin.corbeille' ? 'active' : '' }}" data-nav title="Corbeille">
+                                <svg class="nav-icon" aria-hidden="true"><use href="{{ asset('sprite.svg') }}#corbeille"></use></svg>
+                                <span class="sb-text">Corbeille</span>
                             </a>
                         </div>
                     {% endif %}

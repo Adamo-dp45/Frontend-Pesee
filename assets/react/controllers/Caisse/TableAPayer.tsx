@@ -4,7 +4,7 @@ import { Badge } from '@/assets/components/ui/badge'
 import { buttonVariants } from '@/assets/components/ui/button'
 import { ServerDataTable } from '../../components/server/server-data-table'
 import { entetesDepuis } from '../../components/server/server-data-table-column-header'
-import { texte } from '../../components/cellules'
+import { dateSeule, numero, texte } from '../../components/cellules'
 import { ServerMeta, ServerTableFilter, SortMeta } from '../../hooks/useServerTable'
 import { Pesee } from '../../models/pesee.model'
 
@@ -48,9 +48,7 @@ export default function TableAPayer({ items, meta, queryParams, sortMeta, sites,
                         {row.original.numticket ?? row.original.codepesee ?? '—'}
                     </a>
                     <div className="text-xs text-muted-foreground">
-                        {row.original.peseeAt2
-                            ? new Date(row.original.peseeAt2).toLocaleDateString('fr-FR', { dateStyle: 'short' })
-                            : '—'}
+                        {dateSeule(row.original.peseeAt2)}
                     </div>
                 </div>
             ),
@@ -64,7 +62,7 @@ export default function TableAPayer({ items, meta, queryParams, sortMeta, sites,
                     {/* Le motif de non-payabilité vient de l'API : mieux vaut le lire ici qu'après avoir cliqué */}
                     {row.original.fournisseur?.motifNonPayable
                         ? <div className="text-xs text-destructive">{row.original.fournisseur.motifNonPayable}</div>
-                        : <div className="text-xs text-muted-foreground">{texte(row.original.fournisseur?.contact1)}</div>}
+                        : <div className="text-xs text-muted-foreground">{numero(row.original.fournisseur?.contact1)}</div>}
                 </div>
             ),
         },

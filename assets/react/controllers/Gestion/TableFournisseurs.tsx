@@ -2,7 +2,7 @@ import * as React from 'react'
 import { ColumnDef } from '@tanstack/react-table'
 import { ServerDataTable } from '../../components/server/server-data-table'
 import { entetesDepuis } from '../../components/server/server-data-table-column-header'
-import { dateHeure, Etat, MenuActions, montant, texte } from '../../components/cellules'
+import { dateHeure, Etat, MenuActions, montant, numero, texte } from '../../components/cellules'
 import { ServerMeta, ServerTableFilter, SortMeta } from '../../hooks/useServerTable'
 import { Fournisseur } from '../../models/gestion.model'
 
@@ -60,7 +60,7 @@ export default function TableFournisseurs({ items, meta, queryParams, sortMeta, 
                 ? <span className="text-xs text-destructive">{row.original.motifNonPayable}</span>
                 : (
                     <div>
-                        <div>{texte(row.original.contact1)} {row.original.reseau && <span className="text-xs text-muted-foreground">· {row.original.reseau}</span>}</div>
+                        <div>{numero(row.original.contact1)} {row.original.reseau && <span className="text-xs text-muted-foreground">· {row.original.reseau}</span>}</div>
                         {/* Le second numéro ne sert pas au versement, mais c'est par lui qu'on joint le planteur quand le premier ne répond plus */}
                         {row.original.contact2 && <div className="text-xs text-muted-foreground">Autre : {row.original.contact2}</div>}
                     </div>

@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Journal des activités{% endblock %}
+
+{% block body %}
+    <div class="mb-6">
+        <h1 class="text-2xl font-semibold tracking-tight">Journal des activités</h1>
+        <p class="mt-1 text-sm text-muted-foreground">
+            Qui a fait quoi, quand, et sur quoi.
+        </p>
+    </div>
+
+    {#
+        - Ce que ce journal N'EST PAS, et c'est ce qui évite de le chercher pour de mauvaises raisons :
+          l'argent a le sien, le grand livre, qui porte les soldes avant et après chaque écriture.
+    #}
+    <twig:Alert variant="info" class="mb-6">
+        <twig:ux:icon name="lucide:info" class="size-4" />
+        <twig:Alert:Description>
+            Ce journal retient les décisions qui ne déplacent pas d'argent : un prix modifié, un poste
+            coupé, un compte suspendu, un référentiel supprimé. Les mouvements de caisse, eux, se
+            lisent dans <a href="{{ path('caisse.index') }}" class="underline">la caisse</a>, où chaque
+            écriture porte le solde avant et après. Rien ne s'y corrige : on ne réécrit pas un journal.
+        </twig:Alert:Description>
+    </twig:Alert>
+
+    <div {{ react_component('Exploitation/TableActivites', {
+        items: items,
+        meta: meta,
+        queryParams: queryParams,
+        sortMeta: sortMeta,
+        types: types,
+    }) }}></div>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Corbeille{% endblock %}
+
+{% block body %}
+    <div class="mb-6">
+        <h1 class="text-2xl font-semibold tracking-tight">Corbeille</h1>
+        <p class="mt-1 text-sm text-muted-foreground">
+            Produits et planteurs supprimés, tous clients confondus.
+        </p>
+    </div>
+
+    {#
+        - Dire d'emblée ce que la corbeille contient, et surtout ce qu'elle ne contient pas : quelqu'un
+          qui vient y chercher une pesée effacée par erreur doit comprendre tout de suite qu'il n'y en
+          a jamais eu, et pourquoi.
+    #}
+    <twig:Alert variant="info" class="mb-6">
+        <twig:ux:icon name="lucide:info" class="size-4" />
+        <twig:Alert:Description>
+            Seuls les <strong>produits</strong> et les <strong>planteurs</strong> passent par ici : ce
+            sont les seuls que l'application supprime. Les pesées, les paiements et les écritures de
+            caisse sont de l'historique — rien ne les efface, et rien ne peut les effacer.
+            Restaurer remet l'élément dans les écrans de son entreprise ; supprimer définitivement est
+            sans retour.
+        </twig:Alert:Description>
+    </twig:Alert>
+
+    <div class="mb-6 grid gap-4 sm:grid-cols-3">
+        {{ include('tableau_de_bord/_kpi.html.twig', {
+            titre: 'Dans la corbeille', valeur: corbeille.total|default(0), unite: '',
+            detail: 'tous clients confondus', icone: 'lucide:trash-2'
+        }) }}
+        {{ include('partials/_fait.html.twig', {
+            titre: 'Produits', icone: 'lucide:package',
+            valeur: corbeille.totaux.produit|default(0),
+            detail: 'référentiels de pesée supprimés'
+        }) }}
+        {{ include('partials/_fait.html.twig', {
+            titre: 'Planteurs', icone: 'lucide:users',
+            valeur: corbeille.totaux.fournisseur|default(0),
+            detail: 'fiches supprimées'
+        }) }}
+    </div>
+
+    {#
+        - La liste est plafonnée alors que les compteurs, eux, sont exacts. Sans ce message, un écran
+          affichant « 250 éléments » mais n'en montrant que 200 laisserait croire à une perte.
+    #}
+    {% if corbeille.tronquee|default(false) %}
+        <twig:Alert variant="warning" class="mb-6">
+            <twig:ux:icon name="lucide:triangle-alert" class="size-4" />
+            <twig:Alert:Description>
+                La corbeille contient plus d'éléments que cette page n'en affiche. Filtrez par client
+                ou par type pour atteindre les autres.
+            </twig:Alert:Description>
+        </twig:Alert>
+    {% endif %}
+
+    <div {{ react_component('Admin/TableCorbeille', {
+        items: items,
+        meta: meta,
+        queryParams: queryParams,
+        entreprises: entreprises,
+        jeton: csrf_token('gestion'),
+    }) }}></div>
+{% endblock %}

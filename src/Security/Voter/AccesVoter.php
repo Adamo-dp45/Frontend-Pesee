@@ -55,6 +55,7 @@ final class AccesVoter extends Voter
             'MouvementCaisse' => [self::VOIR],
             'DemandeSolde' => [self::VOIR, self::TRAITER],
             'SynchronisationLot' => [self::VOIR],
+            'Activite' => [self::VOIR], // Le journal des decisions : une lecture de supervision
         ],
         'ROLE_AGENT' => [
             'Entreprise' => [self::VOIR],
@@ -67,6 +68,7 @@ final class AccesVoter extends Voter
             'MouvementCaisse' => [self::VOIR],
             'DemandeSolde' => [self::VOIR],
             'SynchronisationLot' => [self::VOIR],
+            'Activite' => [self::VOIR],
         ],
         'ROLE_OPERATEUR' => [
             'Site' => [self::VOIR],

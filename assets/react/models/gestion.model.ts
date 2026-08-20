@@ -165,3 +165,43 @@ export interface SynchronisationLot {
     dureeMs: number | null
     createdAt: string
 }
+
+/*
+    - Une ligne du journal des décisions. 'libelle' est une PHRASE composée au moment du geste, et non
+      un gabarit rejoué à l'affichage : elle reste lisible même si le produit qu'elle nomme a été
+      renommé ou purgé depuis. C'est tout l'intérêt d'un journal.
+    - 'cibleType' et 'cibleId' ne sont pas une relation : ils survivent volontairement à la
+      disparition de ce qu'ils désignent.
+*/
+export interface Activite {
+    id: number
+    type: string
+    typeLibelle: string | null
+    libelle: string
+    cibleType: string | null
+    cibleId: number | null
+    auteurNom: string | null
+    createdAt: string
+}
+
+/*
+    - Une ligne de la corbeille. Ce n'est pas l'entité supprimée : c'est ce qu'il faut savoir pour
+      décider de son sort. Les deux motifs disent POURQUOI un geste est impossible — un bouton grisé
+      sans explication n'aide personne.
+*/
+export interface ElementCorbeille {
+    type: string
+    typeLibelle: string
+    id: number
+    libelle: string
+    contexte: string | null
+    entreprise: string | null
+    entrepriseId: number | null
+    supprimeLe: string | null
+    supprimePar: string | null
+    peseesCount: number
+    purgeable: boolean
+    motifNonPurgeable: string | null
+    restaurable: boolean
+    motifNonRestaurable: string | null
+}

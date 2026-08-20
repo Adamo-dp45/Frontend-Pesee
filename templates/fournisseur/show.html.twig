@@ -34,8 +34,8 @@
                 {{ include('partials/_donnee.html.twig', { libelle: 'Nom', valeur: fournisseur.nom }) }}
                 {{ include('partials/_donnee.html.twig', { libelle: 'Prénom', valeur: fournisseur.prenom }) }}
                 {{ include('partials/_donnee.html.twig', { libelle: 'Code du poste', valeur: fournisseur.codefournisseur }) }}
-                {{ include('partials/_donnee.html.twig', { libelle: 'Téléphone mobile money', valeur: fournisseur.contact1 }) }}
-                {{ include('partials/_donnee.html.twig', { libelle: 'Autre téléphone', valeur: fournisseur.contact2 }) }}
+                {{ include('partials/_donnee.html.twig', { libelle: 'Téléphone mobile money', valeur: fournisseur.contact1|numero }) }}
+                {{ include('partials/_donnee.html.twig', { libelle: 'Autre téléphone', valeur: fournisseur.contact2|numero }) }}
                 {{ include('partials/_donnee.html.twig', { libelle: 'Réseau mobile', valeur: fournisseur.reseau }) }}
                 {{ include('partials/_donnee.html.twig', {
                     libelle: 'Prix spécial au kilo',

@@ -42,7 +42,7 @@ class FournisseurFormType extends AbstractType
             ])
             ->add('contact1', TextType::class, [
                 'label' => 'Numéro mobile money',
-                'help' => 'C\'est sur ce numéro que part le versement.',
+                'help' => 'C\'est sur ce numéro que part le versement. Dix chiffres, par exemple 07 01 02 03 04.',
                 'required' => false,
                 'constraints' => [new Length(max: 30)],
             ])

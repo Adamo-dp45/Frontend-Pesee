@@ -43,6 +43,31 @@
         }) }}
     </div>
 
+    {#
+        - Le témoin de la réconciliation. Elle est planifiée côté serveur, donc elle peut s'arrêter
+          sans que personne ne l'apprenne : les versements resteraient en vol et les caisses
+          amputées jusqu'à ce qu'un opérateur se plaigne de ne plus pouvoir payer.
+        - Le seuil est large exprès. Un versement met quelques minutes à se confirmer ; au-delà
+          d'une demi-heure, ce n'est plus de la lenteur.
+        - Le message ne désigne pas UN coupable : l'agrégateur peut tarder sans que rien ne soit
+          cassé chez nous. Il dit quoi regarder, et dans quel ordre.
+    #}
+    {% set attente = caisse.attenteMinutes|default(null) %}
+    {% if attente is not null and attente >= 30 %}
+        <twig:Alert variant="warning" class="mb-6">
+            <twig:ux:icon name="lucide:triangle-alert" class="size-4" />
+            <twig:Alert:Title>Des versements attendent depuis trop longtemps</twig:Alert:Title>
+            <twig:Alert:Description>
+                {{ caisse.versementsEnVol|default(0) }} versement{{ caisse.versementsEnVol|default(0) > 1 ? 's' : '' }}
+                {{ caisse.versementsEnVol|default(0) > 1 ? 'sont' : 'est' }} en cours chez l'opérateur mobile,
+                le plus ancien depuis {{ attente >= 120 ? (attente // 60) ~ ' heures' : attente ~ ' minutes' }}.
+                Les sommes correspondantes ont quitté les caisses sans être confirmées. Faites vérifier
+                que la réconciliation tourne toujours sur le serveur ; si c'est le cas, c'est l'opérateur
+                mobile qui tarde à répondre.
+            </twig:Alert:Description>
+        </twig:Alert>
+    {% endif %}
+
     <twig:Card class="mb-6">
         <twig:Card:Header>
             <twig:Card:Title>Caisse de chaque pont bascule</twig:Card:Title>

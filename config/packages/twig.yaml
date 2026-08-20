@@ -1,5 +1,9 @@
 twig:
     file_name_pattern: '*.twig'
+    # Sans cette ligne, Twig suit 'date_default_timezone_get()'. Le noyau le pose déjà à UTC,
+    # mais l'écrire ici rend la règle visible là où on la cherche — et la met à l'abri d'un php.ini.
+    date:
+        timezone: UTC
     form_themes: ['form/form_theme.html.twig']
     globals:
         api_url: '%env(ENDPOINT)%'
