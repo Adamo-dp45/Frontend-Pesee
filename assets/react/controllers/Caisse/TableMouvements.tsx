@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { ColumnDef } from '@tanstack/react-table'
 import { ArrowDownLeft, ArrowUpRight } from 'lucide-react'
+import { Badge } from '@/assets/components/ui/badge'
 import { ServerDataTable } from '../../components/server/server-data-table'
 import { entetesDepuis } from '../../components/server/server-data-table-column-header'
 import { dateHeure, montant, texte } from '../../components/cellules'
@@ -57,6 +58,15 @@ export default function TableMouvements({ items, meta, queryParams, sortMeta, si
                         {row.original.site?.code && <div className="font-mono text-xs text-muted-foreground">{row.original.site.code}</div>}
                     </div>
                 ),
+        },
+        {
+            id: 'caisse',
+            header: 'Caisse',
+            /* Sans cette colonne, deux chaînes de soldes s'entrelacent dans la liste et le chaînage
+               « avant → après » paraît rompu à chaque alternance. */
+            cell: ({ row }) => (
+                <Badge variant="outline">{row.original.caisseLibelle ?? row.original.caisse}</Badge>
+            ),
         },
         {
             id: 'type',
@@ -116,6 +126,16 @@ export default function TableMouvements({ items, meta, queryParams, sortMeta, si
             options: [
                 { label: 'Entreprise', value: 'ENTREPRISE' },
                 { label: 'Ponts bascules', value: 'SITE' },
+            ],
+        },
+        {
+            /* Lire le journal d'une seule caisse : c'est ainsi qu'on vérifie que sa chaîne de soldes se tient. */
+            type: 'select',
+            name: 'caisse',
+            label: 'Les deux caisses',
+            options: [
+                { label: 'Espèces', value: 'PHYSIQUE' },
+                { label: 'Flotte mobile money', value: 'NUMERIQUE' },
             ],
         },
         {

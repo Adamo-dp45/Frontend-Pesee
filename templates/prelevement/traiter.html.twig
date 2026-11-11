@@ -1,0 +1,79 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Traiter la demande{% endblock %}
+
+{% block body %}
+    <div class="max-w-2xl">
+        <div class="mb-6">
+            <a href="{{ path('prelevement.index') }}" class="text-sm text-muted-foreground underline-offset-4 hover:underline">
+                ← Retour aux mises en compte
+            </a>
+            <h1 class="mt-2 text-2xl font-semibold tracking-tight">Traiter la demande</h1>
+            <p class="mt-1 text-sm text-muted-foreground">
+                {{ demande.fournisseur.nomComplet ?? 'Planteur inconnu' }} ·
+                {{ demande.site.libellesite ?? 'Pont bascule inconnu' }} ·
+                demandée le {{ demande.createdAt|date('d/m/Y à H:i') }}
+            </p>
+        </div>
+
+        {#
+            - Ce qu'il faut avoir sous les yeux pour décider : le taux réclamé, et ce qu'il
+              représente concrètement sur une livraison ordinaire. Un chiffre par kilo ne parle à
+              personne tant qu'on ne l'a pas multiplié.
+        #}
+        <twig:Card class="mb-4">
+            <twig:Card:Header>
+                <twig:Card:Title>Ce qui est demandé</twig:Card:Title>
+            </twig:Card:Header>
+            <twig:Card:Content class="grid gap-3 sm:grid-cols-2">
+                {{ include('partials/_donnee.html.twig', {
+                    libelle: 'Prélèvement par kilo',
+                    valeur: demande.tauxDemande|number_format(0, ',', ' ') ~ ' F'
+                }) }}
+                {{ include('partials/_donnee.html.twig', {
+                    libelle: 'Sur une pesée de 1 000 kg',
+                    valeur: (demande.tauxDemande * 1000)|number_format(0, ',', ' ') ~ ' F mis de côté'
+                }) }}
+                {{ include('partials/_donnee.html.twig', { libelle: 'Demandée par', valeur: demande.demandePar.nomComplet ?? null }) }}
+                {{ include('partials/_donnee.html.twig', { libelle: 'Épargne actuelle', valeur: (demande.fournisseur.soldeEpargne|default(0))|number_format(0, ',', ' ') ~ ' F' }) }}
+            </twig:Card:Content>
+            {% if demande.motif %}
+                <twig:Card:Footer>
+                    <p class="text-sm text-muted-foreground">{{ demande.motif }}</p>
+                </twig:Card:Footer>
+            {% endif %}
+        </twig:Card>
+
+        {#
+            - Ce que l'approbation fait, et surtout ce qu'elle ne fait PAS. Contrairement à une
+              demande de solde, aucun argent ne bouge : personne ne doit attendre un mouvement de
+              caisse qui ne viendra jamais.
+        #}
+        <twig:Alert class="mb-4">
+            <twig:ux:icon name="lucide:info" class="size-4" />
+            <twig:Alert:Description>
+                Approuver n'écrit aucun mouvement de caisse : le prélèvement s'appliquera aux
+                pesées <strong>à venir</strong> de ce planteur, une à une. Le taux ne se corrige pas
+                ici — il vient du planteur.
+            </twig:Alert:Description>
+        </twig:Alert>
+
+        <twig:Card>
+            <twig:Card:Content class="pt-6">
+                {{ form_start(form) }}
+                    {{ form_errors(form) }}
+
+                    <div class="grid gap-4">
+                        {{ form_row(form.decision) }}
+                        {{ form_row(form.motifRejet) }}
+                    </div>
+
+                    <div class="mt-6 flex items-center justify-end gap-3 border-t border-border pt-4">
+                        <a href="{{ path('prelevement.index') }}" class="btn btn-secondary">Annuler</a>
+                        <button class="btn btn-primary">Enregistrer la décision</button>
+                    </div>
+                {{ form_end(form) }}
+            </twig:Card:Content>
+        </twig:Card>
+    </div>
+{% endblock %}

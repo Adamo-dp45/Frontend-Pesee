@@ -54,6 +54,95 @@
             {% endif %}
         </twig:Card>
 
+        {#
+            - La mise en compte. Elle décide de ce que le planteur touche au guichet, elle mérite
+              donc sa propre carte — pas une ligne perdue au milieu de son numéro de téléphone.
+            - Le solde et le taux disent deux choses différentes : ce qu'on lui garde, et si on
+              continue d'en mettre de côté. Un compte peut être plein alors que le prélèvement est
+              arrêté depuis des mois.
+        #}
+        <twig:Card class="mb-4">
+            <twig:Card:Header>
+                <twig:Card:Title>Compte d'épargne</twig:Card:Title>
+                <twig:Card:Description>
+                    Une part de chaque pesée est mise de côté au lieu d'être remise au guichet.
+                    Elle n'est dans aucune caisse : c'est l'entreprise qui la doit au planteur.
+                </twig:Card:Description>
+            </twig:Card:Header>
+            <twig:Card:Content class="grid gap-3 sm:grid-cols-2">
+                {{ include('partials/_donnee.html.twig', {
+                    libelle: 'Épargne constituée',
+                    valeur: (fournisseur.soldeEpargne|default(0))|number_format(0, ',', ' ') ~ ' F'
+                }) }}
+                {{ include('partials/_donnee.html.twig', {
+                    libelle: 'Prélèvement en cours',
+                    valeur: fournisseur.tauxEpargne ? fournisseur.tauxEpargne|number_format(0, ',', ' ') ~ ' F par kilo' : null
+                }) }}
+            </twig:Card:Content>
+
+            {% if preleveur %}
+                <twig:Card:Footer class="flex-col items-stretch gap-3">
+                    {#
+                        - Un seul formulaire pour ouvrir, changer et arrêter : c'est le même geste,
+                          et trois boutons auraient laissé croire à trois décisions différentes.
+                        - Laisser le champ vide arrête le prélèvement. Ce qui est déjà mis de côté
+                          ne bouge pas — le dire ici évite qu'on n'ose pas appuyer.
+                    #}
+                    <form method="post" action="{{ path('fournisseur.epargne', { id: fournisseur.id }) }}" class="flex flex-wrap items-end gap-3">
+                        <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('gestion') }}">
+                        <div class="grid gap-1.5">
+                            <label for="taux-epargne" class="text-sm font-medium">Prélèvement par kilo (F CFA)</label>
+                            <input id="taux-epargne" name="taux" type="number" min="0" step="1"
+                                   value="{{ fournisseur.tauxEpargne ?? '' }}"
+                                   placeholder="Vide pour arrêter"
+                                   class="flex h-9 w-56 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50">
+                        </div>
+                        <button class="btn btn-primary">Enregistrer</button>
+                    </form>
+                    <p class="text-xs text-muted-foreground">
+                        Un champ vide arrête le prélèvement. L'épargne déjà constituée reste au
+                        planteur, et le nouveau taux ne s'applique qu'aux pesées à venir.
+                    </p>
+                </twig:Card:Footer>
+            {% endif %}
+        </twig:Card>
+
+        {% if mouvements|default([]) is not empty %}
+            <twig:Card class="mb-4">
+                <twig:Card:Header>
+                    <twig:Card:Title>Mouvements de l'épargne</twig:Card:Title>
+                    <twig:Card:Description>
+                        Chaque ligne porte le solde avant et après : deux lignes qui se suivent
+                        doivent se chaîner.
+                    </twig:Card:Description>
+                </twig:Card:Header>
+                <twig:Card:Content class="p-0">
+                    <div class="overflow-x-auto">
+                        <twig:Table>
+                            <twig:Table:Header>
+                                <twig:Table:Row>
+                                    <twig:Table:Head>Date</twig:Table:Head>
+                                    <twig:Table:Head>Motif</twig:Table:Head>
+                                    <twig:Table:Head class="text-right">Montant</twig:Table:Head>
+                                    <twig:Table:Head class="text-right">Solde après</twig:Table:Head>
+                                </twig:Table:Row>
+                            </twig:Table:Header>
+                            <twig:Table:Body>
+                                {% for mouvement in mouvements %}
+                                    <twig:Table:Row>
+                                        <twig:Table:Cell>{{ mouvement.createdAt ? mouvement.createdAt|date('d/m/Y') : '—' }}</twig:Table:Cell>
+                                        <twig:Table:Cell>{{ mouvement.motif ?? mouvement.typeLibelle ?? '—' }}</twig:Table:Cell>
+                                        <twig:Table:Cell class="text-right tabular-nums">+ {{ mouvement.montant|number_format(0, ',', ' ') }} F</twig:Table:Cell>
+                                        <twig:Table:Cell class="text-right tabular-nums font-medium">{{ mouvement.soldeApres|number_format(0, ',', ' ') }} F</twig:Table:Cell>
+                                    </twig:Table:Row>
+                                {% endfor %}
+                            </twig:Table:Body>
+                        </twig:Table>
+                    </div>
+                </twig:Card:Content>
+            </twig:Card>
+        {% endif %}
+
         {# Ce qu'on vient vraiment vérifier sur la fiche d'un planteur : ce qu'il a livré. #}
         <twig:Card>
             <twig:Card:Header>

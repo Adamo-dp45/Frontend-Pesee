@@ -77,6 +77,7 @@ final class DemandeSoldeController extends GestionController
     {
         $form = $this->createForm(DemandeSoldeFormType::class, null, [
             'sites' => $this->options($this->api->collection('/api/sites', ['itemsPerPage' => 100]), 'libellesite'),
+            'caisses' => self::CAISSES,
             'creation' => true,
         ]);
         $form->handleRequest($request);
@@ -118,8 +119,10 @@ final class DemandeSoldeController extends GestionController
 
         $form = $this->createForm(DemandeSoldeFormType::class, [
             'montantDemande' => $demande['montantDemande'] ?? 0,
+            // La caisse se corrige comme le montant : on se trompe de caisse aussi facilement que de chiffre
+            'caisse' => $demande['caisse'] ?? null,
             'motif' => $demande['motif'] ?? null,
-        ]);
+        ], ['caisses' => self::CAISSES]);
         $form->handleRequest($request);
 
         if($form->isSubmitted() && $form->isValid()) {

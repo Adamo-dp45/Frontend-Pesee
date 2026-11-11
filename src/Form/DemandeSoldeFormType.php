@@ -31,6 +31,19 @@ class DemandeSoldeFormType extends AbstractType
         }
 
         $builder
+            /*
+                - La caisse AVANT le montant : « il me manque 200 000 » ne veut pas dire la même
+                  chose selon qu'il s'agit de billets ou de flotte, et l'administrateur dote
+                  exactement celle qu'on lui désigne. Une demande muette sur ce point l'obligeait à
+                  deviner, ou à doter les deux.
+            */
+            ->add('caisse', ChoiceType::class, [
+                'label' => 'Caisse à réapprovisionner',
+                'help' => 'Celle qui est à sec. Être à court de billets pendant que le flotte déborde est courant.',
+                'choices' => array_flip($options['caisses']),
+                'placeholder' => '— Choisir une caisse —',
+                'constraints' => [new NotNull(message: 'La caisse à réapprovisionner est obligatoire')],
+            ])
             ->add('montantDemande', IntegerType::class, [
                 'label' => 'Montant demandé (F CFA)',
                 'constraints' => [
@@ -54,6 +67,7 @@ class DemandeSoldeFormType extends AbstractType
             'csrf_field_name' => '_token',
             'csrf_token_id' => 'demande',
             'sites' => [],
+            'caisses' => [],
             'creation' => false,
         ]);
     }

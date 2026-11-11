@@ -1,6 +1,6 @@
 /* La forme d'une pesée telle que l'API la renvoie sur '/api/operations'. */
 
-export type StatutReglement = 'NON_PAYE' | 'PARTIEL' | 'SOLDE'
+export type StatutReglement = 'NON_PAYE' | 'PARTIEL' | 'SOLDE' | 'RETENU'
 
 export interface Pesee {
     id: number
@@ -29,6 +29,23 @@ export interface Pesee {
     poidsnet: number | null
     prixunitaire: number | null
     montantdu: number | null
+    /* Ce qui part sur l'épargne du planteur, et le taux au kilo qui l'a produit. Nuls tant que la
+       pesée n'a pas été arbitrée ; zéro quand elle l'a été sans prélèvement. */
+    retenue: number | null
+    tauxRetenue: number | null
+    /* Ce qu'on remettra vraiment au planteur au guichet : montant dû moins retenue. C'est LUI qui
+       borne un versement — 'montantdu' reste ce que la pesée vaut, et ne bouge jamais. */
+    montantpayable: number | null
+    /* Le seul montant CONFIRMÉ par la passerelle. Tant qu'un versement est en vol, il ne bouge pas. */
     montantpaye: number | null
+    /* Ce qui a quitté la caisse sans réponse de la passerelle, et 'resteaengager' ce que l'API
+       acceptera encore. Sans ces deux-là, une pesée qu'on vient de payer affiche le même reste
+       qu'avant le versement, et on la repaie. */
+    montantenvol: number | null
+    resteaengager: number | null
     statutReglement: StatutReglement | null
+    /* Ce qui empêche de verser sur CETTE pesée, planteur compris : produit jamais tarifé, pesée déjà
+       soldée, camion encore sur le pont. Calculé par l'API, qui refusera le versement pour la même
+       raison — l'écran ne redécide rien, il dit à l'avance ce que le serveur répondrait. */
+    motifNonPayable: string | null
 }

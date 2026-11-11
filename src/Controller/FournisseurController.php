@@ -112,7 +112,46 @@ final class FournisseurController extends GestionController
             ]),
             'modifiable' => $this->isGranted('FOURNISSEUR_MODIFIER'),
             'supprimable' => $this->isGranted('FOURNISSEUR_SUPPRIMER'),
+            // La mise en compte : l'administrateur l'ouvre et l'arrête, l'opérateur la demande
+            'preleveur' => $this->isGranted('FOURNISSEUR_PRELEVER'),
+            'mouvements' => $this->api->collection('/api/mouvement_epargnes', [
+                'compte.fournisseur' => $id,
+                'itemsPerPage' => 10,
+                'order[createdAt]' => 'desc',
+            ]),
         ]);
+    }
+
+    /*
+        - Ouvrir ou arrêter la mise en compte d'un planteur. Un taux vide arrête le prélèvement : ce
+          qui a déjà été mis de côté reste au planteur, seul le robinet se ferme.
+        - Réservé à l'administrateur. L'opérateur, lui, passe par une demande — il a le planteur
+          devant lui, mais décider de ce qu'un homme touche au guichet n'est pas son geste.
+    */
+    #[IsGranted('FOURNISSEUR_PRELEVER')]
+    #[Route('/{id<\d+>}/epargne', name: 'epargne', methods: ['POST'])]
+    public function epargne(int $id, Request $request): Response
+    {
+        if(!$this->jetonValide($request)) {
+            $this->addFlash('danger', self::JETON_INVALIDE);
+
+            return $this->redirectToRoute('fournisseur.show', ['id' => $id]);
+        }
+
+        $saisie = trim((string) $request->request->get('taux'));
+        $taux = $saisie === '' ? null : (int) $saisie;
+
+        try {
+            $this->api->patch('/api/fournisseurs/' . $id . '/epargne', ['taux' => $taux]);
+
+            $this->addFlash('success', $taux === null
+                ? 'Mise en compte arrêtée. L\'épargne déjà constituée reste au planteur.'
+                : sprintf('Mise en compte fixée à %d F par kilo. Elle s\'appliquera aux pesées à venir.', $taux));
+        } catch(ApiException $e) {
+            $this->addFlash('danger', $e->getMessage());
+        }
+
+        return $this->redirectToRoute('fournisseur.show', ['id' => $id]);
     }
 
     #[IsGranted('FOURNISSEUR_MODIFIER')]

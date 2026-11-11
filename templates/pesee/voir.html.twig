@@ -4,6 +4,8 @@
 
 {% set enCours = pesee.statut == 'EN_COURS' %}
 {% set reste = pesee.resteapayer|default((pesee.montantdu|default(0)) - (pesee.montantpaye|default(0))) %}
+{# La part mise sur l'épargne du planteur : sans elle, « dû moins versé » ne tombe plus sur « reste à payer », et l'écran paraît faux #}
+{% set retenue = pesee.retenue|default(0) %}
 
 {% block body %}
     <div class="max-w-4xl">
@@ -48,7 +50,10 @@
             }) }}
             {{ include('tableau_de_bord/_kpi.html.twig', {
                 titre: 'Montant dû', valeur: pesee.montantdu|default(0), unite: 'F',
-                detail: (pesee.prixunitaire|default(0))|number_format(0, ',', ' ') ~ ' F le kilo', icone: 'lucide:banknote'
+                detail: retenue > 0
+                    ? 'dont ' ~ retenue|number_format(0, ',', ' ') ~ ' F mis en compte'
+                    : (pesee.prixunitaire|default(0))|number_format(0, ',', ' ') ~ ' F le kilo',
+                icone: 'lucide:banknote'
             }) }}
             {#
                 - « Versé » ne compte que les versements confirmés. Ceux qui sont encore en vol
@@ -71,12 +76,27 @@
             }) }}
         </div>
 
-        {% if payable and not enCours and reste > 0 %}
+        {#
+            - 'payable' est un DROIT, pas un état : il dit que l'utilisateur peut verser, pas que
+              cette pesée se laisse verser. L'état, c'est 'motifNonPayable', calculé par l'API —
+              celle-là même qui refuserait le versement, et avec la même phrase.
+            - Le motif s'affiche plutôt que de faire disparaître le bouton : une pesée sans prix et
+              une pesée soldée se ressemblaient à l'écran, toutes deux sans rien à cliquer.
+        #}
+        {% if payable and not enCours %}
             <div class="mb-6">
-                <twig:Button as="a" href="{{ path('paiement.new', { operation: pesee.id }) }}">
-                    <twig:ux:icon name="lucide:send" class="size-4" />
-                    Verser au planteur
-                </twig:Button>
+                {% if pesee.motifNonPayable %}
+                    <twig:Alert variant="warning">
+                        <twig:ux:icon name="lucide:info" class="size-4" />
+                        <twig:Alert:Title>Versement impossible</twig:Alert:Title>
+                        <twig:Alert:Description>{{ pesee.motifNonPayable }}</twig:Alert:Description>
+                    </twig:Alert>
+                {% else %}
+                    <twig:Button as="a" href="{{ path('paiement.new', { operation: pesee.id }) }}">
+                        <twig:ux:icon name="lucide:send" class="size-4" />
+                        Verser au planteur
+                    </twig:Button>
+                {% endif %}
             </div>
         {% endif %}
 

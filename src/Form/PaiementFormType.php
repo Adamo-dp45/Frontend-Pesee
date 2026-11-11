@@ -9,7 +9,6 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\NotNull;
 use Symfony\Component\Validator\Constraints\Positive;
 
@@ -26,6 +25,23 @@ class PaiementFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            /*
+                - Le mode EN PREMIER : il décide de la caisse qui se vide et de tout ce qui suit.
+                  Les espèces sont proposées en tête parce que c'est le geste le plus simple — rien
+                  à joindre, rien à attendre — et parce que c'est le seul recours pour un planteur
+                  sans téléphone.
+                - L'attribut 'data-mode-reglement' est lu par 'modules/mode_reglement.js' : il
+                  masque les deux champs mobiles quand on choisit les espèces. Le formulaire reste
+                  valable sans JavaScript, les champs sont alors simplement visibles et ignorés par
+                  l'API.
+            */
+            ->add('modeReglement', ChoiceType::class, [
+                'label' => 'Mode de règlement',
+                'choices' => array_flip($options['modes']),
+                'placeholder' => false,
+                'constraints' => [new NotNull(message: 'Le mode de règlement est obligatoire')],
+                'attr' => ['data-mode-reglement' => 'mode'],
+            ])
             ->add('montant', IntegerType::class, [
                 'label' => 'Montant à verser (F CFA)',
                 'help' => 'Un planteur peut être payé en plusieurs fois : la pesée passe alors de « non payée » à « partielle », puis « soldée ».',
@@ -34,19 +50,25 @@ class PaiementFormType extends AbstractType
                     new Positive(message: 'Le montant doit être supérieur à zéro'),
                 ],
             ])
+            /*
+                - Les deux champs qui suivent ne servent qu'au MOBILE MONEY. Ils ne sont donc plus
+                  obligatoires au niveau du formulaire : exiger un numéro pour remettre des billets
+                  à quelqu'un qui est devant soi n'aurait servi qu'à rendre le mode espèces
+                  inutilisable.
+                - C'est le CONTRÔLEUR qui les exige quand le mode choisi est mobile : la règle vit à
+                  un seul endroit, et l'erreur se pose sous le champ concerné plutôt qu'en bandeau.
+            */
             ->add('numeroDestinataire', TextType::class, [
                 'label' => 'Numéro mobile money',
                 'help' => 'Celui du planteur, pré-rempli. Vérifiez-le avec lui avant d\'engager.',
-                'constraints' => [
-                    new NotBlank(message: 'Le numéro du destinataire est obligatoire'),
-                    new Length(max: 30),
-                ],
+                'required' => false,
+                'constraints' => [new Length(max: 30)],
             ])
             ->add('reseau', ChoiceType::class, [
                 'label' => 'Réseau',
                 'choices' => array_combine($options['reseaux'], $options['reseaux']),
                 'placeholder' => '— Choisir un réseau —',
-                'constraints' => [new NotNull(message: 'Le réseau est obligatoire : sans lui, la passerelle ne sait pas où envoyer l\'argent')],
+                'required' => false,
             ])
         ;
     }
@@ -58,6 +80,7 @@ class PaiementFormType extends AbstractType
             'csrf_field_name' => '_token',
             'csrf_token_id' => 'paiement',
             'reseaux' => [],
+            'modes' => [],
         ]);
     }
 }

@@ -8,6 +8,7 @@ use App\Domain\Helper\TableHelper;
 use App\Domain\Service\ExportService;
 use App\Form\PaiementFormType;
 use App\Security\Exception\ApiException;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -80,19 +81,41 @@ final class PaiementController extends GestionController
         */
         $form = $this->createForm(PaiementFormType::class, [
             /*
-                - Le reste se calcule sur les versements CONFIRMÉS, les seuls que l'API expose ici. Ceux qui sont en vol n'y figurent pas : l'API les décomptera et refusera un montant trop élevé même s'il semble tenir à l'écran. C'est voulu — on ne peut pas engager deux fois la même somme.
+                - 'resteaengager' et non « dû moins versé » : l'API décompte aussi ce qui est en vol chez la passerelle, et refuse au-delà. Pré-remplir avec la créance entière proposait donc un montant qu'elle allait rejeter dès qu'un versement était en cours — l'opérateur validait, et découvrait le plafond dans un message d'erreur.
             */
-            'montant' => max(0, ($pesee['montantdu'] ?? 0) - ($pesee['montantpaye'] ?? 0)),
+            'montant' => $pesee['resteaengager'] ?? max(0, ($pesee['montantdu'] ?? 0) - ($pesee['montantpaye'] ?? 0)),
+            /*
+                - Le mode proposé est celui que le planteur permet : s'il n'a pas de numéro exploitable, le mobile money lui est fermé et c'est l'espèce qui s'offre d'emblée. Proposer un mode qui va être refusé fait perdre un aller-retour, planteur devant soi.
+            */
+            'modeReglement' => ($pesee['fournisseur']['motifNonPayable'] ?? null) === null ? 'MOBILE_MONEY' : 'ESPECES',
             'numeroDestinataire' => $pesee['fournisseur']['contact1'] ?? null,
             'reseau' => $pesee['fournisseur']['reseau'] ?? null,
-        ], ['reseaux' => self::RESEAUX]);
+        ], ['reseaux' => self::RESEAUX, 'modes' => self::MODES_REGLEMENT]);
         $form->handleRequest($request);
+
+        $mobile = ($form->getData()['modeReglement'] ?? null) === 'MOBILE_MONEY';
+
+        /*
+            - Les deux champs mobiles ne sont obligatoires QUE pour le mobile money : le formulaire ne sait pas l'exprimer seul, et l'exiger de tous aurait rendu les espèces inutilisables. L'erreur se pose sous le champ concerné plutôt que dans un bandeau — c'est là que l'opérateur regarde.
+            - Posées AVANT le test de validité, sinon un formulaire déjà jugé valide partirait quand même à l'API.
+        */
+        if($form->isSubmitted() && $mobile) {
+            if(($form->getData()['numeroDestinataire'] ?? '') === '') {
+                $form->get('numeroDestinataire')->addError(new FormError('Le numéro du destinataire est obligatoire pour un versement mobile money'));
+            }
+
+            if(($form->getData()['reseau'] ?? null) === null) {
+                $form->get('reseau')->addError(new FormError('Le réseau est obligatoire : sans lui, la passerelle ne sait pas où envoyer l\'argent'));
+            }
+        }
 
         if($form->isSubmitted() && $form->isValid()) {
             try {
                 $this->api->post('/api/paiements', $form->getData() + ['operationId' => $operation]);
 
-                $this->addFlash('success', 'Versement engagé. Il sera confirmé par la passerelle.');
+                $this->addFlash('success', $mobile
+                    ? 'Versement engagé. Il sera confirmé par la passerelle.'
+                    : 'Versement enregistré. Les espèces ont quitté la caisse du poste.');
 
                 return $this->redirectToRoute('paiement.index');
             } catch(ApiException $e) {

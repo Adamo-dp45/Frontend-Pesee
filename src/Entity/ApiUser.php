@@ -76,8 +76,34 @@ class ApiUser implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /*
+        - Ce que ce compte a le droit de faire, tel que l'API le lui a dit : '/api/me' renvoie la
+          liste à plat ('SITE_VOIR', 'PRODUIT_MODIFIER'…), et elle voyage en session avec le reste
+          du profil. 'AccesVoter' ne fait que la consulter.
+        - Rien ne se déduit du rôle ici. C'est la table de 'App\Security\Droits' côté API qui
+          tranche, et elle n'existe qu'à un seul endroit.
+        - Une session ouverte avant cette bascule n'a pas la clé : la liste est vide, les boutons
+          disparaissent, une reconnexion suffit.
+    */
+    /** @return list<string> */
+    public function getDroits(): array
+    {
+        return $this->data['droits'] ?? [];
+    }
+
+    /*
+        - Les rôles que ce compte peut attribuer, libellés compris. La règle — un agent n'encadre
+          que des opérateurs — vit dans le garde de l'API, qui refuse aussi à l'enregistrement.
+          Elle était recopiée ici, et une liste trop large n'échoue qu'après la saisie.
+    */
+    /** @return array<string, string> */
+    public function getRolesAttribuables(): array
+    {
+        return $this->data['rolesAttribuables'] ?? [];
+    }
+
+    /*
         - Qui est ce compte, et rien de plus. Ce qu'il a le DROIT de faire se demande à
-          'AccesVoter' — 'is_granted('PRODUIT_MODIFIER')' — qui recopie la table de l'API.
+          'AccesVoter' — 'is_granted('PRODUIT_MODIFIER')' — qui lit la liste ci-dessus.
 
         - Ces méthodes servaient aussi à répondre « peut-il tarifer ? », « peut-il encaisser ? ».
           Elles énuméraient les rôles à la main, à côté de la table de l'API, et c'est ainsi qu'un
@@ -103,18 +129,14 @@ class ApiUser implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->aLeRole(self::SUPER_ADMIN);
     }
 
-    /**
-     * Le libellé du rôle, pour l'afficher sous le nom dans la barre latérale.
-     */
+    /*
+        - Le libellé du rôle, pour l'afficher sous le nom dans la barre latérale. Il vient de
+          l'API, qui le publie sous 'roleLibelle' : la correspondance rôle → libellé était recopiée
+          ici, et renommer un rôle demandait de le faire des deux côtés.
+    */
     public function getLibelleRole(): string
     {
-        return match (true) {
-            $this->aLeRole(self::SUPER_ADMIN) => 'Super administrateur',
-            $this->aLeRole(self::ADMIN) => 'Administrateur',
-            $this->aLeRole(self::AGENT) => 'Agent',
-            $this->aLeRole(self::OPERATEUR) => 'Opérateur',
-            default => 'Utilisateur',
-        };
+        return $this->data['roleLibelle'] ?? 'Utilisateur';
     }
 
     public function getUserIdentifier(): string

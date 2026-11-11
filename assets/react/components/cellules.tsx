@@ -77,6 +77,7 @@ const ETATS: Record<string, { libelle: string; variant: Variante }> = {
     ANNULEE: { libelle: 'Annulée', variant: 'outline' },
     NON_PAYE: { libelle: 'Non payée', variant: 'outline' },
     PARTIEL: { libelle: 'Partielle', variant: 'secondary' },
+    RETENU: { libelle: 'Retenue', variant: 'secondary' }, // Tout est parti sur l'épargne : rien à verser au guichet
     SOLDE: { libelle: 'Soldée', variant: 'default' },
 }
 

@@ -56,12 +56,22 @@
             <td class="valeur">{{ paiement.fournisseur.nomComplet ?? '—' }}</td>
         </tr>
         <tr>
-            <td class="cle">Numéro mobile money</td>
-            <td class="valeur">
-                {{ paiement.numeroDestinataire ?? '—' }}
-                {% if paiement.reseau %} ({{ paiement.reseau }}){% endif %}
-            </td>
+            <td class="cle">Mode de règlement</td>
+            <td class="valeur">{{ paiement.modeReglementLibelle ?? paiement.modeReglement ?? '—' }}</td>
         </tr>
+        {#
+            - Le numéro n'apparaît que s'il y en a un. Un reçu d'espèces affichait « Numéro mobile
+              money : — », ce qui fait douter le planteur de ce qu'il vient de recevoir.
+        #}
+        {% if paiement.numeroDestinataire %}
+            <tr>
+                <td class="cle">Numéro mobile money</td>
+                <td class="valeur">
+                    {{ paiement.numeroDestinataire }}
+                    {% if paiement.reseau %} ({{ paiement.reseau }}){% endif %}
+                </td>
+            </tr>
+        {% endif %}
         <tr>
             <td class="cle">Pesée réglée</td>
             <td class="valeur">{{ paiement.operation.numticket ?? '—' }}</td>

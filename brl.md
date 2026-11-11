@@ -15,6 +15,11 @@
 - 
 
 - 
+> Sur ApiExceptionSubscriber, je ne suis pas d'accord — et je l'ai vérifié plutôt que d'argumenter. Il ne fait pas double emploi avec ApiExceptionHandlerHelper : le helper est appelé dans un catch, là où le contrôleur sait quoi faire de l'erreur ; le subscriber rattrape les appels qui ne sont dans aucun catch. Or il y en a beaucoup — 64 appels API pour 23 catch, et BilanController, PeseeController, TableauDeBordController n'en ont aucun. Je l'ai donc remis, avec un commentaire qui dit précisément en quoi les deux diffèrent — c'est justement la confusion qui t'a fait penser qu'il était devenu inutile. Si tu veux vraiment t'en passer, il faut d'abord entourer chaque lecture d'un try/catch, ce qui ramène le bruit que le subscriber avait supprimé.
+> L'alias @ est déclaré dans tsconfig mais pas dans Webpack — les composants shadcn l'utilisent. webpack.config.js
+> Un défaut sérieux trouvé en testant, qui touchait tous les écrans. En rejetant sans motif, l'API répondait bien 422 — et rien ne s'affichait. Cause : ApiExceptionHandlerHelper traite tout 422 comme une erreur de validation et boucle sur getViolations(). Or un 422 métier (« une demande est déjà en attente », « solde insuffisant », « déjà traitée ») n'a pas de violations par champ, seulement un message. La boucle tournait à vide, la méthode rendait null, le formulaire se réaffichait muet : le geste semblait n'avoir aucun effet. J'ai ajouté le cas manquant — sans violations, le message devient une erreur globale du formulaire. C'est le helper que j'ai porté de Transport, donc le défaut y est probablement aussi.
+
+
 
 Le site web des clients. Il ne touche jamais la base : il appelle l'API avec le jeton de l'utilisateur connecté, et c'est l'API qui tranche toutes les autorisations.
 

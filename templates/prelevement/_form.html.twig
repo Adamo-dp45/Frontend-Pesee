@@ -1,0 +1,24 @@
+{#
+    - Le partiel partagé par 'new' et 'edit' : une variable '{{ button }}' pour le libellé du bouton.
+    - Le planteur n'apparaît qu'au dépôt : déplacer une demande ouvrirait l'épargne de quelqu'un d'autre.
+#}
+<twig:Card>
+    <twig:Card:Content class="pt-6">
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+
+            <div class="grid gap-4">
+                {% if form.fournisseur is defined %}
+                    {{ form_row(form.fournisseur) }}
+                {% endif %}
+                {{ form_row(form.tauxDemande) }}
+                {{ form_row(form.motif) }}
+            </div>
+
+            <div class="mt-6 flex items-center justify-end gap-3 border-t border-border pt-4">
+                <a href="{{ path('prelevement.index') }}" class="btn btn-secondary">Annuler</a>
+                <button class="btn btn-primary">{{ button }}</button>
+            </div>
+        {{ form_end(form) }}
+    </twig:Card:Content>
+</twig:Card>

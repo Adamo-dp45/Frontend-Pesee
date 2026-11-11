@@ -7,8 +7,6 @@ use App\Domain\Helper\ApiExceptionHandlerHelper;
 use App\Domain\Helper\TableHelper;
 use App\Form\UtilisateurFormType;
 use App\Security\Exception\ApiException;
-use App\Security\UserGuard;
-use App\Security\Voter\AccesVoter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -32,18 +30,10 @@ final class UtilisateurController extends GestionController
     /* 'clé du formulaire' => 'filtre de l'API'. */
     private const FILTRES = ['recherche' => 'nom', 'statut' => 'statut'];
 
-    /** Un agent ne peut créer et gérer que des opérateurs. */
-    private const ROLES = [
-        'ROLE_ADMIN' => 'Administrateur',
-        'ROLE_AGENT' => 'Agent',
-        'ROLE_OPERATEUR' => 'Opérateur',
-    ];
-
     public function __construct(
         private readonly ApiHelper $api,
         private readonly TableHelper $table,
-        private readonly ApiExceptionHandlerHelper $apiExceptionHandler,
-        private readonly UserGuard $userGuard
+        private readonly ApiExceptionHandlerHelper $apiExceptionHandler
     )
     {
     }
@@ -64,8 +54,8 @@ final class UtilisateurController extends GestionController
             'url' => $this->generateUrl('utilisateur.show', ['id' => $compte['id']]),
             'urlEdit' => $this->generateUrl('utilisateur.edit', ['id' => $compte['id']]),
             'urlActivation' => $this->generateUrl('utilisateur.activation', ['id' => $compte['id']]),
-            'modifiable' => $this->peut($compte, AccesVoter::MODIFIER),
-            'suspendable' => $this->peut($compte, AccesVoter::BLOQUER),
+            'modifiable' => $this->peut($compte, 'MODIFIER'),
+            'suspendable' => $this->peut($compte, 'BLOQUER'),
             'moiMeme' => (int) ($compte['id'] ?? 0) === $moi->getId(),
         ], $donnees['items']);
 
@@ -124,12 +114,12 @@ final class UtilisateurController extends GestionController
             'roles' => $this->rolesAttribuables(),
             'roleActuel' => $this->roleActuel($compte),
             'moiMeme' => (int) ($compte['id'] ?? 0) === $this->utilisateur()->getId(),
-            'modifiable' => $this->peut($compte, AccesVoter::MODIFIER),
-            'promouvable' => $this->peut($compte, AccesVoter::PROMOUVOIR),
+            'modifiable' => $this->peut($compte, 'MODIFIER'),
+            'promouvable' => $this->peut($compte, 'PROMOUVOIR'),
             // Suspendre un fondateur est le seul recours du super administrateur quand une entreprise se verrouille : personne d'autre ne peut le faire
-            'suspendable' => $this->peut($compte, AccesVoter::BLOQUER),
+            'suspendable' => $this->peut($compte, 'BLOQUER'),
             // Ce que l'écran affiche quand il n'y a rien à proposer : un bouton absent sans explication ressemble à une panne
-            'motif' => $this->userGuard->motifRefus($this->utilisateur(), $compte, AccesVoter::MODIFIER),
+            'motif' => $compte['motifNonGerable'] ?? null,
         ]);
     }
 
@@ -144,7 +134,7 @@ final class UtilisateurController extends GestionController
               ce renvoi, une URL tapée à la main ouvre un formulaire qui ne pourra jamais être
               enregistré, et l'API ne le dit qu'après la saisie.
         */
-        if(($motif = $this->userGuard->motifRefus($this->utilisateur(), $compte, AccesVoter::MODIFIER)) !== null) {
+        if(($motif = $compte['motifNonGerable'] ?? null) !== null) {
             $this->addFlash('danger', $motif);
 
             return $this->redirectToRoute('utilisateur.show', ['id' => $id]);
@@ -241,24 +231,22 @@ final class UtilisateurController extends GestionController
     }
 
     /*
-        - Les deux questions de l'API, dans le même ordre : le rôle porte-t-il cette action sur la
-          ressource « User » (la table de 'AccesVoter'), et peut-on l'exercer sur CE compte-là (la
-          hiérarchie de 'UserGuard') ? Une seule des deux suffit à afficher un bouton qui échouera.
+        - Les deux questions — le rôle porte-t-il cette action sur la ressource « User » ? et
+          peut-on l'exercer sur CE compte-là ? — sont tranchées PAR L'API, qui publie le résultat
+          avec chaque compte. Ce fichier les reposait de son côté, à partir d'une copie de la
+          hiérarchie de l'API ; la copie avait déjà pris du retard d'une règle.
 
         @param array<string, mixed> $compte
     */
     private function peut(array $compte, string $action): bool
     {
-        return $this->isGranted('USER_' . $action)
-            && $this->userGuard->peutGerer($this->utilisateur(), $compte, $action);
+        return in_array($action, (array) ($compte['droitsSurCeCompte'] ?? []), true);
     }
 
     /** @return array<string, string> */
     private function rolesAttribuables(): array
     {
-        // Un agent gère les opérateurs, pas ses pairs ni ses supérieurs
-        return $this->utilisateur()->estAgent()
-            ? ['ROLE_OPERATEUR' => self::ROLES['ROLE_OPERATEUR']]
-            : self::ROLES;
+        // Décidé par l'API, qui refuse aussi à l'enregistrement : un agent n'encadre que des opérateurs
+        return $this->utilisateur()->getRolesAttribuables();
     }
 }

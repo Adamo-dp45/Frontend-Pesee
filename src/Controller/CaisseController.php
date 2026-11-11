@@ -13,7 +13,11 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /*
-    - La caisse à deux niveaux : l'entreprise détient un solde global, elle en dote ses ponts
+    - DEUX caisses — les espèces et le flotte mobile money — à DEUX niveaux : l'entreprise les
+      détient, elle en dote celles de ses ponts bascules, et chacune reste dans sa nature. L'argent
+      ne passe pas d'une caisse à l'autre : cela se fait à la banque ou chez l'agrégateur.
+
+    - La caisse à deux niveaux : l'entreprise détient ses soldes, elle en dote ses ponts
       bascules, et c'est depuis la caisse d'un site que les planteurs sont payés.
 
     - Le grand livre est la pièce maîtresse. Chaque écriture porte le solde avant et après :
@@ -32,7 +36,7 @@ final class CaisseController extends GestionController
     /*
         - 'clé du formulaire' => 'filtre de l'API'. Le filtre entrées/sorties s'appelle 'mouvement' et non 'sens' : ce dernier porte déjà le sens du TRI. Les confondre faisait qu'un clic sur un en-tête envoyait 'sens=desc' à l'API, qui l'attend en CREDIT ou DEBIT — et la liste se vidait.
     */
-    private const FILTRES = ['compte' => 'compte', 'mouvement' => 'sens', 'site' => 'site'];
+    private const FILTRES = ['compte' => 'compte', 'caisse' => 'caisse', 'mouvement' => 'sens', 'site' => 'site'];
 
     public function __construct(
         private readonly ApiHelper $api,
@@ -66,14 +70,14 @@ final class CaisseController extends GestionController
     #[IsGranted('ENTREPRISE_RECHARGER')]
     public function recharge(Request $request): Response
     {
-        $form = $this->createForm(RechargeFormType::class);
+        $form = $this->createForm(RechargeFormType::class, null, ['caisses' => self::CAISSES]);
         $form->handleRequest($request);
 
         if($form->isSubmitted() && $form->isValid()) {
             try {
                 $this->api->post('/api/me/entreprise/recharge', $form->getData());
 
-                $this->addFlash('success', 'Solde rechargé.');
+                $this->addFlash('success', 'Caisse rechargée.');
 
                 return $this->redirectToRoute('caisse.index');
             } catch(ApiException $e) {

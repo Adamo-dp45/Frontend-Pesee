@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { ColumnDef } from '@tanstack/react-table'
+import { Badge } from '@/assets/components/ui/badge'
 import { ServerDataTable } from '../../components/server/server-data-table'
 import { entetesDepuis } from '../../components/server/server-data-table-column-header'
 import { dateHeure, Etat, MenuActions, montant, texte } from '../../components/cellules'
@@ -63,6 +64,13 @@ export default function TableDemandes({ items, meta, queryParams, sortMeta, site
             cell: ({ row }) => row.original.motif
                 ? <span className="text-xs">{row.original.motif}</span>
                 : <span className="text-muted-foreground">—</span>,
+        },
+        {
+            id: 'caisse',
+            header: 'Caisse',
+            /* Laquelle des deux est à sec. « Il me manque 200 000 » ne veut pas dire la même chose
+               selon qu'il s'agit de billets ou de flotte, et l'administrateur dote celle-là. */
+            cell: ({ row }) => <Badge variant="outline">{row.original.caisseLibelle ?? row.original.caisse}</Badge>,
         },
         {
             id: 'montantDemande',

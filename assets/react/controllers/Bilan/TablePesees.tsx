@@ -22,6 +22,7 @@ import { Pesee, StatutReglement } from '../../models/pesee.model'
 const REGLEMENT: Record<StatutReglement, { libelle: string; variant: 'default' | 'secondary' | 'outline' }> = {
     SOLDE: { libelle: 'Soldée', variant: 'default' },
     PARTIEL: { libelle: 'Partielle', variant: 'secondary' },
+    RETENU: { libelle: 'Retenue', variant: 'secondary' }, // Tout est parti sur l'épargne : rien à verser au guichet
     NON_PAYE: { libelle: 'Non payée', variant: 'outline' },
 }
 

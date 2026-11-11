@@ -3,12 +3,22 @@ import './stimulus_bootstrap.js';
 import './styles/app.css';
 import { initTheme } from './modules/theme.js';
 import { initDropdowns } from './modules/dropdown.js';
-import { initSidebar } from './modules/sidebar.js';
+import { initSidebar, initSidebarResize } from './modules/sidebar.js';
 import { initGraphiques } from './modules/graphiques.js';
 import { initConfirmation } from './modules/confirmation.js';
+import { initModeReglement } from './modules/mode_reglement.js';
 
-/* Un seul écouteur pour toute la session : il survit aux navigations Turbo. */
+/*
+    - UNE SEULE FOIS pour toute la session. Ces modules posent leurs écouteurs sur 'document' ou
+      sur 'window', qui survivent au remplacement de la page par Turbo. Les relancer à chaque
+      'turbo:load' empilerait les mêmes écouteurs page après page : au troisième écran visité, un
+      clic serait traité trois fois.
+    - Le prix à payer : aucun de ces écouteurs ne garde d'élément en mémoire. Ils retrouvent ce
+      dont ils ont besoin au moment du geste, car les nœuds de la page précédente sont détachés.
+*/
 initConfirmation()
+initDropdowns()
+initSidebarResize()
 
 document.addEventListener('turbo:before-render', (event) => {
     if(!document.startViewTransition) { /*
@@ -44,9 +54,14 @@ document.addEventListener('turbo:before-render', (event) => {
     }
 })
 
+/*
+    - À CHAQUE PAGE. Ces modules câblent des éléments du corps de la page, que Turbo remplace à
+      chaque visite : les écouteurs de la page précédente partent avec elle, il n'y a rien à
+      empiler, et ceux-ci doivent être reposés sur les nouveaux nœuds.
+*/
 document.addEventListener('turbo:load', () => {
     initTheme()
-    initDropdowns()
     initSidebar()
     initGraphiques()
+    initModeReglement()
 })

@@ -77,10 +77,19 @@ export default function TableSites({ items, meta, queryParams, sortMeta, modifia
                 : <span className="text-xs text-muted-foreground">Aucun</span>,
         },
         {
-            id: 'solde',
-            header: () => entete('solde', 'Caisse', true),
+            id: 'soldePhysique',
+            header: () => entete('soldePhysique', 'Espèces', true),
             meta: { aDroite: true },
-            cell: ({ row }) => montant(row.original.solde),
+            cell: ({ row }) => montant(row.original.soldePhysique),
+        },
+        {
+            id: 'soldeNumerique',
+            header: () => entete('soldeNumerique', 'Flotte', true),
+            meta: { aDroite: true },
+            /* Les deux caisses en colonnes séparées : leur cumul ne dit pas si le tiroir est vide,
+               et c'est le tiroir qui paie les planteurs sans téléphone. Le tri porte sur chacune —
+               'solde' est un calcul, que SQL ne sait pas classer. */
+            cell: ({ row }) => montant(row.original.soldeNumerique),
         },
         {
             id: 'statut',

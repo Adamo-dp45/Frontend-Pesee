@@ -90,8 +90,19 @@ export default function TableEntreprises({ items, meta, queryParams, sortMeta, m
             id: 'solde',
             header: 'Solde',
             meta: { aDroite: true },
-            // C'est lui qui alimente les caisses des postes : à sec, plus aucune dotation n'est possible
-            cell: ({ row }) => montant(row.original.solde),
+            /*
+                - C'est lui qui alimente les caisses des postes : à sec, plus aucune dotation n'est
+                  possible. Le détail en dessous, parce que le cumul ne dit pas laquelle des deux
+                  caisses est vide — et elles ne se remplacent pas.
+            */
+            cell: ({ row }) => (
+                <div>
+                    <div>{montant(row.original.solde)}</div>
+                    <div className="text-xs text-muted-foreground">
+                        {montant(row.original.soldePhysique)} esp. · {montant(row.original.soldeNumerique)} flotte
+                    </div>
+                </div>
+            ),
         },
         {
             id: 'statut',

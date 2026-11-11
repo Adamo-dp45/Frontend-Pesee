@@ -33,11 +33,19 @@
             </twig:Alert>
         {% endif %}
 
-        {# Un seul chiffre ici : le reste sont des faits, pas des mesures. #}
-        <div class="grid gap-4 sm:grid-cols-3 mb-6">
+{#
+            - Les deux caisses du poste, séparément : c'est ce que l'opérateur a sous la main pour
+              payer, et l'une ne remplace pas l'autre. Le reste de la grille sont des faits, pas des
+              mesures.
+        #}
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
             {{ include('tableau_de_bord/_kpi.html.twig', {
-                titre: 'Caisse du poste', valeur: site.solde, unite: 'F',
-                detail: 'disponible pour payer les planteurs', icone: 'lucide:wallet'
+                titre: 'Espèces', valeur: site.soldePhysique|default(0), unite: 'F',
+                detail: 'dans le tiroir de l\'opérateur', icone: 'lucide:banknote'
+            }) }}
+            {{ include('tableau_de_bord/_kpi.html.twig', {
+                titre: 'Flotte mobile money', valeur: site.soldeNumerique|default(0), unite: 'F',
+                detail: 'pour les versements sur téléphone', icone: 'lucide:smartphone'
             }) }}
             {{ include('partials/_fait.html.twig', {
                 titre: 'Synchronisation', icone: 'lucide:refresh-cw',
@@ -176,15 +184,25 @@
                 <twig:Card:Header>
                     <twig:Card:Title>Doter la caisse</twig:Card:Title>
                     <twig:Card:Description>
-                        L'argent quitte le solde de l'entreprise pour rejoindre celui du poste.
-                        Deux écritures au grand livre : il se déplace, il ne se crée pas.
+                        L'argent quitte la caisse de l'entreprise pour rejoindre LA MÊME caisse du
+                        poste : les espèces et le flotte ne se convertissent pas l'un en l'autre.
+                        Deux écritures au grand livre — il se déplace, il ne se crée pas.
                     </twig:Card:Description>
                 </twig:Card:Header>
                 <twig:Card:Content>
                     <form method="post" action="{{ path('site.dotation', { id: site.id }) }}" class="grid gap-4">
                         <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('gestion') }}">
-                        <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="grid gap-4 sm:grid-cols-3">
                             {# La dotation poste sur sa propre route, qui signale ses refus par un flash : aucune violation ne revient ici #}
+                            <div class="grid gap-2">
+                                <label for="dotation-caisse" class="text-sm font-medium">Caisse</label>
+                                {# Même habillage que le select d'affectation juste au-dessus : un seul style de liste sur cet écran #}
+                                <select id="dotation-caisse" name="caisse" required class="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm">
+                                    <option value="">— Choisir —</option>
+                                    <option value="PHYSIQUE">Espèces</option>
+                                    <option value="NUMERIQUE">Flotte mobile money</option>
+                                </select>
+                            </div>
                             {{ include('partials/_champ.html.twig', {
                                 nom: 'montant', label: 'Montant (F CFA)', type: 'number', requis: true
                             }) }}

@@ -31,7 +31,8 @@ final class SiteController extends GestionController
     /*
         - Liste blanche des tris : chaque ressource n'expose à son 'OrderFilter' que quelques propriétés. Laisser passer un tri inconnu ferait répondre l'API en erreur, ou pire, l'ignorerait en laissant croire au classement demandé.
     */
-    private const TRIS = ['libellesite', 'code', 'solde', 'createdAt'];
+    // Le tri porte sur chaque caisse : 'solde' est un cumul calculé, que l'API ne sait pas classer en SQL
+    private const TRIS = ['libellesite', 'code', 'soldePhysique', 'soldeNumerique', 'createdAt'];
 
     /* 'clé du formulaire' => 'filtre de l'API'. La recherche porte sur le libellé, c'est ce qu'on lit dans la colonne. */
     private const FILTRES = ['recherche' => 'libellesite', 'statut' => 'statut'];
@@ -202,12 +203,16 @@ final class SiteController extends GestionController
     public function dotation(int $id, Request $request): Response
     {
         return $this->agir($request, $id, function () use ($id, $request): string {
+            // La caisse vient du formulaire : l'argent ne traverse pas d'une caisse à l'autre, il faut donc dire laquelle
+            $caisse = (string) $request->request->get('caisse');
+
             $this->api->patch('/api/sites/' . $id . '/dotation', [
+                'caisse' => $caisse === '' ? null : $caisse,
                 'montant' => $request->request->getInt('montant'),
                 'motif' => $this->ouNull($request->request->get('motif')),
             ]);
 
-            return 'Caisse dotée. L\'argent a quitté le solde de l\'entreprise.';
+            return sprintf('%s dotée. L\'argent a quitté la même caisse de l\'entreprise.', self::CAISSES[$caisse] ?? 'Caisse');
         });
     }
 

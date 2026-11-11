@@ -5,6 +5,9 @@
     - 'EN_COURS' et 'TERMINEE' sont l'état d'une PESÉE : le camion est-il ressorti ? Ils manquaient
       aux deux dictionnaires — aucun écran ne les affichait encore, mais la première colonne « État »
       sur une pesée aurait sorti la valeur brute dans une pastille grise.
+
+    - 'RETENU' est la pesée dont l'épargne du planteur a tout absorbé : il n'y a rien à lui verser
+      au guichet, et ce n'est pourtant ni un impayé ni un solde.
 #}
 {% set etats = {
     'ACTIF':      { libelle: 'Actif',      variant: 'default' },
@@ -25,6 +28,7 @@
     'NON_PAYE':   { libelle: 'Non payée',  variant: 'outline' },
     'PARTIEL':    { libelle: 'Partielle',  variant: 'secondary' },
     'SOLDE':      { libelle: 'Soldée',     variant: 'default' },
+    'RETENU':     { libelle: 'Retenue',    variant: 'secondary' },
 } %}
 {% set etat = etats[statut] ?? { libelle: statut|default('—'), variant: 'outline' } %}
 

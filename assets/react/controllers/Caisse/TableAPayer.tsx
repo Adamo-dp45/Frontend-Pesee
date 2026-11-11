@@ -2,6 +2,7 @@ import * as React from 'react'
 import { ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@/assets/components/ui/badge'
 import { buttonVariants } from '@/assets/components/ui/button'
+import { cn } from '@/assets/lib/utils'
 import { ServerDataTable } from '../../components/server/server-data-table'
 import { entetesDepuis } from '../../components/server/server-data-table-column-header'
 import { dateSeule, numero, texte } from '../../components/cellules'
@@ -87,16 +88,38 @@ export default function TableAPayer({ items, meta, queryParams, sortMeta, sites,
             id: 'montantdu',
             header: () => entete('montantdu', 'Reste à payer', true),
             meta: { aDroite: true },
+            /*
+                - Le chiffre en gros est ce que l'API acceptera ENCORE, pas la créance du planteur.
+                  Il comptait auparavant le seul montant confirmé : un versement tout juste engagé
+                  n'y changeait donc rien, la ligne affichait le même reste qu'avant et l'opérateur,
+                  croyant son geste perdu, recommençait.
+
+                - Les deux lignes en dessous disent d'où vient l'écart. Celle des versements en vol
+                  est la plus importante des deux : c'est elle qui explique un reste qui a baissé
+                  sans qu'un franc soit encore confirmé.
+            */
             cell: ({ row }) => {
                 const du = row.original.montantdu ?? 0
+                const retenue = row.original.retenue ?? 0
+                /* Ce qu'on peut REMETTRE au planteur, et non ce que vaut la pesée : la part mise sur son épargne ne passera pas par le guichet. */
+                const payable = row.original.montantpayable ?? Math.max(0, du - retenue)
                 const paye = row.original.montantpaye ?? 0
+                const enVol = row.original.montantenvol ?? 0
+                const aEngager = row.original.resteaengager ?? Math.max(0, payable - paye - enVol)
 
                 return (
                     <div>
-                        <div className="font-semibold">{francs(Math.max(0, du - paye))}</div>
+                        <div className="font-semibold">{francs(aEngager)}</div>
                         {/* Un versement partiel déjà fait doit se voir : sinon on repaie la totalité */}
                         {paye > 0 && (
-                            <div className="text-xs text-muted-foreground">{francs(paye)} déjà versés sur {francs(du)}</div>
+                            <div className="text-xs text-muted-foreground">{francs(paye)} déjà versés sur {francs(payable)}</div>
+                        )}
+                        {/* La part mise de côté doit se voir : le planteur a son ticket en main, et il y lit le montant PLEIN */}
+                        {retenue > 0 && (
+                            <div className="text-xs text-muted-foreground">{francs(retenue)} mis en compte sur {francs(du)}</div>
+                        )}
+                        {enVol > 0 && (
+                            <div className="text-xs font-medium text-muted-foreground">{francs(enVol)} en cours de confirmation</div>
                         )}
                     </div>
                 )
@@ -113,9 +136,39 @@ export default function TableAPayer({ items, meta, queryParams, sortMeta, sites,
             id: 'actions',
             header: '',
             meta: { aDroite: true },
-            cell: ({ row }) => (
-                <a className={buttonVariants({ size: 'sm' })} href={row.original.urlPaiement}>Verser</a>
-            ),
+            /*
+                - Le bouton ne mène nulle part quand la pesée n'est pas payable : l'API refuse, et
+                  l'opérateur ne l'apprenait qu'après le clic, sur l'écran de versement, par un
+                  message qui ne disait pas quoi corriger. Le motif accompagne déjà chaque ligne —
+                  autant le rendre lisible là où le geste se décide.
+
+                - Un 'span' et non un bouton désactivé : la cible est un lien, et un lien ne se
+                  désactive pas. 'pointer-events-none' coupe le clic, 'aria-disabled' le dit aux
+                  lecteurs d'écran.
+            */
+            cell: ({ row }) => {
+                const motif = row.original.motifNonPayable
+
+                if (!motif) {
+                    return <a className={buttonVariants({ size: 'sm' })} href={row.original.urlPaiement}>Verser</a>
+                }
+
+                /* La colonne « Planteur » porte déjà le sien : le répéter ici ferait lire deux fois la même phrase */
+                const dejaDit = motif === row.original.fournisseur?.motifNonPayable
+
+                return (
+                    <div className="inline-flex flex-col items-end gap-1">
+                        <span
+                            className={cn(buttonVariants({ size: 'sm', variant: 'outline' }), 'pointer-events-none opacity-60')}
+                            title={motif}
+                            aria-disabled="true"
+                        >
+                            Verser
+                        </span>
+                        {!dejaDit && <span className="max-w-56 text-right text-xs text-destructive">{motif}</span>}
+                    </div>
+                )
+            },
         },
     ]
 

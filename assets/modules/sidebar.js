@@ -89,7 +89,6 @@ export const initSidebar = () => {
 
     toggle.addEventListener('click', toggleSidebar)
     overlay.addEventListener('click', closeSidebar)
-    window.addEventListener('resize', () => { if (!isMobile()) closeSidebar() })
 
     document.querySelectorAll('[data-nav]').forEach(l => l.addEventListener('click', () => { if (isMobile()) closeSidebar() }))
     document.querySelectorAll('[data-submenu]').forEach(t => t.addEventListener('click', onSubmenuClick))
@@ -98,4 +97,22 @@ export const initSidebar = () => {
     document.getElementById('sidebarUserBtn')?.addEventListener('click', onUserBtnClick)
 
     openActiveSubmenu()
+}
+
+/*
+    - UNE SEULE FOIS pour la session, d'où l'appel au démarrage dans 'app.js' et non dans le
+      'turbo:load' : 'window' survit au remplacement de la page par Turbo, donc reposer cet
+      écouteur à chaque visite l'empilerait.
+
+    - Les éléments sont retrouvés au moment du redimensionnement, jamais capturés au démarrage :
+      ceux de la première page sont détachés dès la deuxième, et les masquer n'aurait plus aucun
+      effet à l'écran.
+*/
+export const initSidebarResize = () => {
+    window.addEventListener('resize', () => {
+        if (window.innerWidth <= 768) return
+
+        document.getElementById('sidebar')?.classList.remove('mobile-open')
+        document.getElementById('sidebarOverlay')?.classList.remove('visible')
+    })
 }

@@ -7,7 +7,8 @@
         <div>
             <h1 class="text-2xl font-semibold tracking-tight">Caisse</h1>
             <p class="text-sm text-muted-foreground mt-1">
-                L'entreprise détient un solde global et en dote ses ponts bascules.
+                L'entreprise tient deux caisses — les espèces et le flotte mobile money — et en dote
+                celles de ses ponts bascules. Elles ne se convertissent pas l'une en l'autre.
             </p>
         </div>
         {% if rechargeable %}
@@ -18,16 +19,27 @@
         {% endif %}
     </div>
 
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-6">
+{#
+            - Les deux caisses ont leur propre carte, et c'est tout l'objet de l'écran : leurs soldes
+              ne se remplacent pas. Un total confortable peut cacher un tiroir vide, et c'est ce
+              tiroir qui paie les planteurs sans téléphone.
+        #}
         {% if caisse.soldeEntreprise is not null %}
             {{ include('tableau_de_bord/_kpi.html.twig', {
-                titre: 'Solde entreprise', valeur: caisse.soldeEntreprise, unite: 'F',
-                detail: 'pas encore attribué aux postes', icone: 'lucide:landmark'
+                titre: 'Entreprise — espèces', valeur: caisse.soldeEntreprisePhysique|default(0), unite: 'F',
+                detail: 'pas encore attribué aux postes', icone: 'lucide:banknote'
+            }) }}
+            {{ include('tableau_de_bord/_kpi.html.twig', {
+                titre: 'Entreprise — flotte', valeur: caisse.soldeEntrepriseNumerique|default(0), unite: 'F',
+                detail: 'pas encore attribué aux postes', icone: 'lucide:smartphone'
             }) }}
         {% endif %}
         {{ include('tableau_de_bord/_kpi.html.twig', {
             titre: 'Dans les caisses', valeur: caisse.soldeSites|default(0), unite: 'F',
-            detail: 'réparti sur les ponts bascules', icone: 'lucide:wallet'
+            detail: (caisse.soldeSitesPhysique|default(0))|number_format(0, ',', ' ') ~ ' F en espèces · '
+                ~ (caisse.soldeSitesNumerique|default(0))|number_format(0, ',', ' ') ~ ' F de flotte',
+            icone: 'lucide:wallet'
         }) }}
         {#
             - Le montant immobilisé explique l'écart entre ce qu'on croit avoir et ce qu'on peut
@@ -36,6 +48,15 @@
         {{ include('tableau_de_bord/_kpi.html.twig', {
             titre: 'Immobilisé', valeur: caisse.montantImmobilise|default(0), unite: 'F',
             detail: 'versements en cours, non confirmés', icone: 'lucide:hourglass'
+        }) }}
+        {#
+            - L'épargne des planteurs n'est dans AUCUNE caisse : au moment du prélèvement, pas un
+              billet ne bouge. C'est une dette de l'entreprise, et sans retrait elle ne fait que
+              grossir — cet écran est le seul endroit où elle se voit.
+        #}
+        {{ include('tableau_de_bord/_kpi.html.twig', {
+            titre: 'Épargne des planteurs', valeur: caisse.epargneDue|default(0), unite: 'F',
+            detail: 'mis de côté, dû aux planteurs', icone: 'lucide:piggy-bank'
         }) }}
         {{ include('tableau_de_bord/_kpi.html.twig', {
             titre: 'Demandes en attente', valeur: caisse.demandesEnAttente|default(0), unite: '',
@@ -79,9 +100,10 @@
                         <twig:Table:Row>
                             <twig:Table:Head>Pont bascule</twig:Table:Head>
                             <twig:Table:Head>Opérateur</twig:Table:Head>
-                            <twig:Table:Head class="text-right">Solde</twig:Table:Head>
+                            <twig:Table:Head class="text-right">Espèces</twig:Table:Head>
+                            <twig:Table:Head class="text-right">Flotte</twig:Table:Head>
                             <twig:Table:Head class="text-right">Immobilisé</twig:Table:Head>
-                            <twig:Table:Head class="text-right">Disponible</twig:Table:Head>
+                            <twig:Table:Head class="text-right">Flotte disponible</twig:Table:Head>
                             <twig:Table:Head></twig:Table:Head>
                         </twig:Table:Row>
                     </twig:Table:Header>
@@ -90,12 +112,14 @@
                             <twig:Table:Row>
                                 <twig:Table:Cell class="font-medium">{{ ligne.site }}</twig:Table:Cell>
                                 <twig:Table:Cell>{{ ligne.operateur ?? '—' }}</twig:Table:Cell>
-                                <twig:Table:Cell class="text-right tabular-nums">{{ ligne.solde|number_format(0, ',', ' ') }} F</twig:Table:Cell>
+                                <twig:Table:Cell class="text-right tabular-nums">{{ (ligne.soldePhysique|default(0))|number_format(0, ',', ' ') }} F</twig:Table:Cell>
+                                <twig:Table:Cell class="text-right tabular-nums">{{ (ligne.soldeNumerique|default(0))|number_format(0, ',', ' ') }} F</twig:Table:Cell>
+                                {# L'immobilisé ne porte que sur le flotte : des espèces remises en main propre ne restent jamais en vol #}
                                 <twig:Table:Cell class="text-right tabular-nums text-muted-foreground">
                                     {{ ligne.immobilise ? '− ' ~ ligne.immobilise|number_format(0, ',', ' ') ~ ' F' : '—' }}
                                 </twig:Table:Cell>
                                 <twig:Table:Cell class="text-right tabular-nums font-medium">
-                                    {{ (ligne.solde - ligne.immobilise)|number_format(0, ',', ' ') }} F
+                                    {{ ((ligne.soldeNumerique|default(0)) - ligne.immobilise)|number_format(0, ',', ' ') }} F
                                 </twig:Table:Cell>
                                 <twig:Table:Cell class="text-right">
                                     <a href="{{ path('site.show', { id: ligne.siteId }) }}" class="text-sm underline-offset-4 hover:underline">

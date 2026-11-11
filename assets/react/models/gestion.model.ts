@@ -4,6 +4,10 @@ export type Statut = 'ACTIF' | 'SUSPENDU'
 export type StatutSite = 'ACTIF' | 'BLOQUE'
 export type ReseauMobile = 'ORANGE' | 'MTN' | 'MOOV' | 'WAVE'
 
+/* Les deux natures d'argent : les espèces du tiroir et le flotte mobile money. Elles ne se
+   convertissent pas l'une en l'autre, et chacune tient sa propre chaîne de grand livre. */
+export type TypeCaisse = 'PHYSIQUE' | 'NUMERIQUE'
+
 /* Les relations arrivent imbriquées, réduites aux champs utiles à l'affichage. */
 export interface SiteBref {
     id: number
@@ -56,6 +60,10 @@ export interface Site extends AvecPesees {
     localite: string | null
     entreprise: { id: number; nom: string } | null
     operateur: UserBref | null
+    /* Les deux caisses du poste. 'solde' en est le cumul : il se lit, il ne se dépense pas — un
+       versement va chercher celle de son mode de règlement. */
+    soldePhysique: number
+    soldeNumerique: number
     solde: number
     statut: StatutSite
     /* Le libellé du statut vient de l'API : les deux écrans ne peuvent pas diverger. */
@@ -90,6 +98,8 @@ export interface Entreprise {
     contact1: string | null
     contact2: string | null
     email: string | null
+    soldePhysique: number
+    soldeNumerique: number
     solde: number
     statut: 'ACTIVE' | 'DESACTIVEE'
     /* Compteurs calculés en SQL par l'API : la liste ne reçoit jamais les collections. */
@@ -100,11 +110,18 @@ export interface Entreprise {
 
 export type StatutPaiement = 'EN_ATTENTE' | 'ENVOYE' | 'REUSSI' | 'ECHOUE' | 'ANNULE'
 
+/* Espèces ou mobile money. Le mode décide de la caisse qui se vide, de la nécessité d'un numéro,
+   et du moment où le versement est confirmé : les espèces le sont d'emblée. */
+export type ModeReglement = 'ESPECES' | 'MOBILE_MONEY'
+
 export interface Paiement {
     id: number
     reference: string
     montant: number
     statut: StatutPaiement
+    modeReglement: ModeReglement
+    modeReglementLibelle: string
+    /* Nuls pour un règlement en espèces : des billets ne vont à aucun numéro. */
     numeroDestinataire: string | null
     reseau: ReseauMobile | null
     messageErreur: string | null
@@ -117,12 +134,37 @@ export interface Paiement {
 
 export type StatutDemande = 'EN_ATTENTE' | 'APPROUVEE' | 'REJETEE' | 'ANNULEE'
 
+/*
+    - La demande de mise en compte. Pas de « taux accordé » en face du taux demandé : contrairement
+      à une demande de solde, l'administrateur ouvre au taux réclamé ou refuse — le chiffre vient du
+      planteur, pas de lui.
+*/
+export interface DemandePrelevement {
+    id: number
+    /* En francs PAR KILO : sur une pesée de 500 kg, un taux de 20 met 10 000 F de côté. */
+    tauxDemande: number
+    motif: string | null
+    motifRejet: string | null
+    statut: StatutDemande
+    fournisseur: { id: number; nomComplet: string; soldeEpargne: number; tauxEpargne: number | null } | null
+    site: SiteBref | null
+    demandePar: UserBref | null
+    traitePar: UserBref | null
+    traiteAt: string | null
+    createdAt: string
+    /* Le libellé du statut vient de l'API : les deux écrans ne peuvent pas diverger. */
+    statutLibelle: string
+}
+
 export interface DemandeSolde {
     id: number
     montantDemande: number
     montantAccorde: number | null
     motif: string | null
     motifRejet: string | null
+    /* La caisse réclamée : être à court de billets pendant que le flotte déborde est courant. */
+    caisse: TypeCaisse
+    caisseLibelle: string
     statut: StatutDemande
     site: SiteBref | null
     demandePar: UserBref | null
@@ -138,6 +180,10 @@ export type SensMouvement = 'CREDIT' | 'DEBIT'
 export interface MouvementCaisse {
     id: number
     compte: 'ENTREPRISE' | 'SITE'
+    /* 'compte' dit de qui est la caisse, 'caisse' laquelle de ses deux : les deux ensemble
+       désignent un solde, et un seul. Sans quoi deux chaînes entrelacées paraissent rompues. */
+    caisse: TypeCaisse
+    caisseLibelle: string
     sens: SensMouvement
     type: string
     montant: number

@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { ColumnDef } from '@tanstack/react-table'
+import { Badge } from '@/assets/components/ui/badge'
 import { ServerDataTable } from '../../components/server/server-data-table'
 import { entetesDepuis } from '../../components/server/server-data-table-column-header'
 import { dateHeure, Etat, MenuActions, montant, texte } from '../../components/cellules'
@@ -66,6 +67,13 @@ export default function TablePaiements({ items, meta, queryParams, sortMeta, sit
             header: 'Pesée',
             // Un versement sans pesée n'existe pas : le ticket est le lien entre l'argent et la marchandise
             cell: ({ row }) => <span className="font-mono text-xs">{texte(row.original.operation?.numticket)}</span>,
+        },
+        {
+            id: 'modeReglement',
+            header: 'Mode',
+            /* Le mode dit de quelle caisse l'argent est sorti, et pourquoi certaines lignes sont
+               confirmées d'emblée : des espèces ne passent par aucune passerelle. */
+            cell: ({ row }) => <Badge variant="outline">{row.original.modeReglementLibelle ?? row.original.modeReglement}</Badge>,
         },
         {
             id: 'montant',

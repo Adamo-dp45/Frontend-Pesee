@@ -16,12 +16,24 @@
 
         {# Les erreurs du formulaire sont rendues par 'form_errors' dans sa carte, plus ici #}
 
+        {#
+            - Les deux caisses côte à côte, et non le seul cumul : c'est en les voyant qu'on choisit
+              laquelle recharger. Un total de dix millions ne dit pas qu'il ne reste plus un billet.
+        #}
         <twig:Card class="mb-4">
-            <twig:Card:Content class="pt-6">
-                <p class="text-sm text-muted-foreground">Solde actuel de {{ entreprise.nom }}</p>
-                <p class="text-2xl font-semibold tabular-nums mt-1">
-                    {{ entreprise.solde|number_format(0, ',', ' ') }} F
-                </p>
+            <twig:Card:Content class="pt-6 grid gap-4 sm:grid-cols-2">
+                <div>
+                    <p class="text-sm text-muted-foreground">Caisse physique — espèces</p>
+                    <p class="text-2xl font-semibold tabular-nums mt-1">
+                        {{ (entreprise.soldePhysique|default(0))|number_format(0, ',', ' ') }} F
+                    </p>
+                </div>
+                <div>
+                    <p class="text-sm text-muted-foreground">Caisse numérique — mobile money</p>
+                    <p class="text-2xl font-semibold tabular-nums mt-1">
+                        {{ (entreprise.soldeNumerique|default(0))|number_format(0, ',', ' ') }} F
+                    </p>
+                </div>
             </twig:Card:Content>
         </twig:Card>
 
@@ -36,6 +48,7 @@
                 {{ form_start(form) }}
                     {{ form_errors(form) }}
                     <div class="grid gap-4">
+                        {{ form_row(form.caisse) }}
                         {{ form_row(form.montant) }}
                         {{ form_row(form.motif) }}
                     </div>

@@ -128,6 +128,12 @@
                                 <span class="sb-text">Demandes de solde</span>
                             </a>
                         {% endif %}
+                        {% if is_granted('DEMANDEPRELEVEMENT_VOIR') %}
+                            <a href="{{ path('prelevement.index') }}" class="nav-link {{ app.current_route starts with 'prelevement.' ? 'active' : '' }}" data-nav title="Mises en compte">
+                                <svg class="nav-icon" aria-hidden="true"><use href="{{ asset('sprite.svg') }}#demande"></use></svg>
+                                <span class="sb-text">Mises en compte</span>
+                            </a>
+                        {% endif %}
                     </div>
 
                     <div class="sidebar-section">

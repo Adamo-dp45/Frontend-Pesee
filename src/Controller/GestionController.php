@@ -18,6 +18,24 @@ abstract class GestionController extends AbstractController
     protected const JETON_INVALIDE = 'Votre formulaire a expiré, veuillez réessayer.';
 
     /*
+        - Les deux caisses, dans l'ordre où on les lit : les billets d'abord, le flotte ensuite. Une
+          seule liste pour tous les écrans qui en parlent — recharge, dotation, demande de solde —
+          sinon les libellés divergent d'un formulaire à l'autre et on finit par ne plus savoir
+          laquelle est laquelle.
+        - Les clés sont les valeurs que l'API attend ; seuls les libellés sont à nous.
+    */
+    public const CAISSES = [
+        'PHYSIQUE' => 'Caisse physique — les espèces du tiroir',
+        'NUMERIQUE' => 'Caisse numérique — le flotte mobile money',
+    ];
+
+    /** Les modes de règlement d'un versement, dans le même esprit. */
+    public const MODES_REGLEMENT = [
+        'ESPECES' => 'Espèces — remises en main propre',
+        'MOBILE_MONEY' => 'Mobile money — envoyées sur un téléphone',
+    ];
+
+    /*
         - Turbo n'affiche une réponse à un POST que si elle redirige ou porte un statut d'erreur.
           Un formulaire réaffiché en 200 resterait muet.
     */
