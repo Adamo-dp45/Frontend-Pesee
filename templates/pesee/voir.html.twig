@@ -3,9 +3,13 @@
 {% block title %}Pesée {{ pesee.numticket ?? pesee.codepesee }}{% endblock %}
 
 {% set enCours = pesee.statut == 'EN_COURS' %}
-{% set reste = pesee.resteapayer|default((pesee.montantdu|default(0)) - (pesee.montantpaye|default(0))) %}
-{# La part mise sur l'épargne du planteur : sans elle, « dû moins versé » ne tombe plus sur « reste à payer », et l'écran paraît faux #}
+{# Les deux écarts entre ce que vaut la récolte et ce que le guichet versera : sans eux, « dû moins versé » ne tombe plus sur « reste à payer », et l'écran paraît faux #}
 {% set retenue = pesee.retenue|default(0) %}
+{% set transport = pesee.montanttransport|default(0) %}
+{% set reste = pesee.resteapayer|default((pesee.montantdu|default(0)) + transport - retenue - (pesee.montantpaye|default(0))) %}
+{% set ecarts = [] %}
+{% if transport > 0 %}{% set ecarts = ecarts|merge(['+ ' ~ transport|number_format(0, ',', ' ') ~ ' F de transport']) %}{% endif %}
+{% if retenue > 0 %}{% set ecarts = ecarts|merge(['− ' ~ retenue|number_format(0, ',', ' ') ~ ' F mis en compte']) %}{% endif %}
 
 {% block body %}
     <div class="max-w-4xl">
@@ -50,8 +54,8 @@
             }) }}
             {{ include('tableau_de_bord/_kpi.html.twig', {
                 titre: 'Montant dû', valeur: pesee.montantdu|default(0), unite: 'F',
-                detail: retenue > 0
-                    ? 'dont ' ~ retenue|number_format(0, ',', ' ') ~ ' F mis en compte'
+                detail: ecarts
+                    ? ecarts|join(' · ')
                     : (pesee.prixunitaire|default(0))|number_format(0, ',', ' ') ~ ' F le kilo',
                 icone: 'lucide:banknote'
             }) }}
@@ -117,7 +121,8 @@
 
             <twig:Card>
                 <twig:Card:Header>
-                    <twig:Card:Title>Transport</twig:Card:Title>
+                    {# « Acheminement » et non « Transport » : depuis que le transport est aussi une ligne d'argent, deux choses sans rapport portaient le même titre sur le même écran #}
+                    <twig:Card:Title>Acheminement</twig:Card:Title>
                 </twig:Card:Header>
                 <twig:Card:Content class="grid gap-3 sm:grid-cols-2">
                     {{ include('partials/_donnee.html.twig', { libelle: 'Opération', valeur: pesee.mouvement }) }}

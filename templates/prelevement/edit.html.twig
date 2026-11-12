@@ -8,8 +8,17 @@
             ← Retour aux mises en compte
         </a>
         <h1 class="mt-2 text-2xl font-semibold tracking-tight">Corriger la demande</h1>
+        {#
+            - Le produit et son prix dans le sous-titre : le produit ne se corrige PAS ici — le
+              changer ferait approuver un taux contre un prix que personne n'a regardé — mais le taux,
+              lui, doit rester sous ce prix. Sans l'afficher, on corrige à l'aveugle.
+        #}
         <p class="mt-1 text-sm text-muted-foreground">
-            {{ demande.fournisseur.nomComplet ?? 'Planteur inconnu' }} · demandée le {{ demande.createdAt|date('d/m/Y à H:i') }}
+            {{ demande.fournisseur.nomComplet ?? 'Planteur inconnu' }}
+            {% if demande.produit.libelle is defined %}
+                · {{ demande.produit.libelle }} à {{ (demande.produit.prix|default(0))|number_format(0, ',', ' ') }} F le kilo
+            {% endif %}
+            · demandée le {{ demande.createdAt|date('d/m/Y à H:i') }}
         </p>
     </div>
 

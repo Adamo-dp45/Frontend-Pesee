@@ -96,7 +96,7 @@ $donnees = $this->table->handleIndex('/api/…', $request->query->all(), self::F
 | Piège | Ce qui se passe |
 |---|---|
 | **Turbo veut une redirection** | Un POST qui rend directement une vue laisse la page figée. Toujours rediriger après écriture. |
-| **La confirmation est sur le BOUTON** | `data-confirmer="…"` sur le bouton, jamais un `confirm()` : le module rejoue le **même** clic une fois accepté, donc le jeton CSRF et Turbo suivent naturellement. |
+| **La confirmation est sur le BOUTON** | `data-confirmer="…"` sur le bouton, jamais un `confirm()` : le module rejoue le **même** clic une fois accepté, donc le jeton CSRF et Turbo suivent naturellement. Les deux autres attributs sont `data-confirmer-detail` et `data-confirmer-action` — un nom approchant (`data-detail`) ne lève rien, la boîte s'ouvre simplement sans explication. |
 | **`react_component` rend des attributs** | Il se met **dans** une balise, pas à sa place. |
 | **`Select` de base-ui veut des `items`** | Lui passer des enfants seuls ne suffit pas. |
 | **`array_flip` sur les options** | `options()` rend `id => libellé`, `ChoiceType` attend l'inverse. |

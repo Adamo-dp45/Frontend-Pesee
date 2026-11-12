@@ -58,9 +58,9 @@ class FournisseurFormType extends AbstractType
                 'placeholder' => '— Aucun —',
                 'required' => false,
             ])
-            ->add('prixspeciale', IntegerType::class, [
-                'label' => 'Prix spécial au kilo (F CFA)',
-                'help' => 'Laisser vide pour appliquer le prix du produit. Renseigné, il prime dessus.',
+            ->add('prixtransport', IntegerType::class, [
+                'label' => 'Prix du transport au kilo (F CFA)',
+                'help' => 'Pour les planteurs qui amènent eux-mêmes leur récolte : ce prix leur est payé EN PLUS de ce qu\'elle vaut. Laisser vide si on ne leur paie pas le transport.',
                 'required' => false,
                 'constraints' => [new GreaterThan(0)],
             ])

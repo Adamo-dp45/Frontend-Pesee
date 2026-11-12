@@ -106,11 +106,18 @@ export default function TablePesees({ items, meta, queryParams, sortMeta, payabl
             header: () => entete('montantdu', 'Montant', true),
             meta: { aDroite: true },
             cell: ({ row }) => {
-                const reste = (row.original.montantdu ?? 0) - (row.original.montantpaye ?? 0)
+                const transport = row.original.montanttransport ?? 0
+                /* « Reste » est ce que le guichet sortira encore, pas ce que vaut la récolte : le transport s'y ajoute, l'épargne s'en retranche. */
+                const reste = row.original.resteapayer
+                    ?? Math.max(0, (row.original.montantdu ?? 0) + transport - (row.original.retenue ?? 0) - (row.original.montantpaye ?? 0))
 
                 return (
                     <div>
                         <div>{nombre(row.original.montantdu, 'F')}</div>
+                        {/* Le transport se lit à côté de la récolte, jamais fondu dedans : le planteur a un ticket qui annonce la récolte seule */}
+                        {transport > 0 && (
+                            <div className="text-xs text-muted-foreground">+ {nombre(transport, 'F')} de transport</div>
+                        )}
                         {(row.original.montantpaye ?? 0) > 0 && (
                             <div className="text-xs text-muted-foreground">reste {nombre(reste, 'F')}</div>
                         )}

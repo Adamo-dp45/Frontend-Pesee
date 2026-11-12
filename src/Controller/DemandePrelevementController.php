@@ -70,13 +70,14 @@ final class DemandePrelevementController extends GestionController
         ]);
     }
 
-    /* Une seule demande en attente par planteur : l'API le refuse au-delà. */
+    /* Une seule demande en attente par planteur ET PAR PRODUIT : l'API le refuse au-delà. */
     #[IsGranted('DEMANDEPRELEVEMENT_CREER')]
     #[Route('/nouvelle', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request): Response
     {
         $form = $this->createForm(DemandePrelevementFormType::class, null, [
             'planteurs' => $this->planteurs(),
+            'produits' => $this->produits(),
             'creation' => true,
         ]);
         $form->handleRequest($request);
@@ -86,7 +87,8 @@ final class DemandePrelevementController extends GestionController
 
             try {
                 $this->api->post('/api/demande_prelevements', [
-                    'fournisseur' => '/api/fournisseurs/' . $saisie['fournisseur'], // Relation en IRI
+                    'fournisseur' => '/api/fournisseurs/' . $saisie['fournisseur'], // Relations en IRI
+                    'produit' => '/api/produits/' . $saisie['produit'],
                     'tauxDemande' => $saisie['tauxDemande'],
                     'motif' => $saisie['motif'],
                 ]);
@@ -199,15 +201,49 @@ final class DemandePrelevementController extends GestionController
     }
 
     /*
-        - Les planteurs du périmètre, pour la liste déroulante. Ceux qui épargnent déjà en sont
-          écartés : l'API refuserait la demande, autant ne pas la proposer.
+        - TOUS les planteurs du périmètre, et plus seulement ceux qui n'épargnent pas encore. Depuis
+          que le prélèvement porte sur un produit, un planteur qui met déjà de côté sur son cacao
+          reste parfaitement légitime à en demander un sur son hévéa.
+
+        - Le couple exact, lui, est tenu par l'API, qui refuse un doublon avec un message nommant le
+          produit. L'écran n'a plus de quoi le pré-filtrer de toute façon : la liste des planteurs ne
+          porte pas leurs prélèvements, pour ne pas faire une requête par ligne.
     */
     /** @return array<int, string> */
     private function planteurs(): array
     {
-        $tous = $this->api->collection('/api/fournisseurs', ['itemsPerPage' => 200]);
-        $libres = array_filter($tous, static fn(array $planteur): bool => ($planteur['tauxEpargne'] ?? null) === null);
+        return $this->options($this->api->collection('/api/fournisseurs', ['itemsPerPage' => 200]), 'nomComplet');
+    }
 
-        return $this->options(array_values($libres), 'nomComplet');
+    /*
+        - Les produits du périmètre, LE PRIX DANS LE LIBELLÉ. L'opérateur doit saisir un taux
+          strictement inférieur à ce prix ; le lui cacher reviendrait à le laisser deviner, puis se
+          faire refuser.
+
+        - Les produits NON TARIFÉS sont écartés : l'API refuse un prélèvement dessus — leurs pesées
+          ne valent rien, et rien ne serait jamais mis de côté. Les proposer à 0 F revenait à offrir
+          un choix dont aucune valeur n'aurait été acceptée.
+
+        - Pas de filtre par pont bascule ici, contrairement à la fiche planteur : le planteur ne se
+          choisit que dans le même formulaire, et son poste n'est donc pas encore connu. Le périmètre
+          de l'opérateur borne déjà la liste, et l'API refuse le couple dépareillé en nommant le
+          poste du planteur.
+    */
+    /** @return array<int, string> */
+    private function produits(): array
+    {
+        $options = [];
+
+        foreach($this->api->collection('/api/produits', ['itemsPerPage' => 200]) as $produit) {
+            $prix = (int) ($produit['prix'] ?? 0);
+
+            if($prix <= 0) {
+                continue;
+            }
+
+            $options[(int) $produit['id']] = sprintf('%s — %s F le kilo', (string) $produit['libelle'], number_format($prix, 0, ',', ' '));
+        }
+
+        return $options;
     }
 }

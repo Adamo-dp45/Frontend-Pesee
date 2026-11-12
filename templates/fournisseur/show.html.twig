@@ -38,8 +38,8 @@
                 {{ include('partials/_donnee.html.twig', { libelle: 'Autre téléphone', valeur: fournisseur.contact2|numero }) }}
                 {{ include('partials/_donnee.html.twig', { libelle: 'Réseau mobile', valeur: fournisseur.reseau }) }}
                 {{ include('partials/_donnee.html.twig', {
-                    libelle: 'Prix spécial au kilo',
-                    valeur: fournisseur.prixspeciale ? fournisseur.prixspeciale|number_format(0, ',', ' ') ~ ' F' : null
+                    libelle: 'Transport au kilo',
+                    valeur: fournisseur.prixtransport ? fournisseur.prixtransport|number_format(0, ',', ' ') ~ ' F' : null
                 }) }}
                 {{ include('partials/_donnee.html.twig', {
                     libelle: 'Créé le', valeur: fournisseur.createdAt ? fournisseur.createdAt|date('d/m/Y') : null
@@ -61,6 +61,8 @@
               continue d'en mettre de côté. Un compte peut être plein alors que le prélèvement est
               arrêté depuis des mois.
         #}
+        {% set prelevements = fournisseur.prelevements|default([]) %}
+
         <twig:Card class="mb-4">
             <twig:Card:Header>
                 <twig:Card:Title>Compte d'épargne</twig:Card:Title>
@@ -69,39 +71,100 @@
                     Elle n'est dans aucune caisse : c'est l'entreprise qui la doit au planteur.
                 </twig:Card:Description>
             </twig:Card:Header>
-            <twig:Card:Content class="grid gap-3 sm:grid-cols-2">
+            <twig:Card:Content class="grid gap-4">
                 {{ include('partials/_donnee.html.twig', {
                     libelle: 'Épargne constituée',
                     valeur: (fournisseur.soldeEpargne|default(0))|number_format(0, ',', ' ') ~ ' F'
                 }) }}
-                {{ include('partials/_donnee.html.twig', {
-                    libelle: 'Prélèvement en cours',
-                    valeur: fournisseur.tauxEpargne ? fournisseur.tauxEpargne|number_format(0, ',', ' ') ~ ' F par kilo' : null
-                }) }}
+
+                {#
+                    - UN PRÉLÈVEMENT PAR PRODUIT : les cultures ne se valent pas, et le patron règle
+                      chacune à son rythme. Les arrêtés restent affichés, en gris et datés — c'est
+                      exactement ce qu'on cherche le jour où le planteur conteste son solde.
+                #}
+                {% set actifs = prelevements|filter(p => p.actif) %}
+                {% set arretes = prelevements|filter(p => not p.actif) %}
+
+                <div>
+                    <p class="text-sm font-medium">Prélèvements en cours</p>
+                    {% if actifs is empty %}
+                        <p class="mt-1 text-sm text-muted-foreground">Aucun : chaque pesée lui est réglée en entier.</p>
+                    {% else %}
+                        <ul class="mt-2 grid gap-1.5">
+                            {% for p in actifs %}
+                                <li class="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border px-3 py-2">
+                                    <span class="text-sm font-medium">{{ p.produit.libelle ?? '—' }}</span>
+                                    <span class="text-sm tabular-nums">
+                                        {{ p.taux|number_format(0, ',', ' ') }} F le kilo
+                                        {# Le prix du produit à côté du taux : c'est lui qui le borne, et l'écart dit ce qui reste au planteur #}
+                                        <span class="text-xs text-muted-foreground">sur {{ (p.produit.prix|default(0))|number_format(0, ',', ' ') }} F</span>
+                                    </span>
+                                    {% if preleveur %}
+                                        <form method="post" action="{{ path('fournisseur.epargne', { id: fournisseur.id }) }}">
+                                            <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('gestion') }}">
+                                            <input type="hidden" name="produit" value="{{ p.produit.id }}">
+                                            <input type="hidden" name="taux" value="">
+                                            {# Les attributs du module sont 'data-confirmer-detail' et 'data-confirmer-action', pas 'data-detail' : un nom approchant ne lève rien, la boîte s'ouvre simplement sans explication #}
+                                            <button class="btn btn-secondary btn-sm"
+                                                    data-confirmer="Arrêter le prélèvement sur {{ p.produit.libelle ?? 'ce produit' }} ?"
+                                                    data-confirmer-detail="L'épargne déjà constituée reste au planteur. Seules les pesées à venir de ce produit ne seront plus prélevées, et ses autres cultures ne bougent pas."
+                                                    data-confirmer-action="Arrêter">
+                                                Arrêter
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                {% if arretes is not empty %}
+                    <div>
+                        <p class="text-sm font-medium">Arrêtés</p>
+                        <ul class="mt-2 grid gap-1">
+                            {% for p in arretes %}
+                                <li class="text-xs text-muted-foreground">
+                                    {{ p.produit.libelle ?? '—' }} · {{ p.taux|number_format(0, ',', ' ') }} F le kilo
+                                    · arrêté le {{ p.arreteAt|date('d/m/Y') }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
             </twig:Card:Content>
 
             {% if preleveur %}
                 <twig:Card:Footer class="flex-col items-stretch gap-3">
                     {#
-                        - Un seul formulaire pour ouvrir, changer et arrêter : c'est le même geste,
-                          et trois boutons auraient laissé croire à trois décisions différentes.
-                        - Laisser le champ vide arrête le prélèvement. Ce qui est déjà mis de côté
-                          ne bouge pas — le dire ici évite qu'on n'ose pas appuyer.
+                        - Ouvrir, ou changer un taux : c'est le même formulaire. Rouvrir sur un produit
+                          déjà prélevé arrête l'ancien et en ouvre un nouveau, daté — la fiche garde
+                          donc l'histoire plutôt que de prétendre qu'il a toujours épargné au dernier
+                          taux connu.
+                        - L'arrêt, lui, est le bouton de chaque ligne : il porte le nom du produit, et
+                          un champ vide ne dirait pas lequel.
                     #}
                     <form method="post" action="{{ path('fournisseur.epargne', { id: fournisseur.id }) }}" class="flex flex-wrap items-end gap-3">
                         <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('gestion') }}">
                         <div class="grid gap-1.5">
+                            <label for="produit-epargne" class="text-sm font-medium">Produit</label>
+                            <select id="produit-epargne" name="produit" required
+                                    class="flex h-9 w-64 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50">
+                                {% for id, libelle in produits|default({}) %}
+                                    <option value="{{ id }}">{{ libelle }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="grid gap-1.5">
                             <label for="taux-epargne" class="text-sm font-medium">Prélèvement par kilo (F CFA)</label>
-                            <input id="taux-epargne" name="taux" type="number" min="0" step="1"
-                                   value="{{ fournisseur.tauxEpargne ?? '' }}"
-                                   placeholder="Vide pour arrêter"
+                            <input id="taux-epargne" name="taux" type="number" min="1" step="1" required
                                    class="flex h-9 w-56 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50">
                         </div>
-                        <button class="btn btn-primary">Enregistrer</button>
+                        <button class="btn btn-primary">Ouvrir</button>
                     </form>
                     <p class="text-xs text-muted-foreground">
-                        Un champ vide arrête le prélèvement. L'épargne déjà constituée reste au
-                        planteur, et le nouveau taux ne s'applique qu'aux pesées à venir.
+                        Le taux doit rester <strong>inférieur au prix du kilo</strong> du produit, sinon
+                        le planteur repartirait les mains vides. Il ne s'applique qu'aux pesées à venir.
                     </p>
                 </twig:Card:Footer>
             {% endif %}

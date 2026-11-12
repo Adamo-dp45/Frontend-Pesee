@@ -25,19 +25,33 @@ class DemandePrelevementFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         if($options['creation']) {
-            $builder->add('fournisseur', ChoiceType::class, [
-                'label' => 'Planteur',
-                'help' => 'Seuls les planteurs sans prélèvement en cours apparaissent ici. Une seule demande en attente par planteur.',
-                'choices' => array_flip($options['planteurs']), // 'options()' rend 'id => libellé', ChoiceType attend l'inverse
-                'placeholder' => '— Choisir un planteur —',
-                'constraints' => [new NotNull()],
-            ]);
+            $builder
+                ->add('fournisseur', ChoiceType::class, [
+                    'label' => 'Planteur',
+                    'help' => 'Une seule demande en attente par planteur et par produit.',
+                    'choices' => array_flip($options['planteurs']), // 'options()' rend 'id => libellé', ChoiceType attend l'inverse
+                    'placeholder' => '— Choisir un planteur —',
+                    'constraints' => [new NotNull()],
+                ])
+                /*
+                    - Le produit ne se choisit qu'au dépôt, comme le planteur : c'est son prix qui
+                      borne le taux, et déplacer une demande d'une culture à l'autre ferait approuver
+                      un chiffre contre un prix que personne n'a regardé.
+                */
+                ->add('produit', ChoiceType::class, [
+                    'label' => 'Produit',
+                    'help' => 'Le prélèvement ne touchera que les pesées de ce produit. Un planteur peut en avoir plusieurs, à des taux différents.',
+                    'choices' => array_flip($options['produits']),
+                    'placeholder' => '— Choisir un produit —',
+                    'constraints' => [new NotNull()],
+                ])
+            ;
         }
 
         $builder
             ->add('tauxDemande', IntegerType::class, [
                 'label' => 'Prélèvement par kilo (F CFA)',
-                'help' => 'Sur une pesée de 500 kg, un taux de 20 F met 10 000 F de côté. Jamais plus que ce que vaut la pesée.',
+                'help' => 'Sur une pesée de 500 kg, un taux de 20 F met 10 000 F de côté. Il doit rester INFÉRIEUR au prix du kilo du produit, sinon le planteur repartirait les mains vides.',
                 'constraints' => [
                     new NotNull(),
                     new Positive(message: 'Le taux demandé doit être supérieur à zéro'),
@@ -59,6 +73,7 @@ class DemandePrelevementFormType extends AbstractType
             'csrf_field_name' => '_token',
             'csrf_token_id' => 'demande',
             'planteurs' => [],
+            'produits' => [],
             'creation' => false,
         ]);
     }

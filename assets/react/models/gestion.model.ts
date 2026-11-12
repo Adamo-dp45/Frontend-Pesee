@@ -45,7 +45,7 @@ export interface Fournisseur extends AvecPesees {
     contact1: string | null
     contact2: string | null
     reseau: ReseauMobile | null
-    prixspeciale: number | null
+    prixtransport: number | null
     statut: Statut
     site: SiteBref | null
     /* Renseigné quand le planteur ne peut pas être payé : numéro absent, réseau inconnu… */
@@ -143,10 +143,13 @@ export interface DemandePrelevement {
     id: number
     /* En francs PAR KILO : sur une pesée de 500 kg, un taux de 20 met 10 000 F de côté. */
     tauxDemande: number
+    /* Le produit sur lequel porte le prélèvement. C'est son prix au kilo qui borne le taux : un
+       planteur peut avoir plusieurs prélèvements, un par culture, à des taux différents. */
+    produit: { id: number; libelle: string; prix: number } | null
     motif: string | null
     motifRejet: string | null
     statut: StatutDemande
-    fournisseur: { id: number; nomComplet: string; soldeEpargne: number; tauxEpargne: number | null } | null
+    fournisseur: { id: number; nomComplet: string; soldeEpargne: number } | null
     site: SiteBref | null
     demandePar: UserBref | null
     traitePar: UserBref | null

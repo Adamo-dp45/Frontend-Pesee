@@ -10,6 +10,7 @@
             <div class="grid gap-4">
                 {% if form.fournisseur is defined %}
                     {{ form_row(form.fournisseur) }}
+                    {{ form_row(form.produit) }}
                 {% endif %}
                 {{ form_row(form.tauxDemande) }}
                 {{ form_row(form.motif) }}

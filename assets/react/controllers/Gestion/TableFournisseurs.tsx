@@ -67,12 +67,12 @@ export default function TableFournisseurs({ items, meta, queryParams, sortMeta, 
                 ),
         },
         {
-            id: 'prixspeciale',
-            header: () => entete('prixspeciale', 'Prix spécial', true),
+            id: 'prixtransport',
+            header: () => entete('prixtransport', 'Transport', true),
             meta: { aDroite: true },
-            // Il prime sur le prix du produit : l'afficher évite de chercher pourquoi une pesée est valorisée autrement
-            cell: ({ row }) => row.original.prixspeciale
-                ? montant(row.original.prixspeciale)
+            // Payé EN PLUS de la récolte : l'afficher évite de chercher pourquoi ce planteur touche plus que ce que vaut sa pesée
+            cell: ({ row }) => row.original.prixtransport
+                ? montant(row.original.prixtransport)
                 : <span className="text-muted-foreground">—</span>,
         },
         {

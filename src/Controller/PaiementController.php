@@ -83,7 +83,7 @@ final class PaiementController extends GestionController
             /*
                 - 'resteaengager' et non « dû moins versé » : l'API décompte aussi ce qui est en vol chez la passerelle, et refuse au-delà. Pré-remplir avec la créance entière proposait donc un montant qu'elle allait rejeter dès qu'un versement était en cours — l'opérateur validait, et découvrait le plafond dans un message d'erreur.
             */
-            'montant' => $pesee['resteaengager'] ?? max(0, ($pesee['montantdu'] ?? 0) - ($pesee['montantpaye'] ?? 0)),
+            'montant' => $pesee['resteaengager'] ?? max(0, ($pesee['montantdu'] ?? 0) + ($pesee['montanttransport'] ?? 0) - ($pesee['retenue'] ?? 0) - ($pesee['montantpaye'] ?? 0)),
             /*
                 - Le mode proposé est celui que le planteur permet : s'il n'a pas de numéro exploitable, le mobile money lui est fermé et c'est l'espèce qui s'offre d'emblée. Proposer un mode qui va être refusé fait perdre un aller-retour, planteur devant soi.
             */

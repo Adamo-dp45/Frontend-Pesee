@@ -101,8 +101,9 @@ export default function TableAPayer({ items, meta, queryParams, sortMeta, sites,
             cell: ({ row }) => {
                 const du = row.original.montantdu ?? 0
                 const retenue = row.original.retenue ?? 0
-                /* Ce qu'on peut REMETTRE au planteur, et non ce que vaut la pesée : la part mise sur son épargne ne passera pas par le guichet. */
-                const payable = row.original.montantpayable ?? Math.max(0, du - retenue)
+                const transport = row.original.montanttransport ?? 0
+                /* Ce qu'on peut REMETTRE au planteur, et non ce que vaut sa récolte : son transport s'y ajoute, et la part mise sur son épargne ne passera pas par le guichet. */
+                const payable = row.original.montantpayable ?? Math.max(0, du + transport - retenue)
                 const paye = row.original.montantpaye ?? 0
                 const enVol = row.original.montantenvol ?? 0
                 const aEngager = row.original.resteaengager ?? Math.max(0, payable - paye - enVol)
@@ -114,7 +115,10 @@ export default function TableAPayer({ items, meta, queryParams, sortMeta, sites,
                         {paye > 0 && (
                             <div className="text-xs text-muted-foreground">{francs(paye)} déjà versés sur {francs(payable)}</div>
                         )}
-                        {/* La part mise de côté doit se voir : le planteur a son ticket en main, et il y lit le montant PLEIN */}
+                        {/* Les deux écarts avec le ticket que le planteur a en main, où il lit la récolte SEULE */}
+                        {transport > 0 && (
+                            <div className="text-xs text-muted-foreground">dont {francs(transport)} de transport</div>
+                        )}
                         {retenue > 0 && (
                             <div className="text-xs text-muted-foreground">{francs(retenue)} mis en compte sur {francs(du)}</div>
                         )}

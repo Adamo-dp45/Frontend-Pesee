@@ -13,6 +13,9 @@ import { DemandePrelevement } from '../../models/gestion.model'
 
     - Pas de colonne « accordé », contrairement aux demandes de solde : le taux approuvé est celui
       qui a été demandé. L'administrateur ouvre ou refuse, il ne négocie pas l'épargne d'autrui.
+
+    - Une demande porte sur UN PRODUIT, et la colonne rappelle son prix au kilo : le taux doit rester
+      en dessous, sinon le planteur repartirait les mains vides de chaque livraison.
 */
 
 type Ligne = DemandePrelevement & {
@@ -64,6 +67,21 @@ export default function TableDemandesPrelevement({ items, meta, queryParams, sor
             cell: ({ row }) => row.original.motif
                 ? <span className="text-xs">{row.original.motif}</span>
                 : <span className="text-muted-foreground">—</span>,
+        },
+        {
+            id: 'produit',
+            header: 'Produit',
+            /* Sans lui la ligne ne veut rien dire : 20 F par kilo n'est ni la même décision ni le
+               même effort selon qu'il s'agit du cacao ou de l'hévéa. Le prix est juste en dessous,
+               parce que c'est lui qui borne le taux. */
+            cell: ({ row }) => (
+                <div>
+                    <div>{texte(row.original.produit?.libelle)}</div>
+                    <div className="text-xs text-muted-foreground">
+                        {row.original.produit ? `${montant(row.original.produit.prix)} le kilo` : '—'}
+                    </div>
+                </div>
+            ),
         },
         {
             id: 'tauxDemande',

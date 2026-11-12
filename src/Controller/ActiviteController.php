@@ -38,7 +38,7 @@ final class ActiviteController extends GestionController
     */
     private const TYPES = [
         'PRODUIT_TARIFE' => 'Tarification d\'un produit',
-        'FOURNISSEUR_TARIFE' => 'Prix spécial d\'un planteur',
+        'FOURNISSEUR_TARIFE' => 'Prix du transport d\'un planteur',
         'SITE_BLOQUE' => 'Blocage d\'un pont bascule',
         'SITE_DEBLOQUE' => 'Déblocage d\'un pont bascule',
         'SITE_OPERATEUR' => 'Affectation de l\'opérateur',

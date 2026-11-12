@@ -58,13 +58,20 @@
                 <td>Montant dû</td>
                 <td class="valeur">{{ totaux.montantdu|number_format(0, ',', ' ') }} F CFA</td>
             </tr>
+            {% if totaux.montanttransport|default(0) > 0 %}
+                <tr>
+                    <td>Transport</td>
+                    <td class="valeur">{{ totaux.montanttransport|number_format(0, ',', ' ') }} F CFA</td>
+                </tr>
+            {% endif %}
             <tr>
                 <td>Montant versé</td>
                 <td class="valeur">{{ totaux.montantpaye|number_format(0, ',', ' ') }} F CFA</td>
             </tr>
             <tr>
                 <td>Reste à payer</td>
-                <td class="valeur">{{ (totaux.montantdu - totaux.montantpaye)|number_format(0, ',', ' ') }} F CFA</td>
+                {# Le transport s'ajoute à ce que la caisse doit sortir : sans lui, ce document annonce moins que ce qui sera versé #}
+                <td class="valeur">{{ (totaux.montantdu + totaux.montanttransport|default(0) - totaux.montantpaye)|number_format(0, ',', ' ') }} F CFA</td>
             </tr>
         {% endif %}
     </table>

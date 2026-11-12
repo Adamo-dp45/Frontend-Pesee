@@ -20,7 +20,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class FournisseurController extends GestionController
 {
     /* Liste blanche des tris : un tri hors de celle de l'API la ferait répondre en erreur, ou pire, l'ignorerait en laissant croire au classement demandé. */
-    private const TRIS = ['codefournisseur', 'nom', 'prixspeciale', 'createdAt'];
+    private const TRIS = ['codefournisseur', 'nom', 'prixtransport', 'createdAt'];
 
     /* 'clé du formulaire' => 'filtre de l'API'. */
     private const FILTRES = ['recherche' => 'nom', 'site' => 'site', 'statut' => 'statut'];
@@ -119,12 +119,15 @@ final class FournisseurController extends GestionController
                 'itemsPerPage' => 10,
                 'order[createdAt]' => 'desc',
             ]),
+            // Pour la liste déroulante d'ouverture. Le prix est dans le libellé : c'est lui qui borne le taux
+            'produits' => $this->produitsTarifes((int) ($fournisseur['site']['id'] ?? 0)),
         ]);
     }
 
     /*
-        - Ouvrir ou arrêter la mise en compte d'un planteur. Un taux vide arrête le prélèvement : ce
-          qui a déjà été mis de côté reste au planteur, seul le robinet se ferme.
+        - Ouvrir ou arrêter la mise en compte d'un planteur SUR UN PRODUIT. Un taux vide arrête le
+          prélèvement de ce produit : ce qui a déjà été mis de côté reste au planteur, seul le
+          robinet se ferme. Les autres cultures ne bougent pas.
         - Réservé à l'administrateur. L'opérateur, lui, passe par une demande — il a le planteur
           devant lui, mais décider de ce qu'un homme touche au guichet n'est pas son geste.
     */
@@ -140,13 +143,14 @@ final class FournisseurController extends GestionController
 
         $saisie = trim((string) $request->request->get('taux'));
         $taux = $saisie === '' ? null : (int) $saisie;
+        $produit = (int) $request->request->get('produit');
 
         try {
-            $this->api->patch('/api/fournisseurs/' . $id . '/epargne', ['taux' => $taux]);
+            $this->api->patch('/api/fournisseurs/' . $id . '/epargne', ['produit' => $produit, 'taux' => $taux]);
 
             $this->addFlash('success', $taux === null
-                ? 'Mise en compte arrêtée. L\'épargne déjà constituée reste au planteur.'
-                : sprintf('Mise en compte fixée à %d F par kilo. Elle s\'appliquera aux pesées à venir.', $taux));
+                ? 'Mise en compte arrêtée sur ce produit. L\'épargne déjà constituée reste au planteur.'
+                : sprintf('Mise en compte fixée à %d F par kilo. Elle s\'appliquera aux pesées à venir de ce produit.', $taux));
         } catch(ApiException $e) {
             $this->addFlash('danger', $e->getMessage());
         }
@@ -168,7 +172,7 @@ final class FournisseurController extends GestionController
             'contact1' => $fournisseur['contact1'] ?? null,
             'contact2' => $fournisseur['contact2'] ?? null,
             'reseau' => $fournisseur['reseau'] ?? null,
-            'prixspeciale' => $fournisseur['prixspeciale'] ?? null, // Champ vidé = pas de prix spécial, le produit reprend la main
+            'prixtransport' => $fournisseur['prixtransport'] ?? null, // Champ vidé = on ne lui paie pas de transport
         ], ['reseaux' => self::RESEAUX]);
         $form->handleRequest($request);
 
@@ -216,4 +220,34 @@ final class FournisseurController extends GestionController
         return $this->redirectToRoute('fournisseur.index');
     }
 
+    /*
+        - Les produits sur lesquels un prélèvement peut s'ouvrir, LE PRIX DANS LE LIBELLÉ : c'est lui
+          qui borne le taux, et le cacher reviendrait à faire deviner l'administrateur puis à le
+          faire refuser par l'API.
+
+        - DU PONT BASCULE DU PLANTEUR, et de lui seul. Les référentiels sont locaux : « Cacao »
+          existe une fois par poste, avec son propre prix. Un administrateur voit tous les sites, et
+          sans ce filtre la liste lui proposait le café de Gagnoa sur un planteur de Soubré — que
+          l'API refuse, mais trop tard.
+
+        - Les produits non tarifés sont écartés pour la même raison : l'API les refuse — leurs pesées
+          ne valent rien, un prélèvement dessus ne mettrait jamais un franc de côté.
+    */
+    /** @return array<int, string> */
+    private function produitsTarifes(int $site): array
+    {
+        $options = [];
+
+        foreach($this->api->collection('/api/produits', ['site' => $site, 'itemsPerPage' => 200]) as $produit) {
+            $prix = (int) ($produit['prix'] ?? 0);
+
+            if($prix <= 0) {
+                continue;
+            }
+
+            $options[(int) $produit['id']] = sprintf('%s — %s F le kilo', (string) $produit['libelle'], number_format($prix, 0, ',', ' '));
+        }
+
+        return $options;
+    }
 }

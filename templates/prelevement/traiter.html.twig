@@ -26,6 +26,17 @@
                 <twig:Card:Title>Ce qui est demandé</twig:Card:Title>
             </twig:Card:Header>
             <twig:Card:Content class="grid gap-3 sm:grid-cols-2">
+                {#
+                    - Le produit et SON PRIX, côte à côte avec le taux : la décision se joue sur
+                      l'écart entre les deux. Un taux qui atteint le prix ne laisserait rien au
+                      planteur, et l'API refuserait d'ouvrir.
+                #}
+                {{ include('partials/_donnee.html.twig', {
+                    libelle: 'Produit',
+                    valeur: demande.produit.libelle is defined
+                        ? demande.produit.libelle ~ ' — ' ~ (demande.produit.prix|default(0))|number_format(0, ',', ' ') ~ ' F le kilo'
+                        : null
+                }) }}
                 {{ include('partials/_donnee.html.twig', {
                     libelle: 'Prélèvement par kilo',
                     valeur: demande.tauxDemande|number_format(0, ',', ' ') ~ ' F'
@@ -52,9 +63,10 @@
         <twig:Alert class="mb-4">
             <twig:ux:icon name="lucide:info" class="size-4" />
             <twig:Alert:Description>
-                Approuver n'écrit aucun mouvement de caisse : le prélèvement s'appliquera aux
-                pesées <strong>à venir</strong> de ce planteur, une à une. Le taux ne se corrige pas
-                ici — il vient du planteur.
+                Approuver n'écrit aucun mouvement de caisse : le prélèvement s'appliquera aux pesées
+                <strong>à venir</strong> de ce planteur <strong>sur ce produit</strong>, une à une.
+                Ses autres cultures ne sont pas touchées. Le taux ne se corrige pas ici — il vient
+                du planteur, et il doit rester sous le prix du kilo.
             </twig:Alert:Description>
         </twig:Alert>
 

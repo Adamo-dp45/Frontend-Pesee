@@ -29,15 +29,21 @@ export interface Pesee {
     poidsnet: number | null
     prixunitaire: number | null
     montantdu: number | null
+    /* Le transport payé EN PLUS de la récolte, aux planteurs qui la livrent eux-mêmes. 'montantdu'
+       reste la valeur de la récolte seule : les deux ne s'additionnent que dans le payable. */
+    prixtransport: number | null
+    montanttransport: number | null
     /* Ce qui part sur l'épargne du planteur, et le taux au kilo qui l'a produit. Nuls tant que la
        pesée n'a pas été arbitrée ; zéro quand elle l'a été sans prélèvement. */
     retenue: number | null
     tauxRetenue: number | null
-    /* Ce qu'on remettra vraiment au planteur au guichet : montant dû moins retenue. C'est LUI qui
-       borne un versement — 'montantdu' reste ce que la pesée vaut, et ne bouge jamais. */
+    /* Ce qu'on remettra vraiment au planteur au guichet : la récolte, plus le transport, moins la
+       retenue. C'est LUI qui borne un versement — 'montantdu' reste ce que vaut la récolte seule. */
     montantpayable: number | null
     /* Le seul montant CONFIRMÉ par la passerelle. Tant qu'un versement est en vol, il ne bouge pas. */
     montantpaye: number | null
+    /* La créance du planteur : le payable moins ce qui lui a déjà été versé. */
+    resteapayer: number | null
     /* Ce qui a quitté la caisse sans réponse de la passerelle, et 'resteaengager' ce que l'API
        acceptera encore. Sans ces deux-là, une pesée qu'on vient de payer affiche le même reste
        qu'avant le versement, et on la repaie. */

@@ -54,12 +54,14 @@ final class ExportService
     private const COLONNES_MONTANTS = [
         'prixunitaire' => 'Prix unitaire',
         'montantdu' => 'Montant dû',
+        // Payé EN PLUS de la récolte : sans cette colonne, le total du document ne correspond pas à ce qui est sorti de la caisse
+        'montanttransport' => 'Transport',
         'montantpaye' => 'Montant payé',
     ];
 
     /** Colonnes à aligner à droite et à formater avec séparateurs de milliers. */
     private const COLONNES_NUMERIQUES = [
-        'poids1', 'poids2', 'poidsnet', 'prixunitaire', 'montantdu', 'montantpaye',
+        'poids1', 'poids2', 'poidsnet', 'prixunitaire', 'montantdu', 'montanttransport', 'montantpaye',
     ];
 
     public function __construct(
@@ -235,15 +237,16 @@ final class ExportService
     /**
      * @param list<array<string, mixed>> $lignes
      *
-     * @return array{nbPesees: int, poidsnet: int, montantdu: int, montantpaye: int}
+     * @return array{nbPesees: int, poidsnet: int, montantdu: int, montanttransport: int, montantpaye: int}
      */
     private function totaliser(array $lignes): array
     {
-        $totaux = ['nbPesees' => count($lignes), 'poidsnet' => 0, 'montantdu' => 0, 'montantpaye' => 0];
+        $totaux = ['nbPesees' => count($lignes), 'poidsnet' => 0, 'montantdu' => 0, 'montanttransport' => 0, 'montantpaye' => 0];
 
         foreach ($lignes as $pesee) {
             $totaux['poidsnet'] += (int) ($pesee['poidsnet'] ?? 0);
             $totaux['montantdu'] += (int) ($pesee['montantdu'] ?? 0);
+            $totaux['montanttransport'] += (int) ($pesee['montanttransport'] ?? 0);
             $totaux['montantpaye'] += (int) ($pesee['montantpaye'] ?? 0);
         }
 
