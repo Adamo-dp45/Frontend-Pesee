@@ -16,6 +16,7 @@
 /* 'bouton déclencheur' => 'panneau qu'il ouvre' */
 const DECLENCHEURS = {
     profileBtn: 'profileDrop',
+    themeBtn: 'themeDrop',
     // notifBtn: 'notifDrop',
 }
 
@@ -40,6 +41,17 @@ export const initDropdowns = () => {
     })
 
     document.addEventListener('click', e => {
+        /*
+            - 'data-close-dropdown' figurait dans le balisage sans que rien ne le lise : les entrées
+              qui naviguent s'en sortaient par 'turbo:click', mais une entrée qui ne navigue pas —
+              le choix du thème — laissait le menu ouvert sous le doigt.
+        */
+        if (e.target.closest('[data-close-dropdown]')) {
+            closeAllDropdowns()
+
+            return
+        }
+
         const declencheur = Object.keys(DECLENCHEURS).find(id => e.target.closest(`#${id}`))
 
         if (!declencheur) {

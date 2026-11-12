@@ -8,6 +8,57 @@
 }
 .sidebar-overlay.visible{display:block;opacity:1;}
 
+/*
+    - LA PORTÉE DES COULEURS DE LA MARQUE. Les deux barres sont peintes en terracotta, mais tout ce
+      qu'elles contiennent — libellés, icônes, filets, survols — était écrit avec les jetons
+      GÉNÉRIQUES ('--foreground', '--muted-foreground', '--border'…), c'est-à-dire des couleurs
+      prévues pour un fond clair. Sur de la brique, elles devenaient illisibles.
+
+    - Plutôt que de réécrire la vingtaine de règles concernées — en en oubliant fatalement une, et
+      en recommençant au prochain composant ajouté dans une barre —, on REDÉFINIT ICI les jetons
+      génériques pour ces deux sous-arbres. Toute règle qui dit 'var(--foreground)' à l'intérieur
+      d'une barre obtient désormais la variante de la barre, sans rien savoir de ce changement.
+
+    - C'est aussi ce qui permet de revenir en arrière en une ligne : remettre '--sidebar' à une
+      couleur claire et retirer ce bloc suffit.
+*/
+.sidebar,
+.topbar{
+  --foreground: var(--sidebar-foreground);
+  --muted-foreground: var(--sidebar-muted-foreground);
+  --muted: var(--sidebar-accent);
+  --accent: var(--sidebar-accent);
+  --accent-foreground: var(--sidebar-accent-foreground);
+  --border: var(--sidebar-border);
+  --input: var(--sidebar-border);
+  --ring: var(--sidebar-ring);
+  --background: var(--sidebar);
+  --card: var(--sidebar);
+  --primary: var(--sidebar-primary);
+  --primary-foreground: var(--sidebar-primary-foreground);
+  --primary-light: var(--sidebar-active);
+}
+
+/*
+    - L'EXCEPTION : un menu déroulant flotte AU-DESSUS du contenu, il n'appartient pas visuellement
+      à la barre qui le porte. Il reprend donc les couleurs de la page, reprises des copies figées
+      au niveau racine — 'var(--card)' lu ici renverrait la brique, puisque la barre vient de le
+      redéfinir juste au-dessus.
+*/
+.topbar .dropdown,
+.sidebar .dropdown{
+  --foreground: var(--page-foreground);
+  --muted-foreground: var(--page-muted-foreground);
+  --accent: var(--page-accent);
+  --accent-foreground: var(--page-accent-foreground);
+  --border: var(--page-border);
+  --card: var(--page-card);
+  --primary: var(--page-primary);
+  --primary-foreground: var(--page-primary-foreground);
+  --destructive: var(--page-destructive);
+  color: var(--page-foreground);
+}
+
 /* ═══ SIDEBAR (Dashboard 1) ═══ */
 .sidebar{
   width:var(--sidebar-w);
@@ -16,7 +67,7 @@
   display:flex;flex-direction:column;
   border-right:1px solid var(--border);
   background:var(--sidebar);
-  color:var(--sidebar-text);
+  color:var(--sidebar-foreground); /* '--sidebar-text' n'a jamais été défini nulle part : la règle ne faisait rien */
   overflow-y:auto;overflow-x:hidden;
   transition:width .22s cubic-bezier(.4,0,.2,1), min-width .22s cubic-bezier(.4,0,.2,1), transform .25s cubic-bezier(.4,0,.2,1);
   z-index:150;
@@ -83,9 +134,17 @@
   flex-shrink:0;
   overflow:hidden;
 }
+/*
+    - La pastille du logo : fond clair, glyphe à la couleur de la barre. Les deux sont nécessaires —
+      le glyphe est tracé en 'currentColor', et sans cette ligne il héritait du blanc du texte de la
+      barre. Blanc sur blanc : la pastille devenait un carré vide.
+    - C'est ce qu'a provoqué le passage de la barre à la couleur de la marque, parce que '--primary'
+      y désigne désormais le plein clair qui se détache sur la brique, et non plus la brique.
+*/
 .sidebar-logo-icon{
   width:1.75rem;height:1.75rem;min-width:1.75rem;
   background:var(--primary);
+  color:var(--primary-foreground);
   border-radius:calc(var(--radius) - 2px);
   display:flex;align-items:center;justify-content:center;
   flex-shrink:0;
@@ -165,8 +224,17 @@
   cursor:pointer;
   white-space:nowrap;
 }
+/*
+    - La hiérarchie d'origine : l'entrée PARENTE en cours porte un fond plein, l'entrée FILLE en
+      cours se contente d'une couleur de texte. Sur fond clair, cette couleur était la terracotta.
+    - Sur la barre devenue brique, '--primary' désigne le plein clair : l'entrée fille en cours
+      serait ressortie blanche… comme toutes les autres, donc indistinguable. On garde la même
+      hiérarchie en inversant le rapport — les filles au repos s'atténuent, celle en cours reste
+      pleinement lisible.
+*/
+.sub-link{color:var(--muted-foreground);}
 .sub-link:hover{background:var(--accent);color:var(--foreground);}
-.sub-link.active{color:var(--primary);font-weight:600;}
+.sub-link.active{color:var(--foreground);font-weight:600;}
 .sub-dot{width:.3125rem;height:.3125rem;border-radius:9999px;background:currentColor;flex-shrink:0;}
 .sub-badge-warn{
   margin-left:auto;font-size:.625rem;

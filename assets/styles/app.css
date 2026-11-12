@@ -38,14 +38,27 @@
     --chart-3: oklch(0.8816 0.0276 93.1280);
     --chart-4: oklch(0.8822 0.0403 298.1792);
     --chart-5: oklch(0.5608 0.1348 42.0584);
-    --sidebar: oklch(0.9663 0.0080 98.8792);
-    --sidebar-foreground: oklch(0.3590 0.0051 106.6524);
-    --sidebar-primary: oklch(0.6171 0.1375 39.0427);
-    --sidebar-primary-foreground: oklch(0.9881 0 0);
-    --sidebar-accent: oklch(0.9245 0.0138 92.9892);
-    --sidebar-accent-foreground: oklch(0.3250 0 0);
-    --sidebar-border: oklch(0.9401 0 0);
-    --sidebar-ring: oklch(0.7731 0 0);
+    /*
+        - LA BARRE LATÉRALE ET CELLE DU HAUT PORTENT LA COULEUR DE LA MARQUE. La terracotta exacte
+          du logo — oklch(0.6171 0.1375 39.0427) — a été ASSOMBRIE À 0.52 : telle quelle, du texte
+          blanc dessus ne tenait qu'à 3.9 contre 1, en dessous des 4.5 exigés pour du texte courant.
+          À 0.52 le blanc monte à 5.7 et le texte atténué à 4.6, sans que la teinte cesse d'être
+          reconnaissable.
+        - Ces jetons ne servent plus seulement à peindre un fond : ils REMPLACENT les jetons
+          génériques à l'intérieur des deux barres (voir 'elements/sidebar.css'), parce que tout ce
+          qu'elles contiennent — libellés, icônes, filets, survols — se lisait jusqu'ici sur un fond
+          clair.
+    */
+    --sidebar: oklch(0.5200 0.1375 39.0427);
+    --sidebar-foreground: oklch(0.9881 0 0);
+    --sidebar-muted-foreground: oklch(0.9200 0.0250 42);
+    --sidebar-primary: oklch(0.9881 0 0);          /* Pastilles et badges : pleins clairs sur la brique */
+    --sidebar-primary-foreground: oklch(0.5200 0.1375 39.0427);
+    --sidebar-accent: oklch(0.4500 0.1375 39.0427); /* Survol : la même teinte, plus profonde */
+    --sidebar-accent-foreground: oklch(0.9881 0 0);
+    --sidebar-active: oklch(0.4000 0.1375 39.0427); /* Entrée en cours : plus profonde encore que le survol */
+    --sidebar-border: oklch(0.4400 0.1200 39.0427);
+    --sidebar-ring: oklch(0.9200 0.0250 42);
     --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
@@ -93,14 +106,17 @@
     --chart-3: oklch(0.2130 0.0078 95.4245);
     --chart-4: oklch(0.3074 0.0516 289.3230);
     --chart-5: oklch(0.5608 0.1348 42.0584);
-    --sidebar: oklch(0.2357 0.0024 67.7077);
-    --sidebar-foreground: oklch(0.8074 0.0142 93.0137);
-    --sidebar-primary: oklch(0.3250 0 0);
-    --sidebar-primary-foreground: oklch(0.9881 0 0);
-    --sidebar-accent: oklch(0.1680 0.0020 106.6177);
-    --sidebar-accent-foreground: oklch(0.8074 0.0142 93.0137);
-    --sidebar-border: oklch(0.9401 0 0);
-    --sidebar-ring: oklch(0.7731 0 0);
+    /* La même brique, plus profonde : sur une interface sombre, la version claire ressortait comme une lampe. */
+    --sidebar: oklch(0.4400 0.1300 39.0427);
+    --sidebar-foreground: oklch(0.9881 0 0);
+    --sidebar-muted-foreground: oklch(0.8800 0.0400 42);
+    --sidebar-primary: oklch(0.9881 0 0);
+    --sidebar-primary-foreground: oklch(0.4400 0.1300 39.0427);
+    --sidebar-accent: oklch(0.3800 0.1300 39.0427);
+    --sidebar-accent-foreground: oklch(0.9881 0 0);
+    --sidebar-active: oklch(0.3300 0.1300 39.0427);
+    --sidebar-border: oklch(0.3700 0.1100 39.0427);
+    --sidebar-ring: oklch(0.8800 0.0400 42);
     --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
@@ -184,6 +200,24 @@
 }
 
 /* ----- */
+/*
+    - Copies des couleurs de la PAGE, prises au niveau racine. Les deux barres redéfinissent les
+      jetons génériques pour tout ce qu'elles contiennent ; un menu déroulant, lui, est une surface
+      flottante qui doit rester aux couleurs du contenu — sans ces copies, il n'aurait aucun moyen
+      de les retrouver, puisque 'var(--card)' lu depuis la barre renvoie la brique.
+*/
+:root, .dark {
+    --page-foreground: var(--foreground);
+    --page-muted-foreground: var(--muted-foreground);
+    --page-accent: var(--accent);
+    --page-accent-foreground: var(--accent-foreground);
+    --page-border: var(--border);
+    --page-card: var(--card);
+    --page-primary: var(--primary);
+    --page-primary-foreground: var(--primary-foreground);
+    --page-destructive: var(--destructive);
+}
+
 :root {
     --sidebar-w:240px;
     --sidebar-collapsed-w:56px;

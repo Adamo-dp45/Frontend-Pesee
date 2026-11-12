@@ -10924,21 +10924,25 @@ a.\[a\]\:hover\:bg-secondary\/80:hover:not(#\#):not(#\#):not(#\#):not(#\#) {
 
   --chart-5: rgb(180, 85, 45);
 
-  --sidebar: rgb(245, 244, 238);
+  --sidebar: rgb(168, 70, 36);
 
-  --sidebar-foreground: rgb(61, 61, 58);
+  --sidebar-foreground: rgb(251, 251, 251);
 
-  --sidebar-primary: rgb(201, 100, 66);
+  --sidebar-muted-foreground: rgb(244, 224, 216);
 
-  --sidebar-primary-foreground: rgb(251, 251, 251);
+  --sidebar-primary: rgb(251, 251, 251);
 
-  --sidebar-accent: rgb(233, 230, 220);
+  --sidebar-primary-foreground: rgb(168, 70, 36);
 
-  --sidebar-accent-foreground: rgb(52, 52, 52);
+  --sidebar-accent: rgb(145, 49, 9);
 
-  --sidebar-border: rgb(235, 235, 235);
+  --sidebar-accent-foreground: rgb(251, 251, 251);
 
-  --sidebar-ring: rgb(181, 181, 181);
+  --sidebar-active: rgb(125, 38, 0);
+
+  --sidebar-border: rgb(135, 53, 24);
+
+  --sidebar-ring: rgb(244, 224, 216);
 
   --font-sans: ui-sans-serif,system-ui,Segoe UI,Ubuntu,Cantarell,Noto Sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
@@ -10985,12 +10989,16 @@ a.\[a\]\:hover\:bg-secondary\/80:hover:not(#\#):not(#\#):not(#\#):not(#\#) {
 :root:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
 
     --destructive: rgb(228, 0, 22);
+
+    --sidebar-active: rgb(125, 38, 0);
   }
 
 @media (color-gamut: p3) {
 :root:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
 
       --destructive: color(display-p3 0.83032 0.14038 0.1332);
+
+      --sidebar-active: color(display-p3 0.46405 0.15977 0.02626);
     }
 }
 }
@@ -11045,21 +11053,25 @@ a.\[a\]\:hover\:bg-secondary\/80:hover:not(#\#):not(#\#):not(#\#):not(#\#) {
 
   --chart-5: rgb(180, 85, 45);
 
-  --sidebar: rgb(31, 30, 29);
+  --sidebar: rgb(139, 49, 14);
 
-  --sidebar-foreground: rgb(195, 192, 182);
+  --sidebar-foreground: rgb(251, 251, 251);
 
-  --sidebar-primary: rgb(52, 52, 52);
+  --sidebar-muted-foreground: rgb(240, 208, 195);
 
-  --sidebar-primary-foreground: rgb(251, 251, 251);
+  --sidebar-primary: rgb(251, 251, 251);
 
-  --sidebar-accent: rgb(15, 15, 14);
+  --sidebar-primary-foreground: rgb(139, 49, 14);
 
-  --sidebar-accent-foreground: rgb(195, 192, 182);
+  --sidebar-accent: rgb(117, 35, 0);
 
-  --sidebar-border: rgb(235, 235, 235);
+  --sidebar-accent-foreground: rgb(251, 251, 251);
 
-  --sidebar-ring: rgb(181, 181, 181);
+  --sidebar-active: rgb(96, 27, 0);
+
+  --sidebar-border: rgb(109, 37, 8);
+
+  --sidebar-ring: rgb(240, 208, 195);
 
   --font-sans: ui-sans-serif,system-ui,Segoe UI,Ubuntu,Cantarell,Noto Sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
@@ -11098,6 +11110,24 @@ a.\[a\]\:hover\:bg-secondary\/80:hover:not(#\#):not(#\#):not(#\#):not(#\#) {
   --shadow-2xl: 0 1px 3px 0px hsla(0, 0%, 0%, 0.25);
 }
 
+@supports (color: color(display-p3 0 0 0%)) {
+.dark:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
+
+    --sidebar-accent: rgb(117, 35, 0);
+
+    --sidebar-active: rgb(96, 26, 0);
+  }
+
+@media (color-gamut: p3) {
+.dark:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
+
+      --sidebar-accent: color(display-p3 0.4311 0.14737 0.02468);
+
+      --sidebar-active: color(display-p3 0.3598 0.10462 0);
+    }
+}
+}
+
 *:not(#\#):not(#\#) {
 
   border-color: rgb(218, 217, 212);
@@ -11133,6 +11163,27 @@ body:not(#\#):not(#\#) {
   color: rgb(61, 57, 41);
 
   color: var(--foreground);
+}
+
+:root:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#), .dark:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
+
+  --page-foreground: var(--foreground);
+
+  --page-muted-foreground: var(--muted-foreground);
+
+  --page-accent: var(--accent);
+
+  --page-accent-foreground: var(--accent-foreground);
+
+  --page-border: var(--border);
+
+  --page-card: var(--card);
+
+  --page-primary: var(--primary);
+
+  --page-primary-foreground: var(--primary-foreground);
+
+  --page-destructive: var(--destructive);
 }
 
 :root:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
@@ -11477,6 +11528,60 @@ html.dark:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) .tooltip {
   opacity: 1;
 }
 
+.sidebar:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#), .topbar:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
+
+  --foreground: var(--sidebar-foreground);
+
+  --muted-foreground: var(--sidebar-muted-foreground);
+
+  --muted: var(--sidebar-accent);
+
+  --accent: var(--sidebar-accent);
+
+  --accent-foreground: var(--sidebar-accent-foreground);
+
+  --border: var(--sidebar-border);
+
+  --input: var(--sidebar-border);
+
+  --ring: var(--sidebar-ring);
+
+  --background: var(--sidebar);
+
+  --card: var(--sidebar);
+
+  --primary: var(--sidebar-primary);
+
+  --primary-foreground: var(--sidebar-primary-foreground);
+
+  --primary-light: var(--sidebar-active);
+}
+
+.topbar:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) .dropdown, .sidebar:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) .dropdown {
+
+  --foreground: var(--page-foreground);
+
+  --muted-foreground: var(--page-muted-foreground);
+
+  --accent: var(--page-accent);
+
+  --accent-foreground: var(--page-accent-foreground);
+
+  --border: var(--page-border);
+
+  --card: var(--page-card);
+
+  --primary: var(--page-primary);
+
+  --primary-foreground: var(--page-primary-foreground);
+
+  --destructive: var(--page-destructive);
+
+  color: rgb(61, 57, 41);
+
+  color: var(--page-foreground);
+}
+
 .sidebar:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
 
   width: 240px;
@@ -11497,11 +11602,13 @@ html.dark:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) .tooltip {
 
   border-right: 1px solid var(--border);
 
-  background: rgb(245, 244, 238);
+  background: rgb(168, 70, 36);
 
   background: var(--sidebar);
 
-  color: var(--sidebar-text);
+  color: rgb(251, 251, 251);
+
+  color: var(--sidebar-foreground);
 
   overflow-y: auto;
 
@@ -11668,6 +11775,10 @@ html.dark:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) .tooltip {
   background: rgb(201, 100, 66);
 
   background: var(--primary);
+
+  color: rgb(255, 255, 255);
+
+  color: var(--primary-foreground);
 
   border-radius: calc(0.5rem - 2px);
 
@@ -11927,6 +12038,10 @@ html.dark:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) .tooltip {
   cursor: pointer;
 
   white-space: nowrap;
+
+  color: rgb(131, 130, 125);
+
+  color: var(--muted-foreground);
 }
 
 .sub-link:hover:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
@@ -11942,9 +12057,9 @@ html.dark:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) .tooltip {
 
 .sub-link.active:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
 
-  color: rgb(201, 100, 66);
+  color: rgb(61, 57, 41);
 
-  color: var(--primary);
+  color: var(--foreground);
 
   font-weight: 600;
 }
@@ -12184,7 +12299,7 @@ html.dark:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) .tooltip {
 
   flex-shrink: 0;
 
-  background: rgb(245, 244, 238);
+  background: rgb(168, 70, 36);
 
   background: var(--sidebar);
 
@@ -12726,6 +12841,28 @@ html.dark:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) .dropdown {
   color: color(display-p3 0.83032 0.14038 0.1332);
 
   color: var(--destructive);
+}
+
+.dropdown-item.actif:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
+
+  background: rgb(233, 230, 220);
+
+  background: var(--accent);
+}
+
+.dropdown-item.actif:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#)::after {
+
+  content: '✓';
+
+  margin-left: auto;
+
+  font-size: .8125rem;
+
+  line-height: 1;
+
+  color: rgb(201, 100, 66);
+
+  color: var(--primary);
 }
 
 @media (max-width:768px) {

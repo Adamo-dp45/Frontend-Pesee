@@ -1,7 +1,7 @@
 import './stimulus_bootstrap.js';
 
 import './styles/app.css';
-import { initTheme } from './modules/theme.js';
+import { initTheme, peindreLeTheme } from './modules/theme.js';
 import { initDropdowns } from './modules/dropdown.js';
 import { initSidebar, initSidebarResize } from './modules/sidebar.js';
 import { initGraphiques } from './modules/graphiques.js';
@@ -19,6 +19,7 @@ import { initModeReglement } from './modules/mode_reglement.js';
 initConfirmation()
 initDropdowns()
 initSidebarResize()
+initTheme() // L'écouteur de la préférence système, et le menu du thème : tous deux sur des objets qui survivent à Turbo
 
 document.addEventListener('turbo:before-render', (event) => {
     if(!document.startViewTransition) { /*
@@ -60,7 +61,7 @@ document.addEventListener('turbo:before-render', (event) => {
       empiler, et ceux-ci doivent être reposés sur les nouveaux nœuds.
 */
 document.addEventListener('turbo:load', () => {
-    initTheme()
+    peindreLeTheme() // La barre du haut est remplacée à chaque visite : son icône et sa coche sont à repeindre
     initSidebar()
     initGraphiques()
     initModeReglement()

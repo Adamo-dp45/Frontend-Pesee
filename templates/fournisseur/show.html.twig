@@ -210,38 +210,92 @@
         <twig:Card>
             <twig:Card:Header>
                 <twig:Card:Title>Dernières pesées</twig:Card:Title>
+                <twig:Card:Description>
+                    Ce que vaut la récolte, ce qui s'y ajoute ou s'en retire, et ce qui reste à
+                    remettre au guichet.
+                </twig:Card:Description>
             </twig:Card:Header>
             <twig:Card:Content class="p-0">
+                {#
+                    - SIX COLONNES ET NON ONZE. La fiche tient dans 768 px : une colonne par montant
+                      — récolte, transport, retenue, payable, versé, reste — obligerait à faire
+                      défiler le tableau de côté pour lire une seule ligne. Les montants sont donc
+                      groupés là où ils se lisent ensemble, comme dans la file du guichet.
+
+                    - Le découpage suit le raisonnement du domaine, pas la structure de la table :
+                      à gauche ce que la pesée VAUT, à droite ce qu'on REMET au planteur. L'écart
+                      entre les deux est précisément ce que les lignes secondaires expliquent —
+                      sans elles, un planteur qui compare son ticket au guichet ne s'y retrouve pas.
+                #}
                 <div class="overflow-x-auto">
                     <twig:Table>
                         <twig:Table:Header>
                             <twig:Table:Row>
                                 <twig:Table:Head>Ticket</twig:Table:Head>
-                                <twig:Table:Head>Date</twig:Table:Head>
                                 <twig:Table:Head>Produit</twig:Table:Head>
                                 <twig:Table:Head class="text-right">Net</twig:Table:Head>
-                                <twig:Table:Head class="text-right">Montant</twig:Table:Head>
+                                <twig:Table:Head class="text-right">Récolte</twig:Table:Head>
+                                <twig:Table:Head class="text-right">Au guichet</twig:Table:Head>
                                 <twig:Table:Head>Règlement</twig:Table:Head>
                             </twig:Table:Row>
                         </twig:Table:Header>
                         <twig:Table:Body>
                             {% for p in pesees %}
+                                {% set transport = p.montanttransport|default(0) %}
+                                {% set retenue = p.retenue|default(0) %}
+                                {% set paye = p.montantpaye|default(0) %}
+                                {% set payable = p.montantpayable|default(0) %}
+                                {# 'resteapayer' vient de l'API, qui décompte aussi ce qui est en vol : le recalculer ici donnerait un autre chiffre que le guichet #}
+                                {% set reste = p.resteapayer|default(payable - paye) %}
                                 <twig:Table:Row>
                                     <twig:Table:Cell>
                                         <a href="{{ path('pesee.voir', { id: p.id }) }}" class="font-medium underline-offset-4 hover:underline">
                                             {{ p.numticket ?? p.codepesee }}
                                         </a>
-                                    </twig:Table:Cell>
-                                    <twig:Table:Cell class="whitespace-nowrap">
-                                        {{ p.peseeAt2 ? p.peseeAt2|date('d/m/Y') : '—' }}
+                                        <div class="text-xs text-muted-foreground whitespace-nowrap">
+                                            {{ p.peseeAt2 ? p.peseeAt2|date('d/m/Y') : '—' }}
+                                        </div>
                                     </twig:Table:Cell>
                                     <twig:Table:Cell>{{ p.produit.libelle ?? '—' }}</twig:Table:Cell>
-                                    <twig:Table:Cell class="text-right tabular-nums">
+                                    <twig:Table:Cell class="text-right tabular-nums whitespace-nowrap">
                                         {{ p.poidsnet ? p.poidsnet|number_format(0, ',', ' ') ~ ' kg' : '—' }}
                                     </twig:Table:Cell>
-                                    <twig:Table:Cell class="text-right tabular-nums">
+
+                                    {# La récolte SEULE, celle qu'imprime le ticket du planteur, et le prix au kilo qui l'a produite #}
+                                    <twig:Table:Cell class="text-right tabular-nums whitespace-nowrap">
                                         {{ p.montantdu ? p.montantdu|number_format(0, ',', ' ') ~ ' F' : '—' }}
+                                        {% if p.prixunitaire|default(0) > 0 %}
+                                            <div class="text-xs text-muted-foreground">
+                                                {{ p.prixunitaire|number_format(0, ',', ' ') }} F le kilo
+                                            </div>
+                                        {% endif %}
                                     </twig:Table:Cell>
+
+                                    {# Ce qu'on lui remet, et les trois écarts qui l'expliquent #}
+                                    <twig:Table:Cell class="text-right tabular-nums whitespace-nowrap">
+                                        {# Une pesée pas encore valorisée — camion sur le pont, ou produit non tarifé — n'affiche pas « 0 F » : ce zéro-là n'est pas un calcul, c'est une absence #}
+                                        {% if not p.montantdu %}
+                                            <span class="text-muted-foreground">—</span>
+                                        {% else %}
+                                        <div class="font-medium">{{ payable|number_format(0, ',', ' ') }} F</div>
+                                        {% if transport > 0 %}
+                                            <div class="text-xs text-muted-foreground">
+                                                + {{ transport|number_format(0, ',', ' ') }} F de transport
+                                            </div>
+                                        {% endif %}
+                                        {% if retenue > 0 %}
+                                            <div class="text-xs text-muted-foreground">
+                                                − {{ retenue|number_format(0, ',', ' ') }} F mis en compte
+                                            </div>
+                                        {% endif %}
+                                        {% if paye > 0 %}
+                                            <div class="text-xs text-muted-foreground">
+                                                {{ paye|number_format(0, ',', ' ') }} F versés · reste {{ reste|number_format(0, ',', ' ') }} F
+                                            </div>
+                                        {% endif %}
+                                        {% endif %}
+                                    </twig:Table:Cell>
+
                                     <twig:Table:Cell>{{ include('partials/_etat.html.twig', { statut: p.statutReglement }) }}</twig:Table:Cell>
                                 </twig:Table:Row>
                             {% else %}

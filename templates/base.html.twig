@@ -13,9 +13,11 @@
         <script>
             document.documentElement.classList.toggle(
                 'dark',
-                localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
+                localStorage.theme === 'dark'
+                    || (localStorage.theme !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches)
             ) /*
                 - Pour éviter le flash au chargement 'FOUC' ce qui applique le thème instantanément et ne doit pas être dans 'turbo:load' car il doit s'exécuter avant le rendu
+                - Trois choix possibles : 'light', 'dark', 'system'. Tout ce qui n'est pas 'light' ou 'dark' — y compris une clé absente — suit le système, exactement comme 'modules/theme.js'. Les deux lectures doivent concorder, sinon l'écran change de couleur une fraction de seconde après le rendu.
             */
             if(localStorage.getItem('sidebar-collapsed') === 'true') {
                 document.documentElement.classList.add('sidebar-pre-collapsed');
@@ -51,7 +53,16 @@
                     <div class="sidebar-logo-icon">
                         <svg width="16" height="16"><use href="{{ asset('sprite.svg') }}#logo"></use></svg>
                     </div>
-                    <span class="sidebar-logo-text sb-text">Webpesee</span>
+                    {#
+                        - Le nom de l'ENTREPRISE connectée, et non celui du logiciel : l'opérateur
+                          d'un poste travaille chez son employeur, pas chez Webpesee.
+                        - Le repli n'est pas décoratif : le super administrateur n'est rattaché à
+                          aucune entreprise — il les gère toutes — et 'nomEntreprise' est alors nul.
+                        - 'title' parce que le nom est tronqué quand il dépasse la largeur de la
+                          barre : sans lui, un nom long devient indevinable.
+                    #}
+                    {% set proprietaire = app.user.nomEntreprise|default('Webpesee') %}
+                    <span class="sidebar-logo-text sb-text" title="{{ proprietaire }}">{{ proprietaire }}</span>
                 </div>
 
                 <nav class="sidebar-nav">
@@ -243,16 +254,51 @@
                         </button>
                     </div>
                     <div class="topbar-right">
-                        <button class="theme-btn" id="themeBtn">
-                            <svg id="sun-i" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="4"/>
-                                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
-                            </svg>
-                            <svg id="moon-i" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
-                                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
-                            </svg>
-                            <span id="theme-lbl" class="theme-lbl-text">Dark</span>
-                        </button>
+                        {#
+                            - Trois choix et non deux : « Système » suit la préférence du poste, et
+                              la suit en direct. L'icône du bouton montre la couleur EN COURS, son
+                              libellé le CHOIX — les deux diffèrent justement en mode système.
+                            - Le libellé est rempli par 'modules/theme.js' : écrit en dur ici, il
+                              mentirait une fraction de seconde au chargement, le temps que le
+                              script lise la préférence.
+                        #}
+                        <div class="dropdown-anchor">
+                            <button class="theme-btn" id="themeBtn" type="button" aria-haspopup="menu">
+                                <svg id="sun-i" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="4"/>
+                                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+                                </svg>
+                                <svg id="moon-i" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+                                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+                                </svg>
+                                <span id="theme-lbl" class="theme-lbl-text">Thème</span>
+                            </button>
+                            <div class="dropdown" id="themeDrop" role="menu" style="min-width:190px;right:0;top:calc(100% + .375rem);">
+                                <div class="dropdown-section">
+                                    <div class="dropdown-label">Apparence</div>
+                                    <button type="button" class="dropdown-item" role="menuitemradio" aria-checked="false" data-theme="light" data-close-dropdown>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <circle cx="12" cy="12" r="4"/>
+                                            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+                                        </svg>
+                                        Clair
+                                    </button>
+                                    <button type="button" class="dropdown-item" role="menuitemradio" aria-checked="false" data-theme="dark" data-close-dropdown>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+                                        </svg>
+                                        Sombre
+                                    </button>
+                                    <button type="button" class="dropdown-item" role="menuitemradio" aria-checked="false" data-theme="system" data-close-dropdown>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <rect x="2" y="3" width="20" height="14" rx="2"/>
+                                            <path d="M8 21h8M12 17v4"/>
+                                        </svg>
+                                        Système
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                         <div class="topbar-divider"></div>
 
                         <div class="dropdown-anchor">

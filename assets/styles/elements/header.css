@@ -129,6 +129,15 @@ html.dark .dropdown{box-shadow:0 4px 20px rgba(0,0,0,.4),0 1px 6px rgba(0,0,0,.2
 .dropdown-item svg{color:var(--muted-foreground);flex-shrink:0;}
 .dropdown-item.destructive svg{color:var(--destructive);}
 
+/* L'entrée en vigueur. La coche suit le CHOIX et non la couleur affichée : en « Système », c'est bien « Système » qui est cochée, quelle que soit la teinte du moment. */
+.dropdown-item.actif{background:var(--accent);}
+.dropdown-item.actif::after{
+  content:'✓';
+  margin-left:auto;
+  font-size:.8125rem;line-height:1;
+  color:var(--primary);
+}
+
 
 /*
 @media(max-width:900px){
