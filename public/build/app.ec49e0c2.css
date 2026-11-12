@@ -10944,6 +10944,24 @@ a.\[a\]\:hover\:bg-secondary\/80:hover:not(#\#):not(#\#):not(#\#):not(#\#) {
 
   --sidebar-ring: rgb(244, 224, 216);
 
+  --topbar: rgb(27, 27, 25);
+
+  --topbar-foreground: rgb(251, 251, 251);
+
+  --topbar-muted-foreground: rgb(185, 184, 175);
+
+  --topbar-accent: rgb(43, 43, 41);
+
+  --topbar-accent-foreground: rgb(251, 251, 251);
+
+  --topbar-border: rgb(56, 56, 53);
+
+  --topbar-primary: rgb(201, 100, 66);
+
+  --topbar-primary-foreground: rgb(251, 251, 251);
+
+  --topbar-ring: rgb(185, 184, 175);
+
   --font-sans: ui-sans-serif,system-ui,Segoe UI,Ubuntu,Cantarell,Noto Sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
   --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
@@ -11072,6 +11090,24 @@ a.\[a\]\:hover\:bg-secondary\/80:hover:not(#\#):not(#\#):not(#\#):not(#\#) {
   --sidebar-border: rgb(109, 37, 8);
 
   --sidebar-ring: rgb(240, 208, 195);
+
+  --topbar: rgb(17, 17, 15);
+
+  --topbar-foreground: rgb(251, 251, 251);
+
+  --topbar-muted-foreground: rgb(185, 184, 175);
+
+  --topbar-accent: rgb(33, 33, 30);
+
+  --topbar-accent-foreground: rgb(251, 251, 251);
+
+  --topbar-border: rgb(51, 51, 48);
+
+  --topbar-primary: rgb(217, 119, 87);
+
+  --topbar-primary-foreground: rgb(251, 251, 251);
+
+  --topbar-ring: rgb(185, 184, 175);
 
   --font-sans: ui-sans-serif,system-ui,Segoe UI,Ubuntu,Cantarell,Noto Sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
@@ -11528,7 +11564,7 @@ html.dark:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) .tooltip {
   opacity: 1;
 }
 
-.sidebar:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#), .topbar:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
+.sidebar:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
 
   --foreground: var(--sidebar-foreground);
 
@@ -11555,6 +11591,35 @@ html.dark:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) .tooltip {
   --primary-foreground: var(--sidebar-primary-foreground);
 
   --primary-light: var(--sidebar-active);
+}
+
+.topbar:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) {
+
+  --foreground: var(--topbar-foreground);
+
+  --muted-foreground: var(--topbar-muted-foreground);
+
+  --muted: var(--topbar-accent);
+
+  --accent: var(--topbar-accent);
+
+  --accent-foreground: var(--topbar-accent-foreground);
+
+  --border: var(--topbar-border);
+
+  --input: var(--topbar-border);
+
+  --ring: var(--topbar-ring);
+
+  --background: var(--topbar);
+
+  --card: var(--topbar);
+
+  --primary: var(--topbar-primary);
+
+  --primary-foreground: var(--topbar-primary-foreground);
+
+  --primary-light: var(--topbar-accent);
 }
 
 .topbar:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) .dropdown, .sidebar:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) .dropdown {
@@ -12299,9 +12364,9 @@ html.dark:not(#\#):not(#\#):not(#\#):not(#\#):not(#\#) .tooltip {
 
   flex-shrink: 0;
 
-  background: rgb(168, 70, 36);
+  background: rgb(27, 27, 25);
 
-  background: var(--sidebar);
+  background: var(--topbar);
 
   position: relative;
 

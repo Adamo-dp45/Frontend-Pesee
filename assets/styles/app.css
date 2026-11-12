@@ -59,6 +59,23 @@
     --sidebar-active: oklch(0.4000 0.1375 39.0427); /* Entrée en cours : plus profonde encore que le survol */
     --sidebar-border: oklch(0.4400 0.1200 39.0427);
     --sidebar-ring: oklch(0.9200 0.0250 42);
+
+    /*
+        - LA BARRE DU HAUT NE SUIT PLUS LA LATÉRALE : noir doux, pendant que la sidebar garde la
+          brique. Deux familles de jetons donc, et non plus une — '--topbar' ne se déduit pas de
+          '--sidebar', et les mélanger rendrait impossible de changer l'une sans l'autre.
+        - 0.22 de clarté : un noir CHAUD et non un noir pur, pour rester dans la famille sable du
+          reste de l'application. Le blanc y tient à 16.7 contre 1, le texte atténué à 8.7.
+    */
+    --topbar: oklch(0.2200 0.0040 107);
+    --topbar-foreground: oklch(0.9881 0 0);
+    --topbar-muted-foreground: oklch(0.7800 0.0120 100);
+    --topbar-accent: oklch(0.2900 0.0050 107);   /* Survol : un cran au-dessus du fond */
+    --topbar-accent-foreground: oklch(0.9881 0 0);
+    --topbar-border: oklch(0.3400 0.0060 107);
+    --topbar-primary: oklch(0.6171 0.1375 39.0427); /* La brique reste la couleur d'accent : pastilles, avatar */
+    --topbar-primary-foreground: oklch(0.9881 0 0);
+    --topbar-ring: oklch(0.7800 0.0120 100);
     --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
@@ -117,6 +134,21 @@
     --sidebar-active: oklch(0.3300 0.1300 39.0427);
     --sidebar-border: oklch(0.3700 0.1100 39.0427);
     --sidebar-ring: oklch(0.8800 0.0400 42);
+
+    /*
+        - Plus profonde que la page (0.2679), pour que la barre se lise comme un bandeau et non
+          comme la suite du contenu. L'écart de clarté est faible — deux surfaces sombres voisines —
+          c'est donc le filet du bas qui porte la séparation, et il est éclairci en conséquence.
+    */
+    --topbar: oklch(0.1750 0.0035 107);
+    --topbar-foreground: oklch(0.9881 0 0);
+    --topbar-muted-foreground: oklch(0.7800 0.0120 100);
+    --topbar-accent: oklch(0.2450 0.0050 107);
+    --topbar-accent-foreground: oklch(0.9881 0 0);
+    --topbar-border: oklch(0.3200 0.0060 107);
+    --topbar-primary: oklch(0.6724 0.1308 38.7559);
+    --topbar-primary-foreground: oklch(0.9881 0 0);
+    --topbar-ring: oklch(0.7800 0.0120 100);
     --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;

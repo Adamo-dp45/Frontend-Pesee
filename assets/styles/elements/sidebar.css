@@ -22,8 +22,7 @@
     - C'est aussi ce qui permet de revenir en arrière en une ligne : remettre '--sidebar' à une
       couleur claire et retirer ce bloc suffit.
 */
-.sidebar,
-.topbar{
+.sidebar{
   --foreground: var(--sidebar-foreground);
   --muted-foreground: var(--sidebar-muted-foreground);
   --muted: var(--sidebar-accent);
@@ -37,6 +36,29 @@
   --primary: var(--sidebar-primary);
   --primary-foreground: var(--sidebar-primary-foreground);
   --primary-light: var(--sidebar-active);
+}
+
+/*
+    - LA BARRE DU HAUT A SA PROPRE FAMILLE, parce qu'elle ne porte plus la même couleur que la
+      latérale : noir doux d'un côté, brique de l'autre. Le mécanisme est identique — on redéfinit
+      les jetons génériques pour le sous-arbre — seule la source change.
+    - '--primary' y reste la BRIQUE et non un plein clair, contrairement à la sidebar : sur du noir,
+      c'est la couleur de la marque qui ressort, et c'est elle que portent l'avatar et les pastilles.
+*/
+.topbar{
+  --foreground: var(--topbar-foreground);
+  --muted-foreground: var(--topbar-muted-foreground);
+  --muted: var(--topbar-accent);
+  --accent: var(--topbar-accent);
+  --accent-foreground: var(--topbar-accent-foreground);
+  --border: var(--topbar-border);
+  --input: var(--topbar-border);
+  --ring: var(--topbar-ring);
+  --background: var(--topbar);
+  --card: var(--topbar);
+  --primary: var(--topbar-primary);
+  --primary-foreground: var(--topbar-primary-foreground);
+  --primary-light: var(--topbar-accent);
 }
 
 /*
