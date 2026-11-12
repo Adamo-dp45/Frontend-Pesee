@@ -37,6 +37,21 @@ final class SiteController extends GestionController
     /* 'clé du formulaire' => 'filtre de l'API'. La recherche porte sur le libellé, c'est ce qu'on lit dans la colonne. */
     private const FILTRES = ['recherche' => 'libellesite', 'statut' => 'statut'];
 
+    /*
+        - Les identifiants du poste, déposés en session le temps d'une redirection.
+
+        - Pourquoi ce détour plutôt que de rendre la vue directement depuis le POST : Turbo n'affiche
+          pas une réponse 200 à un envoi de formulaire, il attend une redirection. L'écran restait
+          donc figé sur le formulaire alors que le site venait bel et bien d'être créé — et le mot de
+          passe, affiché une seule fois, partait avec la réponse que personne n'a vue.
+
+        - Et pourquoi la session plutôt que l'URL : le mot de passe n'existe nulle part ailleurs et
+          ne doit pas se retrouver dans un paramètre, un journal d'accès ou un historique de
+          navigation. Il est LU UNE FOIS puis retiré, ce qui donne au passage la bonne sémantique —
+          rafraîchir la page ne le remontre pas.
+    */
+    private const IDENTIFIANTS = 'site.identifiants';
+
     public function __construct(
         private readonly ApiHelper $api,
         private readonly TableHelper $table,
@@ -85,7 +100,7 @@ final class SiteController extends GestionController
                     'entreprise' => '/api/entreprises/' . $saisie['entreprise'], // Relation en IRI
                 ]);
 
-                return $this->render('site/identifiants.html.twig', ['site' => $site]);
+                return $this->remettreLesIdentifiants($request, $site, renouvelle: false);
             } catch(ApiException $e) {
                 // Remet les violations de l'API sous les champs concernés, et renvoie une Response ou null
                 if($reponse = $this->apiExceptionHandler->handle($e, $form, 'site.index')) {
@@ -227,15 +242,55 @@ final class SiteController extends GestionController
         }
 
         try {
-            return $this->render('site/identifiants.html.twig', [
-                'site' => $this->api->patch('/api/sites/' . $id . '/identifiants', []),
-                'renouvelle' => true,
-            ]);
+            return $this->remettreLesIdentifiants(
+                $request,
+                $this->api->patch('/api/sites/' . $id . '/identifiants', []),
+                renouvelle: true
+            );
         } catch (ApiException $e) {
             $this->addFlash('danger', $e->getMessage());
 
             return $this->redirectToRoute('site.show', ['id' => $id]);
         }
+    }
+
+    /*
+        - L'écran qui remet les identifiants à l'installateur, atteint par redirection depuis la mise
+          en service et depuis le renouvellement. Il LIT ET VIDE la session : rafraîchir ne remontre
+          rien, revenir en arrière non plus.
+
+        - Un accès direct, ou un retour arrière après coup, ne trouve donc rien — et le dit, plutôt
+          que d'afficher une page vide où l'installateur chercherait un mot de passe absent.
+    */
+    #[Route('/{id<\d+>}/identifiants', name: 'identifiants_vue', methods: ['GET'])]
+    #[IsGranted('SITE_CREER')]
+    public function identifiantsVue(int $id, Request $request): Response
+    {
+        $remise = $request->getSession()->remove(self::IDENTIFIANTS);
+
+        if(!is_array($remise) || (int) ($remise['site']['id'] ?? 0) !== $id) {
+            $this->addFlash('warning', 'Les identifiants du poste ne s\'affichent qu\'une fois. Régénérez-les si vous ne les avez pas notés.');
+
+            return $this->redirectToRoute('site.show', ['id' => $id]);
+        }
+
+        return $this->render('site/identifiants.html.twig', [
+            'site' => $remise['site'],
+            'renouvelle' => (bool) ($remise['renouvelle'] ?? false),
+        ]);
+    }
+
+    /*
+        - Le POST dépose, la redirection affiche. C'est la règle de tout le site — Turbo ignore une
+          réponse 200 à un envoi de formulaire — mais elle compte double ici : sans elle, l'écran
+          restait sur le formulaire et le seul exemplaire du mot de passe était perdu.
+    */
+    /** @param array<string, mixed> $site */
+    private function remettreLesIdentifiants(Request $request, array $site, bool $renouvelle): Response
+    {
+        $request->getSession()->set(self::IDENTIFIANTS, ['site' => $site, 'renouvelle' => $renouvelle]);
+
+        return $this->redirectToRoute('site.identifiants_vue', ['id' => $site['id']]);
     }
 
     /*
